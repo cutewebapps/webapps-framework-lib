@@ -1,0 +1,1 @@
+This is a placeholder which is recommended for storage of source files such as webapps packages

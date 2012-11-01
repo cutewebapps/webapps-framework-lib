@@ -1,0 +1,181 @@
+<?php
+
+class DBx_Table_Select extends DBx_Select
+{
+    /**
+     * Table schema for parent DBx_Table.
+     *
+     * @var array
+     */
+    protected $_info;
+
+    /**
+     * Table integrity override.
+     *
+     * @var array
+     */
+    protected $_integrityCheck = true;
+
+    /**
+     * Table instance that created this select object
+     *
+     * @var DBx_Table_Abstract
+     */
+    protected $_table;
+
+    /**
+     * Class constructor
+     *
+     * @param DBx_Table_Abstract $adapter
+     */
+    public function __construct(DBx_Table_Abstract $table)
+    {
+        parent::__construct( $table->getAdapterRead() );
+        $this->setTable($table);
+    }
+
+    /**
+     * Return the table that created this select object
+     *
+     * @return DBx_Table_Abstract
+     */
+    public function getTable()
+    {
+        return $this->_table;
+    }
+
+    /**
+     * Sets the primary table name and retrieves the table schema.
+     *
+     * @param DBx_Table_Abstract $adapter
+     * @return DBx_Select This DBx_Select object.
+     */
+    public function setTable(DBx_Table_Abstract $table)
+    {
+        $this->_adapterRead = $table->getAdapterRead();
+        
+        $this->_info    = $table->info();
+        $this->_table   = $table;
+
+        return $this;
+    }
+
+    /**
+     * Sets the integrity check flag.
+     *
+     * Setting this flag to false skips the checks for table joins, allowing
+     * 'hybrid' table rows to be created.
+     *
+     * @param DBx_Table_Abstract $adapter
+     * @return DBx_Select This DBx_Select object.
+     */
+    public function setIntegrityCheck($flag = true)
+    {
+        $this->_integrityCheck = $flag;
+        return $this;
+    }
+
+    /**
+     * Tests query to determine if expressions or aliases columns exist.
+     *
+     * @return boolean
+     */
+    public function isReadOnly()
+    {
+        $readOnly = false;
+        $fields   = $this->getPart(DBx_Table_Select::COLUMNS);
+        $cols     = $this->_info[DBx_Table_Abstract::COLS];
+
+        if (!count($fields)) {
+            return $readOnly;
+        }
+
+        foreach ($fields as $columnEntry) {
+            $column = $columnEntry[1];
+            $alias = $columnEntry[2];
+
+            if ($alias !== null) {
+                $column = $alias;
+            }
+
+            switch (true) {
+                case ($column == self::SQL_WILDCARD):
+                    break;
+
+                case ($column instanceof DBx_Expr):
+                case (!in_array($column, $cols)):
+                    $readOnly = true;
+                    break 2;
+            }
+        }
+
+        return $readOnly;
+    }
+
+    /**
+     * Adds a FROM table and optional columns to the query.
+     *
+     * The table name can be expressed
+     *
+     * @param  array|string|DBx_Expr|DBx_Table_Abstract $name The table name or an
+                                                                      associative array relating
+                                                                      table name to correlation
+                                                                      name.
+     * @param  array|string|DBx_Expr $cols The columns to select from this table.
+     * @param  string $schema The schema name to specify, if any.
+     * @return DBx_Table_Select This DBx_Table_Select object.
+     */
+    public function from($name, $cols = self::SQL_WILDCARD, $schema = null)
+    {
+        if ($name instanceof DBx_Table_Abstract) {
+            $info = $name->info();
+            $name = $info[DBx_Table_Abstract::NAME];
+            if (isset($info[DBx_Table_Abstract::SCHEMA])) {
+                $schema = $info[DBx_Table_Abstract::SCHEMA];
+            }
+        }
+
+        return $this->joinInner($name, null, $cols, $schema);
+    }
+
+    /**
+     * Performs a validation on the select query before passing back to the parent class.
+     * Ensures that only columns from the primary DBx_Table are returned in the result.
+     *
+     * @return string|null This object as a SELECT string (or null if a string cannot be produced)
+     */
+    public function assemble()
+    {
+        $fields  = $this->getPart(DBx_Table_Select::COLUMNS);
+        $primary = $this->_info[DBx_Table_Abstract::NAME];
+        $schema  = $this->_info[DBx_Table_Abstract::SCHEMA];
+
+
+        if (count($this->_parts[self::UNION]) == 0) {
+
+            // If no fields are specified we assume all fields from primary table
+            if (!count($fields)) {
+                $this->from($primary, self::SQL_WILDCARD, $schema);
+                $fields = $this->getPart(DBx_Table_Select::COLUMNS);
+            }
+
+            $from = $this->getPart(DBx_Table_Select::FROM);
+
+            if ($this->_integrityCheck !== false) {
+                foreach ($fields as $columnEntry) {
+                    $table = $column = '';
+                    list($table, $column) = $columnEntry;
+
+                    // Check each column to ensure it only references the primary table
+                    if ($column) {
+                        if (!isset($from[$table]) || $from[$table]['tableName'] != $primary) {
+                            throw new DBx_Table_Select_Exception('Select query cannot join with another table');
+                        }
+                    }
+                }
+            }
+        }
+
+        return parent::assemble();
+    }
+}

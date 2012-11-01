@@ -1,0 +1,174 @@
+<?php
+
+class Sys_Filter implements Sys_Filter_Interface
+{
+
+    const CHAIN_APPEND  = 'append';
+    const CHAIN_PREPEND = 'prepend';
+
+    /**
+     * Filter chain
+     *
+     * @var array
+     */
+    protected $_filters = array();
+
+    /**
+     * Default Namespaces
+     *
+     * @var array
+     */
+    protected static $_defaultNamespaces = array();
+
+    /**
+     * Adds a filter to the chain
+     *
+     * @param  Sys_Filter_Interface $filter
+     * @param  string $placement
+     * @return Sys_Filter Provides a fluent interface
+     */
+    public function addFilter(Sys_Filter_Interface $filter, $placement = self::CHAIN_APPEND)
+    {
+        if ($placement == self::CHAIN_PREPEND) {
+            array_unshift($this->_filters, $filter);
+        } else {
+            $this->_filters[] = $filter;
+        }
+        return $this;
+    }
+
+    /**
+     * Add a filter to the end of the chain
+     *
+     * @param  Sys_Filter_Interface $filter
+     * @return Sys_Filter Provides a fluent interface
+     */
+    public function appendFilter(Sys_Filter_Interface $filter)
+    {
+        return $this->addFilter($filter, self::CHAIN_APPEND);
+    }
+
+    /**
+     * Add a filter to the start of the chain
+     *
+     * @param  Sys_Filter_Interface $filter
+     * @return Sys_Filter Provides a fluent interface
+     */
+    public function prependFilter(Sys_Filter_Interface $filter)
+    {
+        return $this->addFilter($filter, self::CHAIN_PREPEND);
+    }
+
+    /**
+     * Get all the filters
+     *
+     * @return array
+     */
+    public function getFilters()
+    {
+        return $this->_filters;
+    }
+
+    /**
+     * Returns $value filtered through each filter in the chain
+     *
+     * Filters are run in the order in which they were added to the chain (FIFO)
+     *
+     * @param  mixed $value
+     * @return mixed
+     */
+    public function filter($value)
+    {
+        $valueFiltered = $value;
+        foreach ($this->_filters as $filter) {
+            $valueFiltered = $filter->filter($valueFiltered);
+        }
+        return $valueFiltered;
+    }
+
+    /**
+     * Returns the set default namespaces
+     *
+     * @return array
+     */
+    public static function getDefaultNamespaces()
+    {
+        return self::$_defaultNamespaces;
+    }
+
+    /**
+     * Sets new default namespaces
+     *
+     * @param array|string $namespace
+     * @return null
+     */
+    public static function setDefaultNamespaces($namespace)
+    {
+        if (!is_array($namespace)) {
+            $namespace = array((string) $namespace);
+        }
+
+        self::$_defaultNamespaces = $namespace;
+    }
+
+    /**
+     * Adds a new default namespace
+     *
+     * @param array|string $namespace
+     * @return null
+     */
+    public static function addDefaultNamespaces($namespace)
+    {
+        if (!is_array($namespace)) {
+            $namespace = array((string) $namespace);
+        }
+
+        self::$_defaultNamespaces = array_unique(array_merge(self::$_defaultNamespaces, $namespace));
+    }
+
+    /**
+     * Returns true when defaultNamespaces are set
+     *
+     * @return boolean
+     */
+    public static function hasDefaultNamespaces()
+    {
+        return (!empty(self::$_defaultNamespaces));
+    }
+
+    /**
+     * Returns a value filtered through a specified filter class, without requiring separate
+     * instantiation of the filter object.
+     *
+     * The first argument of this method is a data input value, that you would have filtered.
+     * The second argument is a string, which corresponds to the basename of the filter class,
+     * relative to the Sys_Filter namespace. This method automatically loads the class,
+     * creates an instance, and applies the filter() method to the data input. You can also pass
+     * an array of constructor arguments, if they are needed for the filter class.
+     *
+     * @param  mixed        $value
+     * @param  string       $classBaseName
+     * @param  array        $args          OPTIONAL
+     * @param  array|string $namespaces    OPTIONAL
+     * @return mixed
+     * @throws Sys_Filter_Exception
+     */
+    public static function filterStatic($value, $classBaseName, array $args = array(), $namespaces = array())
+    {
+
+        $namespaces = array_merge((array) $namespaces, self::$_defaultNamespaces, array('Sys_Filter'));
+        foreach ($namespaces as $namespace) {
+            $className = $namespace . '_' . ucfirst($classBaseName);
+            $class = new ReflectionClass($className);
+            if ($class->implementsInterface('Zend_Filter_Interface')) {
+                if ($class->hasMethod('__construct')) {
+                    $object = $class->newInstanceArgs($args);
+                } else {
+                    $object = $class->newInstance();
+                }
+                return $object->filter($value);
+            }
+        }
+        throw new Sys_Filter_Exception( "Filter class not found from basename '$classBaseName'" );
+    }
+}

@@ -1,0 +1,86 @@
+<?php
+
+class DBx_Table_Definition
+{
+
+    /**
+     * @var array
+     */
+    protected $_tableConfigs = array();
+
+    /**
+     * __construct()
+     *
+     * @param array $options
+     */
+    public function __construct($options = null)
+    {
+        $this->setOptions($options);
+    }
+
+    /**
+     * setOptions()
+     *
+     * @param array $options
+     * @return DBx_Table_Definition
+     */
+    public function setOptions(Array $options)
+    {
+        foreach ($options as $optionName => $optionValue) {
+            $this->setTableConfig($optionName, $optionValue);
+        }
+        return $this;
+    }
+
+    /**
+     * @param string $tableName
+     * @param array  $tableConfig
+     * @return DBx_Table_Definition
+     */
+    public function setTableConfig($tableName, array $tableConfig)
+    {
+        // @todo logic here
+        $tableConfig[DBx_Table::DEFINITION_CONFIG_NAME] = $tableName;
+        $tableConfig[DBx_Table::DEFINITION] = $this;
+
+        if (!isset($tableConfig[DBx_Table::NAME])) {
+            $tableConfig[DBx_Table::NAME] = $tableName;
+        }
+
+        $this->_tableConfigs[$tableName] = $tableConfig;
+        return $this;
+    }
+
+    /**
+     * getTableConfig()
+     *
+     * @param string $tableName
+     * @return array
+     */
+    public function getTableConfig($tableName)
+    {
+        return $this->_tableConfigs[$tableName];
+    }
+
+    /**
+     * removeTableConfig()
+     *
+     * @param string $tableName
+     */
+    public function removeTableConfig($tableName)
+    {
+        unset($this->_tableConfigs[$tableName]);
+    }
+
+    /**
+     * hasTableConfig()
+     *
+     * @param string $tableName
+     * @return bool
+     */
+    public function hasTableConfig($tableName)
+    {
+        return (isset($this->_tableConfigs[$tableName]));
+    }
+
+}

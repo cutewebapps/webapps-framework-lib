@@ -1,7 +1,16 @@
 <?php
 
-require WC_DIR_CLASSES.'/App/model/Dispatcher/CtrlPlugin.php';
+/**
+ * This file is a part of CWA framework.
+ * Copyright 2012, CuteWebApps.com
+ * https://github.com/cutewebapps/webapps-framework-lib
+ * 
+ * Licensed under GPL, Free for usage and redistribution.
+ */
 
+require CWA_DIR_CLASSES.'/App/model/Dispatcher/CtrlPlugin.php';
+
+/** handling fatal errors separately - with register_shutdown function*/
 function exceptionErrorHandler($errno, $errstr, $errfile, $errline )
 {
     global $_EXCEPTION_WAS_CAUGHT;
@@ -9,7 +18,6 @@ function exceptionErrorHandler($errno, $errstr, $errfile, $errline )
     
     throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 }
-
 function shutdownErrorHandler()
 {
     global $_EXCEPTION_WAS_CAUGHT;
@@ -118,31 +126,38 @@ function shutdownErrorHandler()
         }
 
         if ( $confException->render ) {
-            echo file_get_contents( WC_APPLICATION_DIR.'/'.$confException->render  );
+            echo file_get_contents( CWA_APPLICATION_DIR.'/'.$confException->render  );
         }
     }
 }
 
 class App_Dispatcher
 {
+    /**
+     * full version of current URL
+     * @var string
+     */
     static public $strFullUrl  = '';
+    /**
+     * 
+     * @var string
+     */
     static public $strUrl      = '';
-    public    $timeframe  = ''; // time of start
+    /** 
+     * Time of dispatcher start - for checking performance
+     * @var Sys_Timeframe
+     */
+    public    $timeframe  = '';
     protected $_arrRoutes = array();
     protected $_strResponse = '';
-
     protected $_arrUrlParams = array();
-
     protected $_strDefaultController = '';
-
     protected $_objCurrentController = null;
     protected $_strCurrentAction = '';
-    
     public function getInstanceId()
     {
         return App_Application::getInstance()->getInstanceId();
     }
-
     public function getUrlParams()
     {
         return $this->_arrUrlParams;
@@ -155,16 +170,13 @@ class App_Dispatcher
     {
         return $this->_strCurrentAction;
     }
-
     public function getConfig()
     {
         return App_Application::getInstance()->getConfig();
     }
-
-    // TODO: make predispatch a callable via plugins? what does this mean?
     public function preDispatch()
     {
-        if ( defined( 'WC_DISABLE_PLUGINS') )
+        if ( defined( 'CWA_DISABLE_PLUGINS') )
             return true;
         
         if ( is_object( $this->getConfig()->ctrlplugin ) ) {
@@ -176,10 +188,9 @@ class App_Dispatcher
          }
          return true;
     }
-
     public function postDispatch()
     {
-        if ( defined( 'WC_DISABLE_PLUGINS') )
+        if ( defined( 'CWA_DISABLE_PLUGINS') )
             return true;
 
         if ( is_object( $this->getConfig()->ctrlplugin ) ) {
@@ -190,13 +201,11 @@ class App_Dispatcher
          }
          return true;
     }
-
     public function __construct( $arrRoutes = array(), $strDefaultController = '' )
     {
         $this->_arrRoutes = $arrRoutes;
         $this->_strDefaultController = $strDefaultController;
     }
-
     /**
      * @return array
      */
@@ -204,7 +213,6 @@ class App_Dispatcher
     {
         return $this->_arrRoutes;
     }
-
     protected function _getSectionFromTheme( $strTheme )
     {
         $arrSections = $this->getConfig()->sections->toArray();
@@ -212,7 +220,6 @@ class App_Dispatcher
             if ( $strConfigTheme == $strTheme ) { return $strSection; }
         return '';
     }
-
     protected function _getSectionFromSlug( $strSlug )
     {
         $areas = $this->getConfig()->user_area;
@@ -225,7 +232,6 @@ class App_Dispatcher
         }
         return '';
     }
-
     public function runAction( $strAction, $strController, $strModule, $arrParams = array() )
     {
         $strClass = Sys_String::toCamelCase( $strModule ) .'_'
@@ -236,8 +242,6 @@ class App_Dispatcher
         $arrParams[ 'module' ] = $strModule;
         return $this->runControllerAction( $strAction, $strClass, $arrParams );
     }
-
-    
     protected function _log( $arrParams )
     {
         if ( $this->getConfig()->action_log ) {
@@ -261,7 +265,6 @@ class App_Dispatcher
             $strLogFile->append( $strLine. "\n" );
         }
     }
-    
     public function runControllerAction( $strAction, $strControllerClass, $arrParams = array() )
     {
         $this->_log( $arrParams );
@@ -269,14 +272,14 @@ class App_Dispatcher
         $strControllerAction = Sys_String::toCamelCase( $strAction ).'Action';
 
 	if ( !class_exists( $strControllerClass ) ) {
-            throw new App_PageNotFound_Exception( 'No controller class for this call' );
+            throw new App_Exception_PageNotFound( 'No controller class for this call' );
         }
         if ( !method_exists($strControllerClass, $strControllerAction ) ) {
-            throw new App_PageNotFound_Exception( 'No action for this controller' );
+            throw new App_Exception_PageNotFound( 'No action for this controller' );
         }
         if ( isset( $arrParams['default_renderer'] ) ) {
             if ( !class_exists( $arrParams['default_renderer'] ) ) {
-                throw new App_PageNotFound_Exception( "Invalid renderer class ".$arrParams['default_renderer']);
+                throw new App_Exception_PageNotFound( "Invalid renderer class ".$arrParams['default_renderer']);
             }
         }
         
@@ -334,7 +337,7 @@ class App_Dispatcher
         $arrScriptPaths = array();
         foreach ( $arrThemes as $strThemeName ) {
             $arrScriptPaths []= implode( '/', array(
-                WC_APPLICATION_DIR,
+                CWA_APPLICATION_DIR,
                 'theme',
                 $strThemeName,
                 $arrParams['section'],
@@ -355,7 +358,7 @@ class App_Dispatcher
         $arrLayoutPaths = array();
         foreach ( $arrThemes as $strThemeName ) {
             $arrLayoutPaths []= implode( '/', array(
-                WC_APPLICATION_DIR,
+                CWA_APPLICATION_DIR,
                 'theme',
                 $strThemeName,
                 $arrParams['section'],
@@ -421,16 +424,14 @@ class App_Dispatcher
                 throw new App_Exception( 'No output entry in a config' );
             }
             
-            $file = new Sys_File( WC_APPLICATION_DIR . $strFiltered );
+            $file = new Sys_File( CWA_APPLICATION_DIR . $strFiltered );
             if ( $strResult != '' ) $file->save( $strResult );
 
             return ""; 
         } else {
             return $this->_objCurrentController->view->getLayout()->render();
         }   
-
     }
-
     public function runCli( $arrArguments )
     {
         $arrControllerParams = array(
@@ -523,7 +524,6 @@ class App_Dispatcher
             $arrControllerParams['module'],
             $arrControllerParams );
     }
-
     public function runUrl( $strUrl )
     {
         self::$strFullUrl = $strUrl;
@@ -713,9 +713,9 @@ class App_Dispatcher
             // Sys_Debug::dumpDie( $arrControllerParams );
             
             if ( $strControllerClass == '' )
-                throw new App_PageNotFound_Exception( 'No controller for this call' );
+                throw new App_Exception_PageNotFound( 'No controller for this call' );
             if ( $strControllerAction == '' )
-                throw new App_PageNotFound_Exception( 'No controller action for this call' );
+                throw new App_Exception_PageNotFound( 'No controller action for this call' );
 
             // echo 'DEBUG ACTION:'. $strControllerAction .', CLASS '. $strControllerClass . "\n";
 
@@ -726,7 +726,7 @@ class App_Dispatcher
             
             echo $this->runControllerAction(  $strControllerAction, $strControllerClass, $arrControllerParams );
 
-        } catch ( App_PageNotFound_Exception $exception ) {
+        } catch ( App_Exception_PageNotFound $exception ) {
 
             echo $this->runControllerAction(  'page-not-found', $this->_strDefaultController, $arrControllerParams );
 
@@ -770,9 +770,13 @@ class App_Dispatcher
             }
         }
     }
-
+    /**
+     * Get backtrace string
+     * @param array $arrTraceLines
+     * @return string
+     */
     public function backTraceString( $arrTraceLines )
     {
-        App_Exception_Handler::backTraceString( $arrTraceLines );
+        return App_Exception_Handler::backTraceString( $arrTraceLines );
     }
 }

@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * This file is a part of CWA framework.
+ * Copyright 2012, CuteWebApps.com
+ * https://github.com/cutewebapps/webapps-framework-lib
+ * 
+ * Licensed under GPL, Free for usage and redistribution.
+ */
+
 class App_Test_Case
 {
     protected $_bVerbose = false;
@@ -99,7 +107,7 @@ class App_Test_Case
     
     public function getFixture( $strPath )
     {
-        return  WC_APPLICATION_DIR .'/test/fixtures/'.$strPath;
+        return  CWA_APPLICATION_DIR .'/test/fixtures/'.$strPath;
     }
 
     /** @return App_Dispatcher */

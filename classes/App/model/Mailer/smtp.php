@@ -1,4 +1,13 @@
 <?php
+
+/**
+ * This file is a part of CWA framework.
+ * Copyright 2012, CuteWebApps.com
+ * https://github.com/cutewebapps/webapps-framework-lib
+ * 
+ * Licensed under GPL, Free for usage and redistribution.
+ */
+
 /*~ smtp.php
 .---------------------------------------------------------------------------.
 |  Software: PHPMailer - PHP email class                                    |
@@ -346,7 +355,7 @@ class SMTP {
          ** How to telnet in windows: http://technet.microsoft.com/en-us/library/aa995718%28EXCHG.65%29.aspx
          ** PROTOCOL Documentation http://curl.haxx.se/rfc/ntlm.html#ntlmSmtpAuthentication
          */
-        require_once(WC_DIR_CLASSES . '/App/model/Mailer/extra/ntlm_sasl_client.php');
+        require_once CWA_DIR_CLASSES . '/App/model/Mailer/extra/ntlm_sasl_client.php';
         $temp = new stdClass();
         $ntlm_client = new ntlm_sasl_client_class;
         if(! $ntlm_client->Initialize($temp)){//let's test if every function its available
@@ -975,5 +984,3 @@ class SMTP {
   }
 
 }
-
-?>

@@ -1,23 +1,41 @@
 <?php
 
-//temporary - seeking for better session solution...
+/**
+ * This file is a part of CWA framework.
+ * Copyright 2012, CuteWebApps.com
+ * https://github.com/cutewebapps/webapps-framework-lib
+ * 
+ * Licensed under GPL, Free for usage and redistribution.
+ */
 
 class App_Exception              extends Exception {};
-
-// for marking code branches as deprecated
+/** 
+ * for marking code branches as deprecated 
+ */
 class App_Exception_Deprecated   extends App_Exception {};
-// for marking code branches as deprecated
+/** for marking code branches as incorrect and illegal */
 class App_Exception_Inacceptable extends App_Exception {};
-// to raise on hackers alert
+/** exception to raise on hackers alert */
 class App_Exception_Security     extends App_Exception {};
+/**
+ * For pages that are not found
+ */
+class App_Exception_PageNotFound extends App_Exception {};
+/**
+ * For places that are forbidden
+ */
+class App_Exception_AccessDenied extends App_Exception {};
+/**
+ * For server errors and unhandled exceptions
+ */
+class App_Exception_ServerError  extends App_Exception {};
 
-class App_PageNotFound_Exception extends App_Exception {};
-class App_AccessDenied_Exception extends App_Exception {};
-class App_ServerError_Exception  extends App_Exception {};
-
+/**
+ * Class of web application instance
+ */
 class App_Application
 {
-    const ENGINE = 'Web Cerebrium';
+    const ENGINE = 'CWA';
 
     /** @var Sys_Application */
     protected static $_instance = null;
@@ -58,8 +76,8 @@ class App_Application
         else
             $this->_objConfig = new Sys_Config(array(), true);
 
-        if ( !Sys_Global::isRegistered( 'Environment') && getenv('WC_ENV') ) {
-            Sys_Global::set( 'Environment', getenv( 'WC_ENV' ) );	
+        if ( !Sys_Global::isRegistered( 'Environment') && getenv('CWA_ENV') ) {
+            Sys_Global::set( 'Environment', getenv( 'CWA_ENV' ) );	
 	}
 
 
@@ -167,7 +185,7 @@ class App_Application
             $this->getConfig()->default_controller
         );
         if ( isset( $_SERVER['REQUEST_URI'] ) ) {
-            if ( defined( 'WC_NO_REWRITE' ) ) {
+            if ( defined( 'CWA_NO_REWRITE' ) ) {
                 $objDispatcher->runUrl( '/' );
             } else {
                 $objDispatcher->runUrl( $_SERVER['REQUEST_URI'] );

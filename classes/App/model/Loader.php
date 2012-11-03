@@ -1,35 +1,41 @@
 <?php
 
+/**
+ * This file is a part of CWA framework.
+ * Copyright 2012, CuteWebApps.com
+ * https://github.com/cutewebapps/webapps-framework-lib
+ * 
+ * Licensed under GPL, Free for usage and redistribution.
+ */
+
 // require base loader
-require WC_DIR_CLASSES.'/Sys/model/Loader.php';
+require CWA_DIR_CLASSES.'/Sys/model/Loader.php';
 
-
-function wc_init_esc( $val )
+function cwa_init_esc( $val )
 {
     return str_replace("\\'","'",
         str_replace('\\"','"', str_replace( "\\\\", "\\", $val)));
 }
-
-function wc_init_web_application()
+function cwa_init_web_application()
 {
 
-    if ( defined( 'WC_DIR_CLASSES' ) )
-        Sys_Global::set('ClassesRoot', WC_DIR_CLASSES );
+    if ( defined( 'CWA_DIR_CLASSES' ) )
+        Sys_Global::set('ClassesRoot', CWA_DIR_CLASSES );
 
     // try to defined environment from envir variables or constants
-    if ( defined('WC_APPLICATION_ENV') )
-          Sys_Global::set( 'Environment', WC_APPLICATION_ENV );
-    else if ( getenv( 'WC_APPLICATION_ENV' ) != '' )
-          Sys_Global::set( 'Environment', getenv( 'WC_APPLICATION_ENV' ));
+    if ( defined('CWA_ENV') )
+          Sys_Global::set( 'Environment', CWA_ENV );
+    else if ( getenv( 'CWA_ENV' ) != '' )
+          Sys_Global::set( 'Environment', getenv( 'CWA_ENV' ));
 
     // sometimes magic quotes are on inspite of everything...
     if ( get_magic_quotes_gpc() == 1 ){
-        while (list($key,$val)=each($_POST))    { $_POST[$key]  = wc_init_esc($val); }
-        while (list($key,$val)=each($_GET))     { $_GET[$key]   = wc_init_esc($val); }
-        while (list($key,$val)=each($_REQUEST)) { $_REQUEST[$key] = wc_init_esc($val); }
+        while (list($key,$val)=each($_POST))    { $_POST[$key]  = cwa_init_esc($val); }
+        while (list($key,$val)=each($_GET))     { $_GET[$key]   = cwa_init_esc($val); }
+        while (list($key,$val)=each($_REQUEST)) { $_REQUEST[$key] = cwa_init_esc($val); }
     }
 
-    App_Application::getInstance()->loadApplicationConfig( WC_APPLICATION_DIR.'/config' );
+    App_Application::getInstance()->loadApplicationConfig( CWA_APPLICATION_DIR.'/config' );
     // check for redirects here:
     if ( isset( $_SERVER['HTTP_HOST'] ) ) {
         $strRedirect = App_Application::getInstance()->getConfig()->redirect;
@@ -41,17 +47,15 @@ function wc_init_web_application()
     }
     App_Application::getInstance()->connectDb();
 }
-
-function wc_run_web_application()
+function cwa_run_web_application()
 {
     // run routers - path to all application controllers
     App_Application::getInstance()->run();
 }
-
-function wc_patch_web_application() 
+function cwa_patch_web_application() 
 {
     // get all namespaces
-    define( 'WC_DISABLE_PLUGINS', 1 );
+    define( 'CWA_DISABLE_PLUGINS', 1 );
     $checker = new App_CheckEnv();
     $checker->run();
     
@@ -59,22 +63,20 @@ function wc_patch_web_application()
     DBx_Table_Abstract::setDefaultMetadataCache( null );
     App_Update::run( $arrNamespaces );
 }
-
 /**
  * Routine for checking web applications environment
  * Can be put as a separate script 
  */
-function wc_check_web_application_environment() 
+function cwa_check_web_application_environment() 
 {
-    define( 'WC_DISABLE_PLUGINS', 1 );
+    define( 'CWA_DISABLE_PLUGINS', 1 );
     $checker = new App_CheckEnv();
     $checker->run();
 }
-
-function wc_test_web_application()
+function cwa_test_web_application()
 {
     global $argv;
-    define( 'WC_DISABLE_PLUGINS', 1 );
+    define( 'CWA_DISABLE_PLUGINS', 1 );
     $loader = new App_Test_Loader();
 
     if ( isset( $_REQUEST['test'] )) {

@@ -1,5 +1,13 @@
 <?php
 
+/*
+ * This file is a part of CWA framework.
+ * Copyright 2012, CuteWebApps.com
+ * https://github.com/cutewebapps/webapps-framework-lib
+ * 
+ * Licensed under GPL, Free for usage and redistribution.
+ */
+
 /**
  * lessphp v0.3.4-2
  * http://leafo.net/lessphp
@@ -9,7 +17,6 @@
  * Copyright 2012, Leaf Corcoran <leafot@gmail.com>
  * Licensed under MIT or GPLv3, see LICENSE
  */
-
 
 /**
  * The less compiler and parser.

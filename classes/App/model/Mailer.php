@@ -1,4 +1,13 @@
 <?php
+
+/**
+ * This file is a part of CWA framework.
+ * Copyright 2012, CuteWebApps.com
+ * https://github.com/cutewebapps/webapps-framework-lib
+ * 
+ * Licensed under GPL, Free for usage and redistribution.
+ */
+
 /*~ phpmailer.php
 .---------------------------------------------------------------------------.
 |  Software: PHPMailer - PHP email class                                    |
@@ -475,7 +484,7 @@ class App_Mailer {
       if (version_compare(PHP_VERSION, '5.0.0', '<') )
               exit("Sorry, this version of PHPMailer will only run on PHP version 5 or greater!\n");
       
-      $this->PluginDir = WC_DIR_CLASSES . '/App/model/Mailer/';
+      $this->PluginDir = CWA_DIR_CLASSES . '/App/model/Mailer/';
       $this->LangDir = $this->PluginDir .'/lang/';
 
       $this->exceptions = ($exceptions == true);
@@ -1078,13 +1087,10 @@ class App_Mailer {
       'smtp_error'           => 'SMTP server error: ',
       'variable_set'         => 'Cannot set or reset variable: '
     );
-    //Overwrite language-specific strings. This way we'll never have missing translations - no more "language string failed to load"!
-    $l = true;
-    if ($langcode != 'en') { //There is no English translation file
-      $l = @include $this->LangDir.$langcode.'.php';
-    }
-    $this->language = $PHPMAILER_LANG;
-    return ($l == true); //Returns false if language not found
+    //$l = true;
+    //$this->language = $PHPMAILER_LANG;
+    //return ($l == true); //Returns false if language not found
+    return true;
   }
 
   /**
@@ -2695,4 +2701,3 @@ class phpmailerException extends Exception {
     return $errorMsg;
   }
 }
-?>

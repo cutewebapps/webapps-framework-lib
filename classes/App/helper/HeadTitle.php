@@ -1,11 +1,17 @@
 <?php
 
+/**
+ * This file is a part of CWA framework.
+ * Copyright 2012, CuteWebApps.com
+ * https://github.com/cutewebapps/webapps-framework-lib
+ * 
+ * Licensed under GPL, Free for usage and redistribution.
+ */
+
 class App_HeadTitleHelper extends App_ViewHelper_Abstract
 {
     protected static $_instance = null;
-
     protected $_strTitle = '';
-
     /**
      * @return App_Layout
      */
@@ -16,7 +22,6 @@ class App_HeadTitleHelper extends App_ViewHelper_Abstract
         }
         return self::$_instance;
     }
-
     /**
      * @return App_HeadTitleHelper
      */
@@ -24,7 +29,6 @@ class App_HeadTitleHelper extends App_ViewHelper_Abstract
     {
         return self::getInstance();
     }
-
     /**
      * @return App_HeadTitleHelper
      */
@@ -33,7 +37,6 @@ class App_HeadTitleHelper extends App_ViewHelper_Abstract
         $this->_strTitle = $strTitle;
         return $this;
     }
-
     /**
      * Output of the title as class
      * @return App_HeadTitleHelper
@@ -43,10 +46,8 @@ class App_HeadTitleHelper extends App_ViewHelper_Abstract
         echo '<h1>'. (( $strTitle != '' ) ? $strTitle : $this->_strTitle) .'</h1>'."\n";
         return $this;
     }
-
     public function get()
     {
         return "\n".'<title>'.htmlspecialchars( $this->_strTitle, ENT_QUOTES ).'</title>';
     }
-
 }

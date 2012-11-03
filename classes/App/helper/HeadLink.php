@@ -1,9 +1,16 @@
 <?php
 
+/**
+ * This file is a part of CWA framework.
+ * Copyright 2012, CuteWebApps.com
+ * https://github.com/cutewebapps/webapps-framework-lib
+ * 
+ * Licensed under GPL, Free for usage and redistribution.
+ */
+
 class App_HeadLinkHelper extends App_ViewHelper_Abstract
 {
     protected static $_instance = null;
-
     protected $_arrItems = array();
     protected $_arrLinks = array();
 
@@ -17,7 +24,6 @@ class App_HeadLinkHelper extends App_ViewHelper_Abstract
         }
         return self::$_instance;
     }
-
     /**
      * @return App_HeadLinkHelper
      */
@@ -25,7 +31,6 @@ class App_HeadLinkHelper extends App_ViewHelper_Abstract
     {
         return self::getInstance();
     }
-
     /**
      * @return App_HeadLinkHelper
      */
@@ -34,7 +39,6 @@ class App_HeadLinkHelper extends App_ViewHelper_Abstract
         $this->_arrItems[] = $file;
         return $this;        
     }
-
     /**
      * @return App_HeadLinkHelper
      */
@@ -55,7 +59,6 @@ class App_HeadLinkHelper extends App_ViewHelper_Abstract
         );
         return $this;
     }
-
     /**
      *
      * @param array $arrProperties
@@ -66,8 +69,6 @@ class App_HeadLinkHelper extends App_ViewHelper_Abstract
         $this->_arrLinks [] = $arrProperties;
         return $this;
     }
-    
-
     /**
      * @return string
      */

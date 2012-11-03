@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * This file is a part of CWA framework.
+ * Copyright 2012, CuteWebApps.com
+ * https://github.com/cutewebapps/webapps-framework-lib
+ * 
+ * Licensed under GPL, Free for usage and redistribution.
+ */
+
 class Sys_Mode
 {
     /**
@@ -38,11 +46,11 @@ class Sys_Mode
      */
     public static function getApplicationEnv ()
     {
-        if (defined('WC_APPLICATION_ENV'))
-            return WC_APPLICATION_ENV;
+        if (defined('CWA_ENV'))
+            return CWA_ENV;
         if ( Sys_Config::isRegistered( 'Environment') )
             return Sys_Config::get( 'Environment');
-        return (getenv('WC_APPLICATION_ENV') ? getenv('WC_APPLICATION_ENV') : 'production');
+        return (getenv('CWA_ENV') ? getenv('CWA_ENV') : 'local');
     }
 
     /**
@@ -50,20 +58,39 @@ class Sys_Mode
      */
     static function isLocal ()
     {
-        if (isset($_SERVER['HTTP_HOST']))
-            return (strstr($_SERVER['HTTP_HOST'], 'local.') !== false ||
-                strstr($_SERVER['HTTP_HOST'], '.local') !== false);
-        else 
-            if (self::getApplicationEnv() == 'local');
+        return (self::getApplicationEnv() == 'local');
     }
-
-
+    /**
+     * detects whether we are on test server 
+     */
+    static function isTest()
+    {
+        return (self::getApplicationEnv() == 'local');
+    }
+/**
+     * detects whether we are on demo server 
+     */
+    static function isDemo()
+    {
+        return (self::getApplicationEnv() == 'demo');
+    }
+/**
+     * detects whether we are on staging server 
+     */
+    static function isStaging()
+    {
+        return (self::getApplicationEnv() == 'staging');
+    }    
+    
     /**
      * detects whether we are on live server 
      */
     static function isProduction ()
     {
-        return (! self::isLocal() );
+        if (self::getApplicationEnv() == 'production')
+            return true;
+        
+        return (! self::isLocal() ) && (! self::isTest() && (! self::isDemo() ) && (! self::isStaging() ));
     }
 
 

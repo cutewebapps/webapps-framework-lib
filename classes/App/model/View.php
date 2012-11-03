@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * This file is a part of CWA framework.
+ * Copyright 2012, CuteWebApps.com
+ * https://github.com/cutewebapps/webapps-framework-lib
+ * 
+ * Licensed under GPL, Free for usage and redistribution.
+ */
+
 class App_View extends Sys_Editable
 {
     /** @var App_Layout */
@@ -10,7 +18,6 @@ class App_View extends Sys_Editable
     protected $_strContents = '';
     /** @var string|array */
     protected $_path = '';
-    
     /**
      * @return void
      */
@@ -20,13 +27,11 @@ class App_View extends Sys_Editable
         $this->_broker->setView( $this );
         $this->_layout = new App_Layout( $this );
     }
-    
     public function __call( $name, $arguments )
     {
         $this->_broker->setNamespace( 'App' );
         return call_user_func_array( array($this->_broker, $name), $arguments );
     }
-
     /**
      * @return App_Layout
      */
@@ -34,7 +39,6 @@ class App_View extends Sys_Editable
     {
         return $this->_layout;
     }
-    
     /**
      * for overriding
      * @return string 
@@ -43,7 +47,6 @@ class App_View extends Sys_Editable
     {
         return 'phtml';
     }
-
     /**
      * @return string
      */
@@ -51,7 +54,6 @@ class App_View extends Sys_Editable
     {
         return preg_replace( '/\/$/', '', App_Application::getInstance()->getConfig()->base );
     }
-
     /**
      * @return string
      */
@@ -62,7 +64,6 @@ class App_View extends Sys_Editable
         $strPath .= 'static/';
         return $strPath;
     }
-
     /**
      * @return string
      */
@@ -78,7 +79,7 @@ class App_View extends Sys_Editable
      */
     public function baseDir()
     {
-        return WC_APPLICATION_DIR;
+        return CWA_APPLICATION_DIR;
     }
     /**
      * @return App_ViewHelper_Broker
@@ -113,7 +114,7 @@ class App_View extends Sys_Editable
             }
             unset( $arrParams[ 'section' ] );
         }
-        if (defined( 'WC_NO_REWRITE' )) {
+        if (defined( 'CWA_NO_REWRITE' )) {
             $arrAmpParams = array();
             foreach( $arrParams as $strKey => $value ) {
                 $arrAmpParams[] = $strKey.'='.rawurlencode( $value );
@@ -237,7 +238,6 @@ class App_View extends Sys_Editable
     {
         return htmlspecialchars( $str, ENT_QUOTES );
     }
-
     /**
      * @param string $strIndex
      * @param mixed default
@@ -249,7 +249,6 @@ class App_View extends Sys_Editable
             return $this->inflection[ $strIndex ];
         return $default;
     }
-
     /**
      * @return Sys_Config
      */
@@ -257,7 +256,6 @@ class App_View extends Sys_Editable
     {
         return App_Application::getInstance()->getConfig();
     }
-
     /**
      * @return string
      */

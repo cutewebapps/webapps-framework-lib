@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * This file is a part of CWA framework.
+ * Copyright 2012, CuteWebApps.com
+ * https://github.com/cutewebapps/webapps-framework-lib
+ * 
+ * Licensed under GPL, Free for usage and redistribution.
+ */
+
+/**
+ * Handling image files
+ */
 class App_ImageFile {
     /** @var int */
     protected $_nWidth  = 0;
@@ -167,7 +178,7 @@ class App_ImageFile {
     public function getFilePath()
     {
         if ( substr( $this->getHttpPath(), 0, 1 ) == '/' ) {
-            return WC_APPLICATION_DIR . $this->getHttpPath();
+            return CWA_APPLICATION_DIR . $this->getHttpPath();
         }
 
         // there should be no file path for images on another domain!
@@ -351,7 +362,7 @@ class App_ImageFile {
     {
         
         $imgResult = new App_ImageFile( $dir, $w, $w );
-        $imgResult->_strPathFull = WC_APPLICATION_DIR . $imgResult->_strPath; // full system path to thumb
+        $imgResult->_strPathFull = CWA_APPLICATION_DIR . $imgResult->_strPath; // full system path to thumb
         
         $src_file = $this->getFilePath();
         if ( !file_exists( $src_file )) {

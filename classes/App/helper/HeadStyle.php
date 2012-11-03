@@ -1,11 +1,17 @@
 <?php
 
+/**
+ * This file is a part of CWA framework.
+ * Copyright 2012, CuteWebApps.com
+ * https://github.com/cutewebapps/webapps-framework-lib
+ * 
+ * Licensed under GPL, Free for usage and redistribution.
+ */
+
 class App_HeadStyleHelper extends App_ViewHelper_Abstract
 {
     protected static $_instance = null;
-
     protected $_arrItems = array();
-
     /**
      * @return App_Layout
      */
@@ -16,20 +22,16 @@ class App_HeadStyleHelper extends App_ViewHelper_Abstract
         }
         return self::$_instance;
     }
-
-
     public function headStyle()
     {
         return self::getInstance();
     }
-
     public function append( $strCss, $strWrapper = '' )
     {
         if ( $strWrapper != '' && $strCss != '' ) $strCss =  $strWrapper .'{'.$strCss."\n}\n";
         $this->_arrItems[] = $strCss;
         return $this;
     }
-
     public function prepend( $strCss, $strWrapper = '' )
     {
         if ( $strWrapper != '' && $strCss != '' ) $strCss =  $strWrapper .'{'.$strCss."\n}\n";
@@ -37,8 +39,6 @@ class App_HeadStyleHelper extends App_ViewHelper_Abstract
         ksort( $this->_arrItems );
         return $this;
     }
-
-
     public function appendLess( $strLess, $strWrapper = '' )
     {
         $less = new App_Less_Compiler();
@@ -48,7 +48,6 @@ class App_HeadStyleHelper extends App_ViewHelper_Abstract
         $this->_arrItems[] = $strCss;
         return $this;
     }
-
     public function prependLess( $strLess, $strWrapper = '' )
     {
         $less = new App_Less_Compiler();
@@ -59,8 +58,6 @@ class App_HeadStyleHelper extends App_ViewHelper_Abstract
         ksort( $this->_arrItems );
         return $this;
     }    
-    
-    
     public function get( $bMinify = true )
     {
         if ( count( $this->_arrItems ) == 0 ) return '';

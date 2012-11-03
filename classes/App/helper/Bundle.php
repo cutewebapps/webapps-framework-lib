@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is a part of CWA framework.
  * Copyright 2012, CuteWebApps.com
@@ -7,7 +8,17 @@
  * Licensed under GPL, Free for usage and redistribution.
  */
 
-class App_Form_Element_Text extends App_Form_Element_Xhtml
+/**
+ * @TODO: not finished class
+ */
+class App_BundleHelper extends App_ViewHelper_Abstract
 {
-    public $helper = 'formText';
+    /**
+     *  @return string 
+     */
+    public function bundle( $strPath )
+    {
+        return $strPath;
+    }
+
 }

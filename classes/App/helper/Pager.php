@@ -47,7 +47,7 @@ class App_PagerHelper extends App_ViewHelper_Abstract
 	<script type="text/javascript">
 	function changePagerResults(objSelect, strBaseUrl)
 	{
-<?php if (defined( 'WC_NO_REWRITE' )) : ?>
+<?php if (defined( 'CWA_NO_REWRITE' )) : ?>
 	    window.location = strBaseUrl + '=' + objSelect.value;
 <?php else: ?>
 	    window.location = strBaseUrl + '/' + objSelect.value;
@@ -61,7 +61,7 @@ class App_PagerHelper extends App_ViewHelper_Abstract
         $arrParamsNoResults = $arrParams;
         unset( $arrParamsNoResults['results'] );
         
-        if ( defined( 'WC_NO_REWRITE' ))
+        if ( defined( 'CWA_NO_REWRITE' ))
             $strBaseUrl = $this->getView()->url( $arrParamsNoResults ) . '&amp;results';
         else
             $strBaseUrl = $this->getView()->url( $arrParamsNoResults ) . '/results';

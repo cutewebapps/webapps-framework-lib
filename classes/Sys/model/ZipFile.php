@@ -1,13 +1,33 @@
 <?php
 
+/*
+ * This file is a part of CWA framework.
+ * Copyright 2012, CuteWebApps.com
+ * https://github.com/cutewebapps/webapps-framework-lib
+ * 
+ * Licensed under GPL, Free for usage and redistribution.
+ */
 
-class Sys_ZipFile {
+/**
+ * Sys_ZipFile - allows to create a Zip file in memory
+ * 
+ * @TODO: Netbeans shows a couple of warnings. All @ should be removed.
+ */
+
+class Sys_ZipFile 
+{
     var $datasec = array();
     var $ctrl_dir = array();
     var $eof_ctrl_dir = "\x50\x4b\x05\x06\x00\x00\x00\x00";
     var $old_offset = 0;
     
-    function add_dir($name) {
+    /**
+     * Add folder 
+     * @param string $name
+     * @return void
+     */
+    function add_dir($name) 
+    {
         $name = str_replace("\\", "/", $name);
         $fr = "\x50\x4b\x03\x04";
         $fr .= "\x0a\x00";
@@ -48,7 +68,13 @@ class Sys_ZipFile {
         $this -> ctrl_dir[] = $cdrec;
     }
 
-   function add_file($data, $name) {
+    /**
+     * 
+     * @param string $data
+     * @param string $name
+     * @return void
+     */
+    function add_file($data, $name) {
        $name = str_replace("\\", "/", $name);
        $fr = "\x50\x4b\x03\x04";
        $fr .= "\x14\x00";
@@ -92,7 +118,11 @@ class Sys_ZipFile {
        $cdrec .= $name;
        $this -> ctrl_dir[] = $cdrec;
    }
-   function file() {
+   /**
+    * @return string
+    */
+   function file() 
+   {
        $data = implode("", $this -> datasec);
        $ctrldir = implode("", $this -> ctrl_dir);
        return

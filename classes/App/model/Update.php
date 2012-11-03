@@ -1,8 +1,19 @@
 <?php
 
-/* 
-	actually these classes should be used only by App_Update, 
-	none of the components should use them directly 
+/**
+ * This file is a part of CWA framework.
+ * Copyright 2012, CuteWebApps.com
+ * https://github.com/cutewebapps/webapps-framework-lib
+ * 
+ * Licensed under GPL, Free for usage and redistribution.
+ */
+
+/** 
+ *  These are the models for host_packages table 
+ *  which is responsible for storage of component versions
+ * 
+ *  Actually these classes should be used only by App_Update, 
+ *  none of the components should use them directly 
 */
 
 class App_Package_Table extends DBx_Table
@@ -27,15 +38,11 @@ class App_Update extends DBx_ReadWrite_Object
     protected $_strComponent;
     protected $_strOldVersion = '0.0.0';
     protected $_objPackage = null;
-
     public static function getClassName() { return 'App_Update'; }
-
     protected function _getComponentName() { return $this->_strComponent; }
     protected function _getOldVersion() { return $this->_strOldVersion; }
-
     // for sub-class overloading
     public function update() {}
-
     public function __construct( $strComponent, $strConnectionIndex )
     {
         $this->setDbIndex( $strConnectionIndex );
@@ -47,14 +54,12 @@ class App_Update extends DBx_ReadWrite_Object
         $this->_objAdapterR = DBx_Registry::getInstance()->get( $strConnectionIndex )->getDbAdapterRead();
         $this->_objAdapterW = DBx_Registry::getInstance()->get( $strConnectionIndex )->getDbAdapterWrite();
     }
-
     public function isVersionBelow($version)
     {
         $version = strtolower($version);
         $version = preg_replace('/(\d)pr(\d?)/', '$1a$2', $version);
         return version_compare($version, strtolower( $this->_getOldVersion() )) > 0;
     }
-
     public function save( $strNewVersion )
     {
         if ( $strNewVersion == $this->_getOldVersion() )
@@ -65,9 +70,9 @@ class App_Update extends DBx_ReadWrite_Object
         $this->_objPackage->save();
         $this->_strOldVersion = $strNewVersion;
     }
-
     /**
-     * @return boolean whether option is enabled in component section of the config
+     * whether option is enabled in component section of the config
+     * @return boolean 
      */
     public function isEnabled( $strParam )
     {
@@ -77,7 +82,6 @@ class App_Update extends DBx_ReadWrite_Object
                 return false;
           return $objConfigCms->$strParam;
     }
-
     private function _getPackageVersion( $strComponent )
     {
         // $strSelect = 'SELECT package_version FROM host_packages WHERE package_name=\''.$strComponent.'\' ';
@@ -95,8 +99,6 @@ class App_Update extends DBx_ReadWrite_Object
         else 
             return $this->_objPackage->package_version;
     }
-
-
     public static function run( $arrNamespaces, $strConnectionIndex = 'default' )
     {
         if ( Sys_Global::get( 'Environment') == '' )

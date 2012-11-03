@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * This file is a part of CWA framework.
+ * Copyright 2012, CuteWebApps.com
+ * https://github.com/cutewebapps/webapps-framework-lib
+ * 
+ * Licensed under GPL, Free for usage and redistribution.
+ */
+
 class App_Test_Loader
 {
 
@@ -50,7 +58,7 @@ class App_Test_Loader
                 throw new App_Exception( 'Invalid or insecure test class name' ) ;
         
         $strClassName = str_replace( '-', '/', $strClassName );
-        $file = new Sys_Dir( WC_APPLICATION_DIR.'/test/'.$strClassName.'.php' );
+        $file = new Sys_Dir( CWA_APPLICATION_DIR.'/test/'.$strClassName.'.php' );
         
         if ( ! file_exists( $file->getName() ))
               throw new App_Exception( 'Test class not found: '. $file->getName() );
@@ -73,7 +81,7 @@ class App_Test_Loader
             if ( $config->group->$strGroup ) {
                 $strPath = $config->group->$strGroup;
 
-                $dir = new Sys_Dir( WC_APPLICATION_DIR.'/test/'.$strPath );
+                $dir = new Sys_Dir( CWA_APPLICATION_DIR.'/test/'.$strPath );
                 if ( $dir->exists() ) {
                     $arrFiles = $dir->getFiles( '/\.phpt?$/' );
                     

@@ -169,7 +169,7 @@ class Cwa_Package
         $this->dir = getcwd();
         
         $this->env = new Cwa_Env();
-        if ( !$this->env->hasFramework() ) die( "CWA ERROR: no framework installed\n" );    
+        if ( !$this->env->hasFramework() ) die( "CWA ERROR: no framework installed ({$this->env->getClassRoot()})\n" );    
         if ( !file_exists( "control.json" ))  die( "CWA ERROR: control.json was not found\n" );
         $this->env->init(); 
                 

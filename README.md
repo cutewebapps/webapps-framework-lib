@@ -28,3 +28,8 @@ Binaries
 * cwa-package - command-line tool for generating new components
 * cwa-model   - command-line tool for generating drafts of models and controllers
 * cwa-db      - command-line tool for fetching and installing mysql databases
+
+Installation
+=====================
+This package needs to be unpacked into users home directory.
+After than yu can run cwa-install to install other CWA packages.

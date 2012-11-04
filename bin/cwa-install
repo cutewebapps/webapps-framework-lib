@@ -2,6 +2,7 @@
 <?php
 /**
  * Current priority:
+ * @TODO: remote package installation, cwa-install http://xxx.git
  * @TODO: create typical database
  * @TODO: check dependencies (with autoinstallation?
  * 
@@ -116,7 +117,6 @@ class Cwa_Env
         if ( getenv( 'CWA_LOG_ROOT' ) ) return getenv( 'CWA_LOG_ROOT'); 
         return $this->getHome().'/log';
     }          
-    
     /**
      * @return string
      */
@@ -125,7 +125,6 @@ class Cwa_Env
         if ( getenv( 'CWA_VHOST_ROOT' ) ) return getenv( 'CWA_VHOST_ROOT'); 
         return $this->getHome().'/htdocs';
     }
-    
     /**
      * @return boolean
      */
@@ -262,6 +261,9 @@ class Cwa_Package
         $strIp = '*';
         $nServerPort = 80;
         
+        $dirVhRoot = new Sys_Dir( $this->env->getVirtualHostsRoot() );
+        if ( !$dirVhRoot->exists() ) $dirVhRoot->create();
+        
         foreach( $arrHosts as $objProps ) {
             $strName = $objProps->name;
             
@@ -278,7 +280,7 @@ class Cwa_Package
 	ErrorLog  "{$this->env->getLogRoot()}/error_{$strDashedHost}.log"
 	CustomLog  "{$this->env->getLogRoot()}/access_{$strDashedHost}.log" common
             
-        SetEnv CWA_ROOT {$this->env->getRoot()}
+        SetEnv CWA_HOME {$this->env->getHome()}
         SetEnv CWA_CLASS_ROOT {$this->env->getClassRoot()}
         <IfModule mpm_itk_module>
             AssignUserId {$this->env->getSystemUser()} {$this->env->getSystemUserGroup()}

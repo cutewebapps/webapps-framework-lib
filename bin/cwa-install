@@ -19,7 +19,7 @@
  * Following can be overrided:
  * export CWA_BIN_ROOT     =$(CWA_HOME)/bin
  * export CWA_CLASS_ROOT   =$(CWA_HOME)/classes
- * export CWA_CONF_ROOT    =$(CWA_HOME)/conf
+ * export CWA_CONF_ROOT    =$(CWA_HOME)/etc
  * export CWA_DATA_ROOT    =$(CWA_HOME)/data
  * export CWA_STATIC_ROOT  =$(CWA_HOME)/static
  * export CWA_VHOST_ROOT   =$(CWA_HOME)/htdocs 
@@ -83,7 +83,7 @@ class Cwa_Env
     public function getConfRoot() 
     { 
         if ( getenv( 'CWA_CONF_ROOT' ) ) return getenv( 'CWA_CONF_ROOT'); 
-        return $this->getHome().'/conf';
+        return $this->getHome().'/etc';
     }    
     /**
      * @return string
@@ -257,12 +257,23 @@ class Cwa_Package
         $arrHosts = $config->vhosts;
         if ( !is_object( $config->vhosts ) ) $arrHosts = array( $config->vhosts );
 
-        $strSitesAvailableDir =  $this->env->getConfRoot().'/'.$strFrontend .'/sites-enabled';
+        $strSitesAvailableDir =  $this->env->getConfRoot().'/'.$strFrontend .'/sites-available';
         $strIp = '*';
         $nServerPort = 80;
-        
-        $dirVhRoot = new Sys_Dir( $this->env->getVirtualHostsRoot() );
-        if ( !$dirVhRoot->exists() ) $dirVhRoot->create();
+
+        $arrDirs = array(
+            $this->env->getVirtualHostsRoot(),
+            $this->env->getConfRoot(),
+            $this->env->getConfRoot().'/'.$strFrontend,
+            $this->env->getConfRoot().'/'.$strFrontend.'/conf.d',
+            $this->env->getConfRoot().'/'.$strFrontend.'/sites-available'
+        );
+
+        foreach( $arrDirs as $strMandatoryDir ) {
+            $dir = new Sys_Dir( $strMandatoryDir );
+            Sys_Io::out( $dir->getName() );
+            if ( !$dir->exists() ) $dir->create();
+        }
         
         foreach( $arrHosts as $objProps ) {
             $strName = $objProps->name;

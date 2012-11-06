@@ -1,2 +1,180 @@
 #!/usr/bin/php
 <?php
+// TODO: replace pkg/control.php  with control.json
+// TODO: update index.php, patch.php, test.php
+
+
+global $argv, $argc, $strCurrentDir;
+$strCurrentDir = getcwd();
+
+$strPackageName = basename( $strCurrentDir );
+if ( basename( $strCurrentDir ) == 'trunk' ) {
+	$strPackageName = basename( dirname( $strCurrentDir ) );
+}
+$bIsLibrary = ( preg_match( '@-lib$@simU', $strPackageName ) );
+
+// 2. creating folders
+$arrFolders = array(  'classes' );
+if ( !$bIsLibrary ) {
+	$arrFolders []= 'htdocs';
+	$arrFolders []= 'htdocs/static';
+	$arrFolders []= 'htdocs/theme';
+	$arrFolders []= 'htdocs/config';
+}
+foreach( $arrFolders as $strFolder ) {
+	if ( !is_dir( $strCurrentDir.'/'.$strFolder )) {
+		mkdir( $strFolder );
+		echo $strFolder.' folder created'."\n";
+	}
+}
+
+
+// 3. creating pkg/control.php file
+$strControlFile = $strCurrentDir.'/control.json';
+if ( file_exists( $strControlFile ) ) { 
+        echo " control.json already exists\n";  
+} else {
+    
+    $strEx = '';
+    if ( !$bIsLibrary ) { 
+        $strVirtHost = str_replace( '.', '-', str_replace( 'project-', '', $strPackageName));
+        $strEx  = "\n    \"vhosts\" : { \n"; 
+        $strEx .= "\n         \"name\" : \"$strVirtHost\", ";
+        $strEx .= "\n         \"copy\" : [\".htaccess\",\"index.php\",\"patch.php\",\"test.php\"], ";
+        $strEx .= "\n         \"writable\" : [\"cdn\"] ";
+        $strEx .= "\n    },\n";
+    }
+    $strFileContent =<<< EOF
+{
+    "version" : "0.1.0",
+    "license" : "Commercial",
+    "package" : "{$strPackageName}", $strEx
+    "classes" : [],
+    "deps"    : [
+        "webapps-framework-lib",
+        "webapps-cms-lib",
+        "webapps-user-lib",
+        "webapps-jquery-lib",
+        "webapps-jquery-ui-lib",
+    ),
+}
+
+EOF;
+    $f = fopen( $strControlFile, 'wb' );
+    if ( $f ) {
+        fwrite( $f, $strFileContent );
+        fclose( $f );
+        echo " control.json created\n";
+    }
+}
+
+
+if ( !$bIsLibrary ) {
+
+    $strPhpStart ='<'."?php  
+    define( 'CWA_APPLICATION_DIR', realpath( dirname( __FILE__ ) ));
+    if ( getenv('CWA_CLASS_ROOT') )
+        define( 'CWA_DIR_CLASSES', getenv('CWA_CLASS_ROOT') );
+    else
+        define( 'CWA_DIR_CLASSES', CWA_APPLICATION_DIR.'/classes' );
+
+    require_once CWA_DIR_CLASSES . '/App/model/Loader.php';
+    cwa_init_web_application();";
+
+// 4. create htdocs/index.php
+    
+
+$strHtdocsIndex = $strCurrentDir.'/htdocs/index.php';
+if ( file_exists( $strHtdocsIndex ) ) { 
+    echo " htdocs/index.php already exists\n";  
+} else {
+    $strFileContent = $strPhpStart."\n    cwa_run_web_application(); ";
+    $f = fopen( $strHtdocsIndex, 'wb' );
+    if ( $f ) {
+        fwrite( $f, $strFileContent );
+        fclose( $f );
+        echo " htdocs/index.php created\n";
+    }    
+}
+    
+
+// 5. create htdocs/patch.php file
+$strHtdocsPatch = $strCurrentDir.'/htdocs/patch.php';
+if ( file_exists( $strHtdocsPatch ) ) { 
+    echo " htdocs/patch.php already exists\n";  
+} else {
+    $strFileContent = $strPhpStart."\n    cwa_patch_web_application(); ";
+    $f = fopen( $strHtdocsPatch, 'wb' );
+    if ( $f ) {
+        fwrite( $f, $strFileContent );
+        fclose( $f );
+        echo " htdocs/patch.php created\n";
+    }    
+}
+
+// 5.1. create htdocs/test.php file
+$strHtdocsTest = $strCurrentDir.'/htdocs/test.php';
+if ( file_exists( $strHtdocsTest ) ) { 
+    echo " htdocs/test.php already exists\n";  
+} else {
+    $strFileContent = $strPhpStart."\n    cwa_test_web_application(); ";
+    $f = fopen( $strHtdocsTest, 'wb' );
+    if ( $f ) {
+        fwrite( $f, $strFileContent );
+        fclose( $f );
+        echo " htdocs/test.php created\n";
+    }    
+}
+
+
+// 6. todo: create htdocs/.htaccess file
+
+$strHtdocsHtAccess = $strCurrentDir.'/htdocs/.htaccess';
+if ( file_exists( $strHtdocsHtAccess ) ) { 
+    echo " htdocs/.htaccess already exists\n";  
+} else {
+    $strFileContent = "
+<IfModule mod_php5.c>
+    php_value magic_quotes_gpc Off
+</IfModule>
+
+# Options +FollowSymLinks -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    RewriteRule ^$  /index.php  [L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f  
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^.*$  /index.php  [L]
+    
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+    RewriteCond %{REQUEST_FILENAME} !-f  
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond $1 !^cdn
+
+    RewriteRule ^(.+)$  /index.php  [L]
+</IfModule>
+
+ErrorDocument 403 /index.php
+ErrorDocument 404 /index.php
+
+DirectoryIndex index.php        
+    ";
+            
+    $f = fopen( $strHtdocsHtAccess, 'wb' );
+    if ( $f ) {
+        fwrite( $f, $strFileContent );
+        fclose( $f );
+        echo " htdocs/.htaccess created\n";
+    }    
+}
+
+// 7. todo: create htdocs/config/config.php file
+
+// 8. todo: create htdocs/config/env_local.php file
+
+} // end of !$bIsLibrary
+
+exit(0);

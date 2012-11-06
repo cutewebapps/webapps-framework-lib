@@ -1,2 +1,115 @@
 #!/usr/bin/php
 <?php
+
+global $argv, $argc, $strCurrentDir;
+$strCurrentDir = getcwd();
+
+$strModel = $strNameSpace = basename( $strCurrentDir );
+if ( $strModel != 'model' ) {
+    die( 'ERROR: You should be in model folder' );
+}
+$strNameSpace = basename( dirname( $strCurrentDir ) );
+echo 'NAMESPACE: '.$strNameSpace."\n"; 
+
+for ( $i = 1; $i < $argc; $i++ ) {
+    createModelFile( $argv[$i], $strNameSpace );
+}
+
+
+function createModelFile( $strModel, $strNameSpace ) { 
+    global $strCurrentDir;
+    $strFile = $strCurrentDir.'/'.str_replace( '_', '/', $strModel ).'.php';
+    $strClassBase = $strNameSpace.'_'.$strModel;
+
+    echo $strClassBase.': ';
+
+    if ( file_exists( $strFile ) ) { 
+        echo " model alredy exists\n";  return false; 
+    }
+
+    $strFileContent = '<'.'?php';
+    $strFileContent .=<<< EOF
+
+class {$strClassBase}_Table extends DBx_Table
+{
+/**
+ * database table name
+ */
+    protected \$_name='';
+/**
+ * database table primary key
+ */
+    protected \$_primary='';
+}
+
+class {$strClassBase}_List extends DBx_Table_Rowset
+{
+}
+
+class {$strClassBase}_Form_Filter extends App_Form_Filter
+{
+    public function createElements()
+    {
+        \$this->allowFiltering( array( ) );
+    }
+}
+
+class {$strClassBase}_Form_Edit extends App_Form_Edit
+{
+    public function createElements()
+    {
+        \$this->allowEditing(array(  ) );
+    }
+}
+
+
+class {$strClassBase} extends DBx_Table_Row
+{
+    /** @return string */
+    public static function getClassName() { return '{$strClassBase}'; }
+    /** @return string */
+    public static function TableClass() { return self::getClassName().'_Table'; }
+    /** @return {$strClassBase}_Table */
+    public static function Table() { \$strClass = self::TableClass();  return new \$strClass; }
+    /** @return string */
+    public static function TableName() { return self::Table()->getTableName(); }
+    /** @return string */
+    public static function FormClass( \$name ) { return self::getClassName().'_Form_'.\$name; }
+    public static function Form( \$name ) { \$strClass = self::getClassName().'_Form_'.\$name; return new \$strClass; }
+}
+
+EOF;
+
+    $strDir = dirname( $strFile );
+    if ( !is_dir( $strDir )) mkdir( $strDir );
+
+    $f = fopen( $strFile, 'wb' );
+    if ( $f ) {
+        fwrite( $f, $strFileContent );
+        fclose( $f );
+        echo " created successfully\n";
+    }
+    // BUG: name of controller
+    // TODO: if name is too complicated, add a class name
+    $strControllerClassBase = str_replace ('/', '', str_replace( '_', '', $strClassBase ));
+
+// CREATING Controller File
+    
+    $strFileContent = '<'.'?php';
+    $strFileContent .=<<< EOF
+
+class {$strControllerClassBase}Ctrl extends App_DbTableCtrl
+{
+
+}
+EOF;
+    $f = fopen( $strCurrentDir.'/../ctrl/'.str_replace('_', '',$strModel).'Ctrl.php', 'wb' );
+    if ( $f ) {
+        fwrite( $f, $strFileContent );
+        fclose( $f );
+    }
+
+
+    return true;
+}
+

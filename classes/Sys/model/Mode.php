@@ -48,8 +48,8 @@ class Sys_Mode
     {
         if (defined('CWA_ENV'))
             return CWA_ENV;
-        if ( Sys_Config::isRegistered( 'Environment') )
-            return Sys_Config::get( 'Environment');
+        if ( Sys_Global::isRegistered( 'Environment') )
+            return Sys_Global::get( 'Environment');
         return (getenv('CWA_ENV') ? getenv('CWA_ENV') : 'local');
     }
 

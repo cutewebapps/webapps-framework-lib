@@ -158,15 +158,15 @@ class App_View extends Sys_Editable
             $strClass = $arrParams['renderer'];
 
         $subView = new $strClass();
-        
-        
         $arrPaths = $this->getPath();
         if ( is_string( $arrPaths )) $arrPaths = array( $arrPaths );
         
         $strFullPath = '';
         foreach ( $arrPaths as $strFullFile ) {
-            if ( file_exists( $strFullFile ) ) {
-               $strFullPath = dirname( dirname( dirname( $strFullFile ))) .'/'.$strPath;
+            // Sys_Io::out( dirname( dirname( dirname( $strFullFile ))) .'/'.$strPath );
+            $strPossiblePath = dirname( dirname( dirname( $strFullFile ))) .'/'.$strPath;
+            if ( file_exists( $strPossiblePath ) ) {
+               $strFullPath = $strPossiblePath;
                break;
             }
         }

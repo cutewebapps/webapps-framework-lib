@@ -3,9 +3,7 @@
 /**
  * Current priority:
  * @TODO: remote package installation, cwa-install http://xxx.git
- * @TODO: create typical database
  * @TODO: check dependencies (with autoinstallation?
- * 
  * 
  * User can set following variables to make environment more flexible
  * For developer machine:
@@ -363,7 +361,27 @@ EOF;
     {
         if ( is_object( $this->config->database ) ) {
             $strDbName = $this->config->database->name;
-            $strDbSource = $this->config->database->source;
+            if ( getenv('CWA_MYSQL') != ''  ) {
+                $strMysqlBin = getenv('CWA_MYSQL');
+                $strDbCharset = $this->config->database->charset;
+                $strDbSource = $this->config->database->source;
+
+                // TODO: check that database was not created yet
+                // creating database 
+                $strSql = 'CREATE DATABASE IF NOT EXISTS '.$strDbName;
+                if ( $strDbCharset ) $strSql.' DEFAULT CHARACTER SET '.$strDbCharset;
+                $strCmd = 'echo "'.$strSql.'" | '. $strMysqlBin;
+                echo $strCmd."\n";
+                Sys_Cmd::run( $strCmd );
+                
+                if ( $strDbSource )  {
+                    // TODO: download database from remote dump and run it
+                }
+               
+            } else {
+                echo  "Notice: no mysql env.setup, recommended for dev machine (export CWA_MYSQL=\"/usr/bin/mysql -u root\")\n"; 
+            }
+            
         }
     }
     

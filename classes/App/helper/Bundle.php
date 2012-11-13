@@ -26,14 +26,15 @@ class App_BundleHelper extends App_ViewHelper_Abstract
      */
     public function bundle( $strPath )
     {
-        $strBundleMode = App_Application::getInstance()->bundle;
         
-        switch ( $strBundleMode ) {
-            case "localfile":
+        $strBundleMode = App_Application::getInstance()->getConfig()->bundle;
+        switch ( $strBundleMode ) 
+        {
+            case "file":
                 // local file case: version from component (or local file name)
                 // recommeded for dev and productions without CDNs
                 return $this->base().$strPath.'?v='.$this->getLocalVersion();
-                
+
             case "cdn":
                 // next case: version for usage with CDN
                 // when each release copies are stored and never deleted

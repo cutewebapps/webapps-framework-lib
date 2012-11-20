@@ -487,5 +487,10 @@ abstract class App_DbTableCtrl extends App_AbstractCtrl
             $strUrl .= '?rnd='.mt_rand(0, 10000);
         header( 'Location: '.$strUrl );
         die;
+    } 
+
+	/** dummy index Action */
+    public function indexAction()
+    {
     }
 }

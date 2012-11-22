@@ -106,9 +106,14 @@ class App_View extends Sys_Editable
         $arrSplittedParams = array();
         // section, module, controller, action
 
+        if ( isset( $arrParams['prefix'] ) ) {
+            $arrSplittedParams []= $arrParams[ 'prefix' ];
+        }
+        
         if ( isset( $arrParams['section'] )) {
             if ( $arrParams[ 'section' ] != 'frontend' ) {
-                //TODO: get theme from the section name??
+                //TODO: get user area from theme name...?
+                //
                 //$arrSplittedParams []= urlencode( $arrParams[ 'section' ] );
                 $arrSplittedParams []= 'admin';// TEMPORARY!!!!
             }

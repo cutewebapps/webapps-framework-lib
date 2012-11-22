@@ -97,7 +97,7 @@ class Cwa_Env
     public function getDataRoot() 
     { 
         if ( getenv( 'CWA_DATA_ROOT' ) ) return getenv( 'CWA_DATA_ROOT'); 
-        return $this->getHome().'/bin';
+        return $this->getHome().'/data';
     }    
     /**
      * @return string
@@ -240,25 +240,14 @@ class Cwa_Package
     {
         // vhost
         $config = $this->getConfig();
-        if ( empty( $config->vhosts ) ) return;
         $strFrontend = getenv( 'CWA_FRONTEND' );
         if ( $strFrontend == '' ) {
             echo  "no frontend for virtual hosts (export CWA_FRONTEND=apache)"; return;
         }
         if ( $strFrontend != 'apache' ) {
             echo  "unknown frontend for virtual hosts (export CWA_FRONTEND=apache)"; return;
-        }
-
-        $arrStatic = $config->static;
-        if ( !is_object( $config->static ) ) $arrStatic = array( $config->static );
+        }       
         
-        $arrHosts = $config->vhosts;
-        if ( !is_object( $config->vhosts ) ) $arrHosts = array( $config->vhosts );
-
-        $strSitesAvailableDir =  $this->env->getConfRoot().'/'.$strFrontend .'/sites-available';
-        $strIp = '*';
-        $nServerPort = 80;
-
         $arrDirs = array(
             $this->env->getVirtualHostsRoot(),
             $this->env->getConfRoot(),
@@ -272,6 +261,30 @@ class Cwa_Package
             Sys_Io::out( $dir->getName() );
             if ( !$dir->exists() ) $dir->create();
         }
+        
+        
+        if ( is_object( $config->static ) ) {
+             $strAliasDir =  $this->env->getConfRoot().'/'.$strFrontend .'/conf.d';
+             foreach( $config->static as $strStaticDir ) {
+                 Sys_Io::out( 'creating alias /'.$strStaticDir.'/');
+                 
+                 $file = new Sys_File ( $strAliasDir.'/'.$strStaticDir.'.conf' );
+                 $file->save( "Alias /$strStaticDir/ $strAliasDir/$strStaticDir/ \n" );
+             }
+        }
+        
+        
+        if ( empty( $config->vhosts ) ) return;
+        
+       
+        $arrHosts = $config->vhosts;
+        if ( !is_object( $config->vhosts ) ) $arrHosts = array( $config->vhosts );
+
+        $strSitesAvailableDir =  $this->env->getConfRoot().'/'.$strFrontend .'/sites-available';
+        $strIp = '*';
+        $nServerPort = 80;
+
+     
         
         foreach( $arrHosts as $objProps ) {
             $strName = $objProps->name;

@@ -9,15 +9,15 @@
  */
 
 /**
- * not tested throroughly
- */
+ * CDN version
+ * */
 class App_BundleHelper extends App_ViewHelper_Abstract
 {
     public function getLocalVersion()
     {
         $fn = CWA_APPLICATION_DIR.'/cdn/version.txt';
         if ( file_exists( $fn ) )
-            return file_get_contents( $fn );
+            return trim( file_get_contents( $fn ));
         return '0.' .filemtime( CWA_APPLICATION_DIR.'/index.php' );
     }
 

@@ -414,4 +414,61 @@ class App_ImageFile {
     }    
     
     
+    /**
+     * @return  App_ImageFile (crop square )
+     */
+    public function generateThumbnailRectangle( $dir, $w, $h, $q = 80 )
+    {
+        
+        $imgResult = new App_ImageFile( $dir, $w, $w );
+        $imgResult->_strPathFull = CWA_APPLICATION_DIR . $imgResult->_strPath; // full system path to thumb
+        
+        $src_file = $this->getFilePath();
+        if ( !file_exists( $src_file )) {
+            throw new App_ImageFile_Exception('Source file cannot be found');
+            return false;
+        }
+
+        // auto detect type
+        $arrImgSize = getimagesize($src_file);
+        list($strImg,$strType) = explode('/', $arrImgSize['mime']);
+        
+        // создаём исходное изображение на основе
+        // исходного файла и опеределяем его размеры
+        $strCreateFuncName = 'imagecreatefrom'.strtolower($strType);
+        $src = $strCreateFuncName($src_file);
+        
+        $w_src = imagesx($src);
+        $h_src = imagesy($src);
+
+        // создаём пустую квадратную картинку
+        $dest = imagecreatetruecolor($w,$h);
+
+        // вырезаем квадратную серединку по x, если фото горизонтальное
+        if ($w_src>$h_src) {
+            imagecopyresampled($dest, $src, 0, 0,
+            round((max($w_src,$h_src)-min($w_src,$h_src))/2),
+            0, $w, $h, min($w_src,$h_src), min($w_src,$h_src));
+        }
+
+        // вырезаем квадратную серединку по y, если фото вертикальное
+        elseif ($w_src<$h_src) {
+            imagecopyresampled($dest, $src, 0, 0, 0,
+            round((max($w_src,$h_src)-min($w_src,$h_src))/2),
+            $w, $h, min($w_src,$h_src), min($w_src,$h_src));
+        }
+
+        // квадратная картинка масштабируется без вырезок
+        else {
+            imagecopyresampled($dest, $src, 0, 0, 0, 0, $w, $h, $w_src, $h_src);    
+        }
+
+        // вывод картинки и очистка памяти
+        $res=imagejpeg($dest,$imgResult->_strPathFull,$q);
+
+        imagedestroy($dest);
+        imagedestroy($src);
+
+        return ($res)? $imgResult : null;
+    }
 }

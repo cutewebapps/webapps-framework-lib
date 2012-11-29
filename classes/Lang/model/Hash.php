@@ -24,14 +24,20 @@ class Lang_Hash
     {
         if ( $strLang == '' ) {
             if ( App_Application::getInstance()->getConfig()->lang->detect_from_browser ) {
+                $arrLanguagesDetectedInBrowser = App_Application::getInstance()->getConfig()->lang->detect_from_browser->toArray();
                 if ( isset( $_SERVER["HTTP_ACCEPT_LANGUAGE"] )) {
-                    $strLang = substr( $_SERVER["HTTP_ACCEPT_LANGUAGE"], 0, 2 );
+                    $strBrowserLang = substr( $_SERVER["HTTP_ACCEPT_LANGUAGE"], 0, 2 );
+                    if ( in_array( $strBrowserLang, $arrLanguagesDetectedInBrowser ) ) {
+                        $strLang = $strBrowserLang;
+                    }
                 }
             }
+            // Sys_Debug::dump( $arrLanguagesDetectedInBrowser );
             if ( $strLang == '' ) {
                 $strLang = App_Application::getInstance()->getConfig()->lang->default_lang;
             }
         }
+       
         if ( $strComponent == '' )
             $strComponent = App_Application::getInstance()->getConfig()->lang->default_component;
 

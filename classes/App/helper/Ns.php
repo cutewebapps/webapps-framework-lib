@@ -24,6 +24,13 @@ class App_NsHelper extends App_ViewHelper_Abstract
         $this->strProjectNs = App_Application::getInstance()->getConfig()->ns;
         return $this;
     }
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->strProjectNs;
+    }
    
     /**
      * @return mixed

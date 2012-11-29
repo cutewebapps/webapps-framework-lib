@@ -117,7 +117,7 @@ class App_AbstractCtrl
                 $arrSections = $config->lang->sections->toArray();
                 if ( isset( $arrSections[ $arrParams['section'] ] ) ) {
                     if (!in_array( $arrParams['lang'] , $arrSections[ $arrParams['section'] ])) {
-                        throw new App_PageNotFound_Exception( 'Language is not supported' );
+                        throw new App_Exception( 'Language is not supported for this section' );
                     }
                 }
             }

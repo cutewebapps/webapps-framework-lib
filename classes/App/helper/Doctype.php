@@ -15,6 +15,9 @@ class App_DoctypeHelper extends App_ViewHelper_Abstract
             case 'HTML4':
                 return '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'
                    ."\n";
+            case 'XML':
+                return '<?xml version="1.0" encoding="utf-8" standalone="yes"?>'
+                    ."\n";
             default:
                 return '<!DOCTYPE html>';
         }

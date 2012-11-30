@@ -29,7 +29,7 @@ class App_NsHelper extends App_ViewHelper_Abstract
      */
     public function __toString()
     {
-        return $this->strProjectNs;
+        return Sys_String::toLowerDashedCase( $this->strProjectNs );
     }
    
     /**

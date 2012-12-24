@@ -82,9 +82,15 @@ class App_Exception_Handler
                 $mail->IsSMTP();
                 $mail->SMTPAuth = true;
                 $mail->Host     = $confException->smtp->host;
+		if ( $confException->smtp->port ) {
+			$mail->Port = $confException->smtp->port;
+		}
                 $mail->Username = $confException->smtp->username;
                 $mail->Password = $confException->smtp->password;
-
+		if ( $confException->smtp->ssl ) {
+			$mail->SMTPSecure  = $confException->smtp->ssl;
+		}
+//Sys_Debug::dumpDie( $mail );
                 // from
                 $arrFrom = explode(' ', $confException->mail->headers);
                 $strFrom = $arrFrom[1];

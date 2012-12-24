@@ -34,6 +34,7 @@ class App_NsHelper extends App_ViewHelper_Abstract
    
     /**
      * @return mixed
+     * @warning: 5.3+ function
      */
     public function auth()
     {

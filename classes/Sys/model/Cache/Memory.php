@@ -19,7 +19,8 @@ class Sys_Cache_Memory implements Sys_Cache_Abstract {
         foreach( $options as $strKey => $strValue ) {
             $this->_options[ $strKey ] = $strValue;
         }
-        $GLOBALS[ $this->_options['var'] ] = array();
+        if ( !isset( $GLOBALS[ $this->_options['var'] ] ))
+            $GLOBALS[ $this->_options['var'] ] = array();
     }
     
     /**
@@ -39,9 +40,9 @@ class Sys_Cache_Memory implements Sys_Cache_Abstract {
      */
     public function load( $strTag )
     {
-        if ( isset( $GLOBALS[ $this->_options['var'] ][ $strTag ] ) )
+        if ( isset( $GLOBALS[ $this->_options['var'] ][ $strTag ] ) ) {
             return $GLOBALS[ $this->_options['var'] ][ $strTag ];
-        
+        }
         return false;
     }
     

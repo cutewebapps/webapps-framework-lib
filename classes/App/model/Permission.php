@@ -135,6 +135,8 @@ class App_Permission
 
         $bRequired = self::matchRules( $arrParams, $objSectionActionConfig );
         if ( $bRequired ) {
+            // Sys_Debug::dumpDie( $arrParams );
+        
             // if CSRF-token validation is required
             // generator class can be configured!!
             if ( ! App_Token::isValid() ) {

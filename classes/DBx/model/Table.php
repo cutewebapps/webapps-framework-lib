@@ -370,4 +370,71 @@ class DBx_Table extends DBx_Table_Abstract
             return 1;
         }
     }
+    
+      /**
+     * @todo move to DBx_Table
+     * @param array $insertData
+     * @param array $updateData
+     * @return int
+     * @throws DBx_Adapter_Exception
+     */
+    public function insertOrUpdate(array $insertData, array $updateData)
+    {
+        $db    = $this->getAdapterWrite();
+        $table = $this->_name;
+
+        // extract and quote col names from the array keys
+        $i           = 0;
+        $bind        = array();
+        $insert_cols = array(); $insert_vals = array();
+        $update_cols = array(); $update_vals = array();
+        foreach (array('insert', 'update') as $type) {
+            $data = ${"{$type}Data"};
+            $cols = array();
+            $vals = array();
+            foreach ($data as $col => $val) {
+                $cols[] = $db->quoteIdentifier($col, true);
+                if ($val instanceof DBx_Expr) {
+                    $vals[] = $val->__toString();
+                } else {
+                    if ($db->supportsParameters('positional')) {
+                        $vals[] = '?';
+                        $bind[] = $val;
+                    } else {
+                        if ($db->supportsParameters('named')) {
+                            $bind[':col' . $i] = $val;
+                            $vals[] = ':col'.$i;
+                            $i++;
+                        } else {
+                            throw new DBx_Adapter_Exception(get_class($db) ." doesn't support positional or named binding");
+                        }
+                    }
+                }
+            }
+            ${"{$type}_cols"} = $cols; unset($cols);
+            ${"{$type}_vals"} = $vals; unset($vals);
+        }
+
+        // build the statement
+        $set = array();
+        foreach ($update_cols as $i => $col) {
+            $set[] = sprintf('%s = %s', $col, $update_vals[$i]);
+        }
+
+        $sql = sprintf(
+            'INSERT INTO %s (%s) VALUES (%s) ON DUPLICATE KEY UPDATE %s;',
+                $db->quoteIdentifier($table, true),
+                implode(', ', $insert_cols),
+                implode(', ', $insert_vals),
+                implode(', ', $set)
+        );
+
+        // execute the statement and return the number of affected rows
+        if ($db->supportsParameters('positional')) {
+            $bind = array_values($bind);
+        }
+        $stmt   = $db->queryWrite($sql, $bind); 
+        $result = $stmt->rowCount();
+        return $result;
+    }
 }

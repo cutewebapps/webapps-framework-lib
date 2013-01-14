@@ -211,7 +211,7 @@ class App_Test_Crawler extends App_Test_Case
         $nTotal = 0;
         foreach ( $arrMap as $arrTestProperties ) {
             $strResult = 'OK';
-            $strExt   = 'OK';
+            $strExt   = '';
             $arrOutputProps =  array();
             try {
                 $this->visit( $arrTestProperties );

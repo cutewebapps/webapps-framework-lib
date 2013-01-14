@@ -762,20 +762,22 @@ class App_Dispatcher
             }
         }
 
-        if ( App_Application::getInstance()->getConfig()->display_time_generated ) {
-            if ( !isset( $arrControllerParams['format'] )  && !isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) ) {
-                echo '<div style="margin-top:10px;font-size:10px;text-align:center">Generated in '
-                    . $this->timeframe->getCurrent().'</div>';
-            }
-        }
-        if ( App_Application::getInstance()->getConfig()->display_build ) {
-            $strVersionFile = CWA_APPLICATION_DIR.'/cdn/version.txt';
-            if ( !isset( $arrControllerParams['format'] )  && !isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) ) {
-                if ( file_exists( $strVersionFile ) ) {
-                    echo '<div style="margin-top:1px;font-size:10px;text-align:center">Build #'
-                        . file_get_contents( $strVersionFile ) .' from '.date('m/d/Y H:i', filemtime( $strVersionFile ) ).'</div>';
+        $strBottom = '';
+        if ( !isset( $arrControllerParams['format'] )  && !isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) ) {
+            if ( App_Application::getInstance()->getConfig()->display_time_generated ) {
+                if ( !isset( $arrControllerParams['format'] )  && !isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) ) {
+                    $strBottom .= ' Generated in '. $this->timeframe->getCurrent().'. ';
                 }
             }
+            if ( App_Application::getInstance()->getConfig()->display_build ) {
+                $strVersionFile = CWA_APPLICATION_DIR.'/cdn/version.txt';
+                if ( file_exists( $strVersionFile ) ) {
+                    $strBottom .= ' Build #'. file_get_contents( $strVersionFile ) .' from '.date('m/d/Y H:i', filemtime( $strVersionFile ) ).'';
+                }
+            }
+        }
+        if ( $strBottom != '' ) {
+            echo '<div style="margin-top:10px;font-size:10px;text-align:center">'.$strBottom.'</div>';
         }
     }
     /**

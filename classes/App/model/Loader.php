@@ -28,8 +28,15 @@ function cwa_init_web_application()
     else if ( getenv( 'CWA_ENV' ) != '' )
           Sys_Global::set( 'Environment', getenv( 'CWA_ENV' ));
 
-    // sometimes magic quotes are on inspite of everything...
-    if ( get_magic_quotes_gpc() == 1 ){
+    // in Php5.2 sometimes magic quotes are on inspite of everything...
+    // magic quoates are deprecated in 5.3
+    // check this only for PHP version lower than 5.3
+    $bCheckQuotes = true;
+    if ( version_compare( PHP_VERSION, '5.3.0' ) > 0 ) {
+        $bCheckQuotes = false;
+    }
+   
+    if ( $bCheckQuotes && get_magic_quotes_gpc() == 1 ){
         while (list($key,$val)=each($_POST))    { $_POST[$key]  = cwa_init_esc($val); }
         while (list($key,$val)=each($_GET))     { $_GET[$key]   = cwa_init_esc($val); }
         while (list($key,$val)=each($_REQUEST)) { $_REQUEST[$key] = cwa_init_esc($val); }

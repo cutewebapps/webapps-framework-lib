@@ -257,6 +257,71 @@ class App_ImageFile {
     }
     
     /**
+     * Rotate image automatically
+     * @param integer $nWidthLimit
+     * @return App_ImageFile
+     */
+    public function fixOrientation( $strRoot, $strPath, $nWidthLimit, $nOrientation = '' ) {
+    
+        if (!$nOrientation) {
+
+            $exif = exif_read_data( $strRoot . $strPath );            
+            
+            // no orientation tag found, exit
+            if (!isset($exif['COMPUTED']['Orientation'])) return false;
+            //$exif['COMPUTED']['Orientation'] = 6;
+
+    //        Sys_Debug::dump($exif);
+            $nOrientation = $exif['COMPUTED']['Orientation'];
+    //        Sys_Debug::dumpDie($nOrientation);
+            
+        }
+        
+        // Get new dimensions
+        $nHeight = (int) (($nWidthLimit / $this->getWidth()) * $this->getHeight());
+        
+        // create new image file
+        $imgResult = new App_ImageFile( $strPath, $nWidthLimit, $nHeight );
+	    $this->_createFrom();
+        $image = $this->_getGdPtr();
+	    if ( !$image )
+            throw new App_ImageFile_Exception( 'GD Pointer was not created' );
+        
+        // Resample
+        $im = imagecreatetruecolor($nWidthLimit, $nHeight);
+
+        imagecopyresampled(
+                $im, $image,
+                0, 0, 0, 0,
+                $nWidthLimit, $nHeight,
+                $this->getWidth(), $this->getHeight()
+        );
+
+        // Fix Orientation
+        switch($nOrientation) {
+            case 3:
+                $im = imagerotate($im, 180, 0);
+                break;
+            case 6:
+                $im = imagerotate($im, -90, 0);
+                break;
+            case 8:
+                $im = imagerotate($im, 90, 0);
+                break;
+        }
+
+//        Sys_Debug::dumpDie($imgResult->getFilePath());
+        $file = new Sys_File( $imgResult->getFilePath() );
+        $file->write( '', true );
+	    $a = imagejpeg($im, $file->getName(), 95);
+
+	    imagedestroy($im);
+        return  $imgResult;        
+        
+    }    
+    
+    
+    /**
      * Generates resampled image with filling in into box
      * @return App_ImageFile
      */

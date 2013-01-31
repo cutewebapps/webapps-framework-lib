@@ -17,18 +17,19 @@ function checkClassIsLoaded( $strClassName )
 }
 
 /**
- * Autoloade for framework classes
+ * Splitt class name into parts and return them
+ * Those parts will be joined to define real class path
+ * 
  * @param string $strClassName
- * @return boolean
+ * @return array
  * @throws Exception
  */
-function __autoload($strClassName) 
+function getClassParts( $strClassName )
 {
-    // TODO: hack check for sanitizing paths...
-    
     $arrParts = explode('_', $strClassName);
     if (count($arrParts) == 0)
         throw new Exception('ERROR: Empty Class Name');
+    
     $strLastPart = $arrParts[count($arrParts) - 1];
     if (count($arrParts) >= 1 ) {
         if (substr($strLastPart, -4) == 'Ctrl')
@@ -48,7 +49,22 @@ function __autoload($strClassName)
         $arrParts[0] = 'model/'.$strLastPart.'/Base.php';
     }
     
-    $strPath = CWA_DIR_CLASSES . '/' . implode('/', $arrParts) . '.php';
+    return $arrParts;
+}
+
+/**
+ * Autoloade for framework classes
+ * @param string $strClassName
+ * @return boolean
+ * @throws Exception
+ */
+function __autoload($strClassName) 
+{
+    // hack check for sanitizing paths...
+    if ( preg_match( '@\W@', $strClassName )) 
+        throw new Exception( 'Class Name '.$strClassName.' could not be allowed');
+    
+    $strPath = CWA_DIR_CLASSES . '/' . implode('/', getClassParts( $strClassName) ) . '.php';
     if (file_exists($strPath))  {
         include $strPath; return true;
     }

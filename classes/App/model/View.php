@@ -18,6 +18,8 @@ class App_View extends Sys_Editable
     protected $_strContents = '';
     /** @var string|array */
     protected $_path = '';
+    /** @var boolean */
+    protected $_bAutoAppend = true;
     /**
      * @return void
      */
@@ -272,5 +274,24 @@ class App_View extends Sys_Editable
         }
         if ( $strResult == '' ) $strResult == 'en';
         return $strResult;
+    }
+
+    /**
+     * Enable or disable auto appending for this particular view
+     * @param boolean $bValue = true
+     * @return void
+     */
+    public function enableAutoAppend( $bValue = true )
+    {
+        $this->_bAutoAppend = $bValue; 
+    }
+    
+    /**
+     * Get ewhether it is allowed to do auto-append
+     * @return boolean
+     */
+    public function canAutoAppend()
+    {
+        return $this->_bAutoAppend; 
     }
 }

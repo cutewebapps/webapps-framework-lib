@@ -49,6 +49,8 @@ class App_Token
             $strReceivedToken = $_SERVER['X-CSRF-Token'];
 
         $objSession = new App_Session_Namespace( 'csrf' );
+        if ( $objSession->token == "" )
+            return true;
         return ( $objSession->token == $strReceivedToken );
     }
 

@@ -762,6 +762,12 @@ class App_Dispatcher
             }
         }
 
+        $bAutoAppend = true;
+        if ( is_object( $this->_objCurrentController->view ) 
+            && ! $this->_objCurrentController->view->canAutoAppend() ) {
+            $bAutoAppend = false;
+        }
+        
         $strBottom = '';
         if ( !isset( $arrControllerParams['format'] )  && !isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) ) {
             if ( App_Application::getInstance()->getConfig()->display_time_generated ) {
@@ -776,7 +782,7 @@ class App_Dispatcher
                 }
             }
         }
-        if ( $strBottom != '' ) {
+        if ( $bAutoAppend && $strBottom != '' ) {
             echo '<div style="margin-top:10px;font-size:10px;text-align:center">'.$strBottom.'</div>';
         }
     }

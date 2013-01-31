@@ -7,7 +7,9 @@ class App_DocPage
 {
     public $page = '';
     public $content = '';
-
+    public $static = '';
+    
+    
     /**
      * Get Content of generated page
      * 
@@ -15,6 +17,9 @@ class App_DocPage
      */
     public function getContent()
     {
+        if ( !@$this->static ) 
+            return '<pre>'.htmlspecialchars( $this->content ).'</pre>';
+        
         $strContent = $this->content;
         preg_match_all( '@\[\[(.+)\]\]@simU', $strContent, $arrMatches );
         for ( $i = 0; $i< count( $arrMatches[0] ); $i ++ ) {
@@ -42,6 +47,8 @@ class App_DocPage
     public function render( $strPage, $strPath )
     {
         $this->page = $strPage;
+        $this->static = true;
+        
         ob_start();
             require $strPath;
             $this->content = ob_get_contents();
@@ -57,6 +64,7 @@ class App_DocPage
     public function renderClass ( $strClassName, $strPath )
     {
         $this->page = $strClassName;
+        $this->static = false;
         $this->content = file_get_contents( $strPath );
         //@TODO: standard class rendering here 
     }

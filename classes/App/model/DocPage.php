@@ -57,10 +57,8 @@ class App_DocPage
     public function renderClass ( $strClassName, $strPath )
     {
         $this->page = $strClassName;
-        ob_start();
-            require $strPath;
-            $this->content = ob_get_contents();
-        ob_end_clean();
+        $this->content = file_get_contents( $strPath );
+        //@TODO: standard class rendering here 
     }
     
     /**

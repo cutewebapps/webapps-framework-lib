@@ -117,7 +117,7 @@ class App_DocPage
     public function img( $strPath, $strAlt = '' )
     {
         return '<div class="image-wrapper" style="margin:0px auto"><img src="'
-            .$this->path( $strPath ). '" alt="'.$strAlt.'" /></div>';
+            .$this->imgpath( $strPath ). '" alt="'.$strAlt.'" /></div>';
     }
     
 }

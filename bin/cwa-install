@@ -269,7 +269,7 @@ class Cwa_Package
                  Sys_Io::out( 'creating alias /'.$strStaticDir.'/');
                  
                  $file = new Sys_File ( $strAliasDir.'/'.$strStaticDir.'.conf' );
-                 $file->save( "Alias /$strStaticDir/ $strAliasDir/$strStaticDir/ \n" );
+                 $file->save( "Alias /static/$strStaticDir/ " . $this->env->getStaticRoot() . "/$strStaticDir/ \n" );
              }
         }
         

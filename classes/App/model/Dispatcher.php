@@ -402,7 +402,8 @@ class App_Dispatcher
             
         } else {
             // if we dont have format, we can set up headers:
-             header( 'Content-Type: text/html; charset='.$strCharset );
+            if ( !headers_sent() )
+                header( 'Content-Type: text/html; charset='.$strCharset );
         }
 
         if ( isset( $arrParams['noheaders'] ) ) {

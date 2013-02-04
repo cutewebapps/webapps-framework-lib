@@ -20,8 +20,10 @@ class App_DocPage
      */
     public function getContent()
     {
-        if ( !@$this->static ) 
-            return '<pre>'.htmlspecialchars( $this->content ).'</pre>';
+        if ( !@$this->static ) {
+            return '<div><a href="javascript:void(0);" onclick=\'$("pre.source").removeClass("hidden")\'>View Source</a></div>'
+            .'<pre class="source hidden">'.htmlspecialchars( $this->content ).'</pre>';
+        }
         
         $strContent = $this->content;
         preg_match_all( '@\[\[(.+)\]\]@simU', $strContent, $arrMatches );
@@ -76,13 +78,84 @@ class App_DocPage
         ob_end_clean();
         
         // walking through each token and extracting classes
+        $nStart = 0;
+        $arrTokens = token_get_all ( $this->content );
+        while ( $nStart < count( $arrTokens ) ) {
+            $class = new App_DocPage_Class();
+            $nStart = $class->parseTokens( $arrTokens, $nStart );
+            echo '<h3>'. $class->getName() .'</h3>';
+            echo '<hr style="margin-top:0px;margin-bottom:5px" /><pre class="comment">'.$class->getDocBlock().'</pre>';
+            
+            $strParent = $class->parseParent();
+            if ( $strParent )
+                echo '<p>Extends <strong>'. $strParent .'</strong></p>';
+            $arrImplements = $class->parseImplements();
+            if ( count( $arrImplements ) > 0 )
+                echo '<p>Implements inferfaces <strong>'. implode( $arrImplements ).'</strong></p>';
+            
+           // Sys_Debug::dump( $class->getTokens());
+            
+            $strTable = $class->getTable();
+            
+            if ( $strTable ) {
+                echo '<p>Wraps logic of the table: <strong>'. $strTable .'</strong></p>';
+                echo '<p>Primary Key: <strong>'. $class->getPrimaryKey() .'</strong></p>';
+                
+                // TODO: display database schema!
+            }
+            //Sys_Debug::dump( $class->getTokens() );
+            $class->parseMethodsAndProperties();    
+            if ( count( $class->getControllerActions() ) > 0 ) {
+                echo '<h4>Actions</h4>';
+                echo '<ul>';
+                foreach( $class->getControllerActions() as $arrAction ) {
+                    
+                    $docblock = new App_DocPage_Docblock( $arrAction['docblock'] );
+                    echo '<li>';
+                    echo '<pre class="comment">'.$docblock->getRawText().'</pre>';
+                    echo '<h5>'.$arrAction['name'].'</h5>';
+                    // Sys_Debug::dump( $arrAction );
+                    echo '</li>';
+                }
+                echo '</ul>';
+            }
+            if ( count( $class->getMethods() ) > 0 ) {
+                echo '<h4>Methods</h4>';
+                echo '<ol>';
+                foreach( $class->getMethods() as $arrMethod ) {
+                //Sys_Debug::dump ( $class->getMethods() );
+                    $docblock = new App_DocPage_Docblock( $arrMethod['docblock'] );
+                    echo '<li>';
+                    echo '<h5> <span style="color:gray">'.$arrMethod['scope'].'</span> '
+                            .$arrMethod['name'].'(<span style="color:gray">'.$arrMethod['args'].'</span>)</h5>';
+                    echo '<pre class="comment">'.$docblock->getRawText().'</pre>';
+                    //Sys_Debug::dump( $arrMethod );
+                    echo '</li>';
+                }
+                echo '</ol>';
+            }
+            if ( count( $class->getProperties() ) > 0 ) {
+                echo '<h4>Properties</h4>';
+                //Sys_Debug::dump ( $class->getProperties() );
+                echo '<ul>';
+                foreach( $class->getProperties() as $arrProps ) {
+                //Sys_Debug::dump ( $class->getMethods() );
+                    $docblock = new App_DocPage_Docblock( $arrProps['docblock'] );
+                    echo '<li>';
+                    echo '<h5>'.'<span style="color:gray">'.$arrProps['scope'].'</span> '.$arrProps['name'].'</h5>';
+                    echo '<pre class="comment">'.$docblock->getRawText().'</pre>';
+                    
+                   // Sys_Debug::dump( $arrProps );
+                    echo '</li>';
+                }
+                echo '</ul>';
+            }
+            
+            echo '<div style="margin:30px"></div>';
+            
+            $nStart ++;
+        }
         
-        // 1) extract getDocBlock for each class and each classes
-        // 2) each class have methods and properties, with typology and doc comments 
-            // each method
-        
-        // @TODO: standard class rendering here 
-        // Sys_Debug::dump( token_get_all ( $this->content ) ); die;
     }
     
     /**

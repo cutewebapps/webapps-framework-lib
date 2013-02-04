@@ -2,6 +2,9 @@
 
 /**
  * Basic class for displaying PHP class
+ * 
+ * @todo: inclusion of other pages
+ * 
  */
 class App_DocPage
 {
@@ -66,7 +69,20 @@ class App_DocPage
         $this->page = $strClassName;
         $this->static = false;
         $this->content = file_get_contents( $strPath );
-        //@TODO: standard class rendering here 
+        
+        // autoloading classes with to work with reflections further
+        ob_start();
+        require_once $strPath;
+        ob_end_clean();
+        
+        // walking through each token and extracting classes
+        
+        // 1) extract getDocBlock for each class and each classes
+        // 2) each class have methods and properties, with typology and doc comments 
+            // each method
+        
+        // @TODO: standard class rendering here 
+        // Sys_Debug::dump( token_get_all ( $this->content ) ); die;
     }
     
     /**
@@ -92,7 +108,12 @@ class App_DocPage
     public function link( $strName, $strTitle = ''  )
     {
         if ( $strTitle == '' ) $strTitle = $strName;
-        return '<a href="'.$this->path( $strName ).'" target="doc">'.$strTitle.'</a>';
+        
+        $strTargetFrame = App_Application::getInstance()->getConfig()->documentation->iframe;
+        if  ( !$strTargetFrame ) 
+            $strTargetFrame = 'doc';
+        
+        return '<a href="'.$this->path( $strName ).'" target="'.$strTargetFrame.'">'.$strTitle.'</a>';
     }
     
     /**

@@ -49,4 +49,12 @@ class App_NsHelper extends App_ViewHelper_Abstract
         return $this->getView()->broker( $this->strProjectNs );
     }
     
+    /**
+     * all undefined functions in namespace are assumed to be a call to a broker
+     * @return mixed
+     */
+    public function __call( $name, $arguments = array() )
+    {
+        return call_user_func_array( array($this->broker(), $name), $arguments );
+    }
 }

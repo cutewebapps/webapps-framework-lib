@@ -29,6 +29,11 @@ class App_View extends Sys_Editable
         $this->_broker->setView( $this );
         $this->_layout = new App_Layout( $this );
     }
+    /**
+     * @param string  $name
+     * @param mixed $arguments
+     * @return mixed
+     */
     public function __call( $name, $arguments )
     {
         $this->_broker->setNamespace( 'App' );

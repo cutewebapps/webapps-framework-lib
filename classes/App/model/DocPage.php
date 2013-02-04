@@ -107,17 +107,25 @@ class App_DocPage
             $class->parseMethodsAndProperties();    
             if ( count( $class->getControllerActions() ) > 0 ) {
                 echo '<h4>Actions</h4>';
-                echo '<ul>';
+                echo '<ol>';
                 foreach( $class->getControllerActions() as $arrAction ) {
                     
                     $docblock = new App_DocPage_Docblock( $arrAction['docblock'] );
                     echo '<li>';
                     echo '<pre class="comment">'.$docblock->getRawText().'</pre>';
-                    echo '<h5>'.$arrAction['name'].'</h5>';
-                    // Sys_Debug::dump( $arrAction );
+                    echo '<h5>'.$arrAction['shortname'].'<span style="color:lightgray">Action()</span></h5>';
+                    if ( isset( $arrAction['views'] ) && count( $arrAction['views'] ) > 0 ) {
+                        // Sys_Debug::dump( $arrAction );
+                        echo '<div style="color:gray">Templates: </div>';
+                        echo '<ul style="margin-bottom:20px">';
+                        foreach ( $arrAction['views'] as $strView )  {
+                            echo '<li>'.str_replace( '/', '<span style="color:gray"> / </span>', $strView).'</li>';
+                        }
+                        echo '</ul>';
+                    }
                     echo '</li>';
                 }
-                echo '</ul>';
+                echo '</ol>';
             }
             if ( count( $class->getMethods() ) > 0 ) {
                 echo '<h4>Methods</h4>';

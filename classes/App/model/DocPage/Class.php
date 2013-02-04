@@ -235,7 +235,7 @@ class App_DocPage_Class
                     $strScope = 'public';
                     $arrCurrent = array();
                 } else if ( $token[ 0 ] == T_PROTECTED ) {
-                    $strScope = 'public';
+                    $strScope = 'protected';
                     $arrCurrent = array();
                 } else if ( $token[ 0 ] == T_PRIVATE ) {
                     $strScope = 'private';
@@ -252,6 +252,7 @@ class App_DocPage_Class
                     );
                     $strScope = '';
                     $strDocComment = '';
+                    $strMode = '';
                                         
                 } else if ( $token[ 0 ] == T_FUNCTION ) {
                     
@@ -303,6 +304,41 @@ class App_DocPage_Class
         return $arrProperties;
     }
     /**
+     * Get the array of available views template for that controller action
+     * @return array
+     */
+    protected function getControllerActionViews( $strActionName )
+    {
+        $strCtrl = preg_replace( '@Ctrl$@', '', $this->getName() );
+        $arrView = explode( '-_-', Sys_String::toLowerDashedCase( $strCtrl ) );
+        
+        $strAction = Sys_String::toLowerDashedCase( $strActionName );
+        $dir = new Sys_Dir( CWA_APPLICATION_DIR . '/theme' );
+        
+        $objCache = new Sys_Cache_Memory();
+        $arrFiles = $objCache->load( 'themes-list' );
+        if ( $arrFiles === false ) {
+            $arrFiles = $dir->getFiles();
+            $objCache->save( $arrFiles, 'themes-list' );
+        }
+        $arrResults = array();
+        
+        foreach ( $arrFiles as $strFile ) {
+            $strBase = strtolower( preg_replace( '@\.(.+)$@', '', basename( $strFile )));
+            $arrFileParts = explode( "/", $strFile );
+            $ns = $arrFileParts[ count( $arrFileParts ) - 3 ];
+            $ctrl = $arrFileParts[ count( $arrFileParts ) - 2 ];
+            
+            if ( $ns == $arrView[0] && $ctrl == $arrView[1] ) {
+                if ( $strBase == $strAction || substr( $strBase, 0, strlen( $strAction ) + 1 ) == $strAction.'-' ) {
+                    $arrResults[]     = str_replace (CWA_APPLICATION_DIR . '/theme', '', $strFile);    
+                }
+            }
+           //  $arrResults []= $strFile;
+        }
+        return $arrResults;
+    }
+    /**
      * 
      * @return array
      */
@@ -312,6 +348,9 @@ class App_DocPage_Class
         foreach( $this->arrBlocks as $arrBlock ) { 
             if ( $arrBlock['type' ] == 'function' && preg_match( '@Action$@', $arrBlock['name'] ) ) {
                 // TODO: add discovered views for the method..
+                $arrBlock['shortname'] = str_replace ('Action', '', $arrBlock['name'] );
+                $arrBlock['views'] = $this->getControllerActionViews( $arrBlock['shortname'] );
+                
                 $arrMethods [] = $arrBlock; 
             }
         }

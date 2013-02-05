@@ -407,5 +407,36 @@ class App_DocPage_Class
         }
         return '';
     }
+ 
+    /**
+     * Get array of tables with coordinates
+     * @return array
+     */
+    public function getSchemaTables()
+    {
+        $arrTables = array();
+        $strTableName = $this->getTable();
+        $arrFields = array();
+        $arrPositionOffset = array( 'left' => 0, 'center' => 0, 'right' => 0 );
+        // walk thought fields of the table, and collect them in array
+        
+        // ADD field
+        $arrTables [] = array(
+            'name' => $strTableName,
+            'fields' => $arrFields,
+            'position' => 'center',
+            'offset' =>  $arrPositionOffset['center'],
+            'height' => ( count( $arrFields ) + 1 ) * 14
+        );
+        return $arrTables;
+    }
     
+    /**
+     * 
+     * @return array
+     */
+    public function getSchemaConnections()
+    {
+        return array();
+    }
 }

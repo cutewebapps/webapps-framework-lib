@@ -10,6 +10,7 @@ class App_DocPage
 {
     public $page = '';
     public $content = '';
+    public $generated = '';
     public $static = '';
     
     
@@ -21,7 +22,7 @@ class App_DocPage
     public function getContent()
     {
         if ( !@$this->static ) {
-            return '<div><a href="javascript:void(0);" onclick=\'$("pre.source").removeClass("hidden")\'>View Source</a></div>'
+            return $this->generated . '<div><a href="javascript:void(0);" onclick=\'$("pre.source").removeClass("hidden")\'>View Source</a></div>'
             .'<pre class="source hidden">'.htmlspecialchars( $this->content ).'</pre>';
         }
         
@@ -68,6 +69,7 @@ class App_DocPage
      */
     public function renderClass ( $strClassName, $strPath )
     {
+        
         $this->page = $strClassName;
         $this->static = false;
         $this->content = file_get_contents( $strPath );
@@ -77,6 +79,7 @@ class App_DocPage
         require_once $strPath;
         ob_end_clean();
         
+        ob_start();
         // walking through each token and extracting classes
         $nStart = 0;
         $arrTokens = token_get_all ( $this->content );
@@ -101,7 +104,17 @@ class App_DocPage
                 echo '<p>Wraps logic of the table: <strong>'. $strTable .'</strong></p>';
                 echo '<p>Primary Key: <strong>'. $class->getPrimaryKey() .'</strong></p>';
                 
-                // TODO: display database schema!
+                // display database schema!
+                $arrTables = $class->getSchemaTables();
+                if ( count( $arrTables ) > 0 ) {
+                    $arrConnections = $class->getSchemaConnections();
+                    $arrResult = array( 'tables' => $arrTables, 'connections' => $arrConnections );
+                    echo '<script type="text/JavaScript">'."\n";
+                    echo 'jQuery(document).ready( function() { dbschema.data = ' . json_encode( $arrResult ) . '; dbschema.render(); } );';
+                    echo '</script>'."\n";
+                    echo '<div id="canvas"></div>';
+                }
+                
             }
             //Sys_Debug::dump( $class->getTokens() );
             $class->parseMethodsAndProperties();    
@@ -163,7 +176,11 @@ class App_DocPage
             
             $nStart ++;
         }
+        $strContent = ob_get_contents();
+        ob_end_clean();
         
+        $this->generated = $strContent;
+        return $strContent;
     }
     
     /**

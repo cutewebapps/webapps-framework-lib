@@ -26,7 +26,28 @@ class App_DocPage
             .'<pre class="source hidden">'.htmlspecialchars( $this->content ).'</pre>';
         }
         
-        $strContent = $this->content;
+        return $this->filterContent( $this->content );
+    }
+
+    /**
+     * @param string $strContent
+     * @return string
+     */
+    public function filterContent($strContent )
+    {
+        $arrNs = App_Application::getInstance()->getConfig()->documentation->namespaces;
+        if ( ! strstr( $strContent, '[[')  &&is_object($arrNs) || is_array( $arrNs ) ) {
+            // translate all classes from the names namespaces into links
+            foreach ( $arrNs as $strNs ) {
+                preg_match_all( '@'.$strNs.'_(\S+)@sim', $strContent, $arrMatches );
+                for ( $j = 0; $j< count( $arrMatches[0] ); $j ++ ) {
+                    $strInside =  $arrMatches[0][$j];        
+                    $strLink = preg_replace( '@_(Table|Form_Filter|Form_Edit|List)$@', '', $strInside );
+                    $strContent = str_replace( $arrMatches[0][$j], $this->link( $strLink, $strInside ), $strContent );
+                }
+            }
+        }
+        
         preg_match_all( '@\[\[(.+)\]\]@simU', $strContent, $arrMatches );
         for ( $i = 0; $i< count( $arrMatches[0] ); $i ++ ) {
             /// [[Article][Article Text]] or [[Article]] or [[Main Page|different text]] means links?
@@ -87,7 +108,7 @@ class App_DocPage
             $class = new App_DocPage_Class();
             $nStart = $class->parseTokens( $arrTokens, $nStart );
             echo '<h3>'. $class->getName() .'</h3>';
-            echo '<hr style="margin-top:0px;margin-bottom:5px" /><pre class="comment">'.$class->getDocBlock().'</pre>';
+            echo '<hr style="margin-top:0px;margin-bottom:5px" /><pre class="comment">'. $this->filterContent( $class->getDocBlock() ).'</pre>';
             
             $strParent = $class->parseParent();
             if ( $strParent )
@@ -109,6 +130,7 @@ class App_DocPage
                 if ( count( $arrTables ) > 0 ) {
                     $arrConnections = $class->getSchemaConnections();
                     $arrResult = array( 'tables' => $arrTables, 'connections' => $arrConnections );
+                   // Sys_Debug::dump ( $arrResult );
                     echo '<script type="text/JavaScript">'."\n";
                     echo 'jQuery(document).ready( function() { dbschema.data = ' . json_encode( $arrResult ) . '; dbschema.render(); } );';
                     echo '</script>'."\n";
@@ -125,7 +147,7 @@ class App_DocPage
                     
                     $docblock = new App_DocPage_Docblock( $arrAction['docblock'] );
                     echo '<li>';
-                    echo '<pre class="comment">'.$docblock->getRawText().'</pre>';
+                    echo '<pre class="comment">'.$this->filterContent( $docblock->getRawText()).'</pre>';
                     echo '<h5>'.$arrAction['shortname'].'<span style="color:lightgray">Action()</span></h5>';
                     if ( isset( $arrAction['views'] ) && count( $arrAction['views'] ) > 0 ) {
                         // Sys_Debug::dump( $arrAction );
@@ -149,7 +171,7 @@ class App_DocPage
                     echo '<li>';
                     echo '<h5> <span style="color:gray">'.$arrMethod['scope'].'</span> '
                             .$arrMethod['name'].'(<span style="color:gray">'.$arrMethod['args'].'</span>)</h5>';
-                    echo '<pre class="comment">'.$docblock->getRawText().'</pre>';
+                    echo '<pre class="comment">'.$this->filterContent( $docblock->getRawText() ).'</pre>';
                     //Sys_Debug::dump( $arrMethod );
                     echo '</li>';
                 }
@@ -164,7 +186,7 @@ class App_DocPage
                     $docblock = new App_DocPage_Docblock( $arrProps['docblock'] );
                     echo '<li>';
                     echo '<h5>'.'<span style="color:gray">'.$arrProps['scope'].'</span> '.$arrProps['name'].'</h5>';
-                    echo '<pre class="comment">'.$docblock->getRawText().'</pre>';
+                    echo '<pre class="comment">'.$this->filterContent( $docblock->getRawText() ).'</pre>';
                     
                    // Sys_Debug::dump( $arrProps );
                     echo '</li>';

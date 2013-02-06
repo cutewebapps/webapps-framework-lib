@@ -1,8 +1,7 @@
 <?php
 /**
- * Class for parsing PHP file
+ * Class for parsing PHP file 
  * 
- * @todo: must parse classes methods, classes inheritables and their docblocks
  */
 class App_DocPage_Class
 {
@@ -382,7 +381,7 @@ class App_DocPage_Class
                 if ( $token[ 0 ] == T_VARIABLE && $token[ 1 ] == '$_name' ) {
                     $strMode = 'waiting';
                 } else if ( $strMode =='waiting' && $token[ 0 ] == T_CONSTANT_ENCAPSED_STRING ) {
-                    return $token[1];
+                    return str_replace( '\'', '', $token[1] );
                 }
             }
         }
@@ -408,6 +407,39 @@ class App_DocPage_Class
         return '';
     }
  
+    protected $_arrPositionOffset = array( 'left' => 0, 'center' => 0, 'right' => 0 );
+    
+    protected function _getTableArray( $strTableName, $strPosition = 'right' )
+    {
+        $arrFields = array();
+        // should be configurable
+        $dbR = DBx_Registry::getInstance()->get()->getDbAdapterRead();
+        $nRowHeight = 22;
+        
+        // walk thought fields of the table, and collect them in array
+        $arrColumns = ( $dbR->describeTable( $strTableName ) );
+        $nY = 0;
+        foreach ( $arrColumns as $arrColumn ) {
+            unset( $arrColumn[ 'SCHEMA_NAME' ] );
+            unset( $arrColumn[ 'TABLE_NAME' ] ); 
+            unset( $arrColumn[ 'COLUMN_POSITION' ] );
+            
+            $arrColumn[ 'Y' ] =  $nY;
+            $arrFields[] = $arrColumn;
+            $nY += $nRowHeight;
+        }
+        
+        $nOffset = $this->_arrPositionOffset[ $strPosition ];
+        $this->_arrPositionOffset[ $strPosition ] += ( count( $arrFields ) + 2 ) * $nRowHeight;
+        
+        return array(
+            'name' => $strTableName,
+            'fields' => $arrFields,
+            'position' =>  $strPosition,
+            'offset' =>  $nOffset,
+            'height' => ( count( $arrFields ) + 1 ) * $nRowHeight
+        );
+    }
     /**
      * Get array of tables with coordinates
      * @return array
@@ -415,19 +447,13 @@ class App_DocPage_Class
     public function getSchemaTables()
     {
         $arrTables = array();
-        $strTableName = $this->getTable();
-        $arrFields = array();
-        $arrPositionOffset = array( 'left' => 0, 'center' => 0, 'right' => 0 );
-        // walk thought fields of the table, and collect them in array
+        $arrTables[] = $this->_getTableArray( $this->getTable(), 'center' ); 
         
-        // ADD field
-        $arrTables [] = array(
-            'name' => $strTableName,
-            'fields' => $arrFields,
-            'position' => 'center',
-            'offset' =>  $arrPositionOffset['center'],
-            'height' => ( count( $arrFields ) + 1 ) * 14
-        );
+        $docblock = new App_DocPage_Docblock( $this->strDocBlock );
+        foreach( $docblock->getJoins() as $arrJoin ) {
+            $arrTables[] = $this->_getTableArray( $arrJoin[ 'table' ], $arrJoin[ 'position' ] ); 
+        }
+        // Sys_Debug::dump( $arrTables );
         return $arrTables;
     }
     
@@ -437,6 +463,11 @@ class App_DocPage_Class
      */
     public function getSchemaConnections()
     {
-        return array();
+        $docblock = new App_DocPage_Docblock( $this->strDocBlock );
+        $arrJoins = $docblock->getJoins();
+        foreach ( $arrJoins as $key => $val ) {
+            $arrJoins[ $key ]['from'] = $this->getTable();
+        }
+        return $arrJoins;
     }
 }

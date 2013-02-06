@@ -16,7 +16,9 @@ class App_DocPage_Docblock
         $arrDirtyLines = explode( "\n", $this->getPlainText() );
         $arrLines = array();
         foreach ($arrDirtyLines as $strLine ) {
-            if ( trim( $strLine ) && ! preg_match( '/^@(join|center|left|right)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\.(\S+)\s*$/', trim( $strLine ))) {
+            if ( trim( $strLine ) && 
+                    ! preg_match( '/^@(author|package)/', trim( $strLine ) ) &&
+                    ! preg_match( '/^@(join|center|left|right)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\.(\S+)\s*$/', trim( $strLine ))) {
                 $arrLines [] = trim( $strLine );
             }
         }

@@ -411,11 +411,13 @@ class App_DocPage_Class
     
     protected function _getTableArray( $strTableName, $strPosition = 'right' )
     {
-        $arrFields = array();
+        
         // should be configurable
         $dbR = DBx_Registry::getInstance()->get()->getDbAdapterRead();
         $nRowHeight = 22;
         
+        
+        $arrFields = array();
         // walk thought fields of the table, and collect them in array
         $arrColumns = ( $dbR->describeTable( $strTableName ) );
         $nY = 0;
@@ -446,6 +448,7 @@ class App_DocPage_Class
      */
     public function getSchemaTables()
     {
+        $this->_arrPositionOffset = array( 'left' => 0, 'center' => 0, 'right' => 0 );
         $arrTables = array();
         $arrTables[] = $this->_getTableArray( $this->getTable(), 'center' ); 
         
@@ -463,6 +466,8 @@ class App_DocPage_Class
      */
     public function getSchemaConnections()
     {
+        $this->_arrPositionOffset = array( 'left' => 0, 'center' => 0, 'right' => 0 );
+        
         $docblock = new App_DocPage_Docblock( $this->strDocBlock );
         $arrJoins = $docblock->getJoins();
         foreach ( $arrJoins as $key => $val ) {

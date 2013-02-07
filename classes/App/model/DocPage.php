@@ -39,7 +39,7 @@ class App_DocPage
         if ( ! strstr( $strContent, '[[')  &&is_object($arrNs) || is_array( $arrNs ) ) {
             // translate all classes from the names namespaces into links
             foreach ( $arrNs as $strNs ) {
-                preg_match_all( '@'.$strNs.'_(\S+)@sim', $strContent, $arrMatches );
+                preg_match_all( '@'.$strNs.'_([\w_\d]+)@sim', $strContent, $arrMatches );
                 for ( $j = 0; $j< count( $arrMatches[0] ); $j ++ ) {
                     $strInside =  $arrMatches[0][$j];        
                     $strLink = preg_replace( '@_(Table|Form_Filter|Form_Edit|List)$@', '', $strInside );

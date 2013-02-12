@@ -731,11 +731,11 @@ class App_Dispatcher
 
             echo $this->runControllerAction(  'page-not-found', $this->_strDefaultController, $arrControllerParams );
 
-        } catch ( App_AccessDenied_Exception $exception ) {
+        } catch ( App_Exception_AccessDenied $exception ) {
 
             echo $this->runControllerAction(  'access-denied', $this->_strDefaultController, $arrControllerParams );
 
-        } catch ( App_ServerError_Exception $exception ) {
+        } catch ( App_Exception_ServerError $exception ) {
 
             echo $this->runControllerAction(  'server-error', $this->_strDefaultController, $arrControllerParams );
             

@@ -30,6 +30,11 @@ function getClassParts( $strClassName )
     if (count($arrParts) == 0)
         throw new Exception('ERROR: Empty Class Name');
     
+    if ( count($arrParts) == 1 && strstr( $strClassName, '\\' ) ) {
+        // throw new Exception('ERROR: CLASS='. $strClassName );
+        return explode( '\\', $strClassName );
+    }
+    
     $strLastPart = $arrParts[count($arrParts) - 1];
     if (count($arrParts) >= 1 ) {
         if (substr($strLastPart, -4) == 'Ctrl')
@@ -61,7 +66,7 @@ function getClassParts( $strClassName )
 function __autoload($strClassName) 
 {
     // hack check for sanitizing paths...
-    if ( preg_match( '@\W@', $strClassName )) 
+    if ( preg_match( '@[\/\.]@', $strClassName )) 
         throw new Exception( 'Class Name '.$strClassName.' could not be allowed');
     
     $strPath = CWA_DIR_CLASSES . '/' . implode('/', getClassParts( $strClassName) ) . '.php';

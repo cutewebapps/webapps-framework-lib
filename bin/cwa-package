@@ -48,15 +48,13 @@ if ( file_exists( $strControlFile ) ) {
 {
     "version" : "0.1.0",
     "license" : "Commercial",
-    "package" : "{$strPackageName}", $strEx
+    "name" : "{$strPackageName}", $strEx
     "classes" : [],
     "deps"    : [
         "webapps-framework-lib",
         "webapps-cms-lib",
-        "webapps-user-lib",
-        "webapps-jquery-lib",
-        "webapps-jquery-ui-lib",
-    ),
+        "webapps-user-lib"
+    ]
 }
 
 EOF;

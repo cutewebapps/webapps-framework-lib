@@ -27,55 +27,100 @@ function createModelFile( $strModel, $strNameSpace ) {
         echo " model alredy exists\n";  return false; 
     }
 
-    $strFileContent = '<'.'?php';
+    $strFileContent = '<'.'?php'."\n";
     $strFileContent .=<<< EOF
 
+/**
+  * table for storage of ...
+  * related classes: {$strClassBase}Ctrl
+  */
 class {$strClassBase}_Table extends DBx_Table
 {
 /**
  * database table name
+ * @var string
  */
     protected \$_name='';
 /**
  * database table primary key
+ * @var string
  */
     protected \$_primary='';
 }
-
+/**
+ * class of the rowset
+ */
 class {$strClassBase}_List extends DBx_Table_Rowset
 {
 }
 
+/**
+ * class for extending form filtration
+ */
 class {$strClassBase}_Form_Filter extends App_Form_Filter
 {
+    /**
+     * specify elements that could be filtered with standard controller
+     * @return void
+     */
     public function createElements()
     {
         \$this->allowFiltering( array( ) );
     }
 }
 
+/**
+ * class for extending editing procedures
+ */
 class {$strClassBase}_Form_Edit extends App_Form_Edit
 {
+    /**
+     * specify elements that could be edited with standard controller
+     * @return void
+     */
     public function createElements()
     {
         \$this->allowEditing(array(  ) );
     }
 }
 
-
+/**
+ * class of the database row
+ */
 class {$strClassBase} extends DBx_Table_Row
 {
-    /** @return string */
+    /** 
+      * Get class name - for php 5.2 compatibility
+      * @return string 
+      */
     public static function getClassName() { return '{$strClassBase}'; }
-    /** @return string */
+    /** 
+      * Get table class object 
+      * @return string 
+      */
     public static function TableClass() { return self::getClassName().'_Table'; }
-    /** @return {$strClassBase}_Table */
+    /** 
+      *  Get table class instance
+      *  @return {$strClassBase}_Table 
+      */
     public static function Table() { \$strClass = self::TableClass();  return new \$strClass; }
-    /** @return string */
+    /** 
+      * get table name 
+      * @return string 
+      */
     public static function TableName() { return self::Table()->getTableName(); }
-    /** @return string */
+    /** 
+      * get class name for the specified form ("Filter" or "Edit")
+      * @return string 
+      */
     public static function FormClass( \$name ) { return self::getClassName().'_Form_'.\$name; }
+    /** 
+      * get class instance for the specified form ("Filter" or "Edit")
+      *  @return mixed 
+      */
     public static function Form( \$name ) { \$strClass = self::getClassName().'_Form_'.\$name; return new \$strClass; }
+    
+
 }
 
 EOF;
@@ -89,18 +134,28 @@ EOF;
         fclose( $f );
         echo " created successfully\n";
     }
-    // BUG: name of controller
+    // BUG: name of controller, first part still should be separated by "_" underscore
     // TODO: if name is too complicated, add a class name
     $strControllerClassBase = str_replace ('/', '', str_replace( '_', '', $strClassBase ));
 
 // CREATING Controller File
     
-    $strFileContent = '<'.'?php';
+    $strFileContent = '<'.'?php'."\n";
     $strFileContent .=<<< EOF
 
+/**
+  * controller for the {$strClassBase} model
+  */   
 class {$strControllerClassBase}Ctrl extends App_DbTableCtrl
 {
-
+    /**
+     * get class of the model
+     * @return string
+     */
+    public function getClassName() 
+    {
+        return '{$strClassBase}';
+    }
 }
 EOF;
     $f = fopen( $strCurrentDir.'/../ctrl/'.str_replace('_', '',$strModel).'Ctrl.php', 'wb' );

@@ -259,6 +259,9 @@ class SMTP {
     if (empty($authtype)) {
       $authtype = 'LOGIN';
     }
+    
+    if ( !is_resource( $this->smtp_conn ) )
+        throw new App_Exception( "Invalid SMTP connection for authentification" );
 
     switch ($authtype) {
       case 'PLAIN':

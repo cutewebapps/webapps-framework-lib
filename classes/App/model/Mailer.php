@@ -2324,7 +2324,7 @@ class App_Mailer {
     if(isset($this->language[$key])) {
       return $this->language[$key];
     } else {
-      return 'Language string failed to load: ' . $key;
+      return  $key;
     }
   }
 
@@ -2695,9 +2695,7 @@ class App_Mailer {
 /**
  * Exception handling
  */
-class phpmailerException extends Exception {
-  public function errorMessage() {
-    $errorMsg = '<strong>' . $this->getMessage() . "</strong><br />\n";
-    return $errorMsg;
-  }
+class phpmailerException extends App_Exception 
+{
+  
 }

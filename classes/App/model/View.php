@@ -225,6 +225,7 @@ class App_View extends Sys_Editable
             }
         }
         if ( !$bSuccess ) {
+            ob_end_clean();
             throw new App_Exception( 'Template was not found at '.implode( ",", $arrPaths ));
         }
 

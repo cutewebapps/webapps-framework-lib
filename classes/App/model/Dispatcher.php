@@ -270,7 +270,6 @@ class App_Dispatcher
     public function runControllerAction( $strAction, $strControllerClass, $arrParams = array() )
     {
         $this->_log( $arrParams );
-        // Sys_Debug::dumpDie( $arrParams );
         $strControllerAction = Sys_String::toCamelCase( $strAction ).'Action';
 
 	if ( !class_exists( $strControllerClass ) ) {
@@ -284,7 +283,7 @@ class App_Dispatcher
                 throw new App_Exception_PageNotFound( "Invalid renderer class ".$arrParams['default_renderer']);
             }
         }
-        
+
         $this->_objCurrentController = new $strControllerClass( $arrParams );
         $this->_strCurrentAction = $strAction;
 
@@ -404,7 +403,7 @@ class App_Dispatcher
             
         } else {
             // if we dont have format, we can set up headers:
-            if ( !headers_sent() )
+            if ( PHP_SAPI != "cli" && !headers_sent() )
                 header( 'Content-Type: text/html; charset='.$strCharset );
         }
 
@@ -521,11 +520,25 @@ class App_Dispatcher
             Sys_Io::out( 'ERROR: module/controller was not specified' );
         }
 
-        $this->runAction( 
-            $arrControllerParams['action'],
-            $arrControllerParams['controller'],
-            $arrControllerParams['module'],
-            $arrControllerParams );
+        try {
+            echo $this->runAction( 
+                $arrControllerParams['action'],
+                $arrControllerParams['controller'],
+                $arrControllerParams['module'],
+                $arrControllerParams );
+        } catch ( App_Exception_PageNotFound $exception ) {
+            echo $this->runControllerAction(  'page-not-found', $this->_strDefaultController, $arrControllerParams );
+        } catch ( App_Exception_AccessDenied $exception ) {
+            echo $this->runControllerAction(  'access-denied', $this->_strDefaultController, $arrControllerParams );
+        } catch ( App_Exception_ServerError $exception ) {
+            echo $this->runControllerAction(  'server-error', $this->_strDefaultController, $arrControllerParams );
+        } catch ( Exception $exception ) {
+
+            $ex = new App_Exception_Handler();
+            $ex->process( $exception ); // - save into logs and mail if configured
+            die( "\n". 'EXCEPTION: ' . $exception->getMessage(). "\n". App_Exception_Handler::backTraceString( $exception->getTrace() ));
+        }
+        
     }
     public function runUrl( $strUrl )
     {
@@ -720,7 +733,7 @@ class App_Dispatcher
             if ( $strControllerAction == '' )
                 throw new App_Exception_PageNotFound( 'No controller action for this call' );
 
-            // echo 'DEBUG ACTION:'. $strControllerAction .', CLASS '. $strControllerClass . "\n";
+             // echo 'DEBUG ACTION:'. $strControllerAction .', CLASS '. $strControllerClass . "\n";
 
             // check security
             App_Permission::check( $arrControllerParams );

@@ -20,7 +20,10 @@ class App_AbstractCtrl
     {
         return isset( $this->_arrParams[ $strParam ]  );
     }
-    public function hasParam( $strParam ) { return $this->setParam( $strParam ); }
+    public function hasParam( $strParam ) 
+    {
+        return $this->_hasParam( $strParam ); 
+    }
 
     protected function _setParam( $strParam, $value )
     {

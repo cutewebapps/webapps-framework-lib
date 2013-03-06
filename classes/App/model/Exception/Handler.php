@@ -25,9 +25,11 @@ class App_Exception_Handler
                 $strFileName = $confException->log .'/'.date('Y-m-d').'.log';
 //                if ( ini_get( 'safe_mode' ) ) $strFileName = $confException->log;
 
+                $strIp = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1';
+                
                 // same exception info into LOG file
                 $strFile = new Sys_File( $strFileName );
-                $strBody = date("Y-m-d H:i:s")."\t".$_SERVER['REMOTE_ADDR']
+                $strBody = date("Y-m-d H:i:s")."\t".$strIp
                                 ."\t".App_Dispatcher::$strUrl.' ';
                 $strBody .= "\n***\t".$exception->getMessage();
                 $strBody .= "\n".self::backTraceString( $exception->getTrace() ) ."\n\n";

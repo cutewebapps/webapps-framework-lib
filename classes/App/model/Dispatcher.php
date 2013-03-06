@@ -88,10 +88,12 @@ function shutdownErrorHandler()
                 $mail = new App_Mailer();
 
                 $mail->IsSMTP();
-                $mail->SMTPAuth = true;
                 $mail->Host     = $confException->smtp->host;
-                $mail->Username = $confException->smtp->username;
-                $mail->Password = $confException->smtp->password;
+                if ( $confException->smtp->username != "" ) {
+                    $mail->SMTPAuth = true;
+                    $mail->Username = $confException->smtp->username;
+                    $mail->Password = $confException->smtp->password;
+                }
 
                 // from
                 $arrFrom = explode(' ', $confException->mail->headers);

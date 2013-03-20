@@ -44,10 +44,11 @@ class App_Exception_Handler
         if  (is_object(  $confException ) ) {
 
             // mail exception info to somebody
+            $strIp = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1';
             $strTo = $confException->mail->to;
             $strSubject = $confException->mail->subject.' '
                     .'"'.$exception->getMessage().'"'
-                    .' for '.$_SERVER['REMOTE_ADDR'];
+                    .' for '.$strIp;
             $strHeaders =
                     'Content-Type: text/html; charset="utf-8"' . "\r\n"
                     .$confException->mail->headers;

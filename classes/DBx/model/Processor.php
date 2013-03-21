@@ -81,7 +81,8 @@ class DBx_Processor
         while ( $this->pos < $nLength ) {
             
             $strExpression = $this->nextExpression( $strContents );
-            Sys_Io::out( $strExpression );
+            //Sys_Io::out( $strExpression );
+            $this->objDbWrite->queryWrite( $strExpression );
 
             $nLimit -- ;
             if ( $nLimit == 0 ) break;

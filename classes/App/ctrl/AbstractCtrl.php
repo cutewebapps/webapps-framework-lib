@@ -13,51 +13,179 @@ class App_AbstractCtrl
     protected $_strTemplate = '';
     protected $_arrContexts = array(); // allowed contexts for the controller action
     protected $_arrParams   = array();
-
     protected $_strScriptName = '';
 
+    /**
+     * 
+     * @param type $strParam
+     * @return boolean
+     */
     protected function _hasParam( $strParam )
     {
         return isset( $this->_arrParams[ $strParam ]  );
     }
+    /**
+     * 
+     * @param type $strParam
+     * @return boolean
+     */
     public function hasParam( $strParam ) 
     {
         return $this->_hasParam( $strParam ); 
     }
 
+    /**
+     * 
+     * @param type $strParam
+     * @param type $value
+     */
     protected function _setParam( $strParam, $value )
     {
        $this->_arrParams[ $strParam ] = $value;
     }
-    public function setParam( $strParam, $value ) { return $this->_setParam( $strParam, $value ); }
+    /**
+     * 
+     * @param type $strParam
+     * @param type $value
+     * @return type
+     */
+    public function setParam( $strParam, $value ) 
+    { 
+        return $this->_setParam( $strParam, $value ); 
+    }
 
+    /**
+     * 
+     * @return boolean
+     */
     protected function isPost()
     {
         return count( $_POST ) > 0;
     }
     
+    /**
+     * 
+     * @param string $strParam
+     * @return boolean
+     */
     protected function _hasFile( $strParam )
-     {
-         return ( isset( $_FILES[$strParam]['tmp_name'] ) )
-             && ( $_FILES[$strParam]['tmp_name'] != '' );
-     }
+    {
+        return ( isset( $_FILES[$strParam]['tmp_name'] ) )
+            && ( $_FILES[$strParam]['tmp_name'] != '' );
+    }
 
-     protected function _saveUploaded( $strIndex, $strFileName )
-     {
-         move_uploaded_file(  $_FILES[ $strIndex ]['tmp_name'], $strFileName );
-     }
+    /**
+     * 
+     * @return array
+     */
+    protected function _getAllFiles()
+    {
+        $arrResult = array();
+        foreach( $_FILES as $strKey => $F ) {
+            if ( $F[ 'tmp_name' ] != ''  && $F['error'] == 0 ) 
+                $arrResult[ $strKey ] = $F;
+        }
+        return $arrResult;
+    }
+    
+    /**
+     * @return array
+     */
+    protected function _getFileErrors()
+    {
+        $arrResult = array();
+        foreach( $_FILES as $strKey => $F ) {
+            if ( $F[ 'error' ] != 0 && $F['error'] != UPLOAD_ERR_NO_FILE ) {
+                switch( $F['error']) {
+                    case UPLOAD_ERR_INI_SIZE: 
+                        $message = "The uploaded file exceeds the upload_max_filesize directive in php.ini"; 
+                        break; 
+                    case UPLOAD_ERR_FORM_SIZE: 
+                        $message = "The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form"; 
+                        break; 
+                    case UPLOAD_ERR_PARTIAL: 
+                        $message = "The uploaded file was only partially uploaded"; 
+                        break; 
+                    case UPLOAD_ERR_NO_FILE: 
+                        $message = "No file was uploaded"; 
+                        break; 
+                    case UPLOAD_ERR_NO_TMP_DIR: 
+                        $message = "Missing a temporary folder"; 
+                        break; 
+                    case UPLOAD_ERR_CANT_WRITE: 
+                        $message = "Failed to write file to disk"; 
+                        break; 
+                    case UPLOAD_ERR_EXTENSION: 
+                        $message = "File upload stopped by extension"; 
+                        break; 
+                    default: 
+                        $message = "Unknown upload error"; 
+                        break; 
+                }
+                $arrResult[ $strKey ] = $message;
+            }
+        }
+        return $arrResult;
+        
+    }
+
+    /**
+     * 
+     * @param type $strIndex
+     * @param type $strFileName
+     * @return void
+     */
+    protected function _saveUploaded( $strIndex, $strFileName )
+    {
+        move_uploaded_file(  $_FILES[ $strIndex ]['tmp_name'], $strFileName );
+    }
 
 
+    /**
+     * 
+     * @param type $strParam
+     * @param type $strDefault
+     * @return type
+     */
     protected function _getParam( $strParam, $strDefault = '' )
     {
         return $this->_hasParam( $strParam ) ? $this->_arrParams[ $strParam ] : $strDefault;
     }
-    public function getParam( $strParam, $strDefault = '' ) { return $this->_getParam( $strParam, $strDefault ); }
+    /**
+     * 
+     * @param string $strParam
+     * @param mixed $strDefault
+     * @return mixed
+     */
+    public function getParam( $strParam, $strDefault = '' ) 
+    { 
+        return $this->_getParam( $strParam, $strDefault ); 
+    }
     
+    /**
+     * 
+     * @param stirng $strParam
+     * @param int $strDefault
+     * @return int
+     */
     protected function _getIntParam( $strParam, $strDefault = 0 )
     {
-        return $this->_hasParam( $strParam ) ? intval( $this->_arrParams[ $strParam ] ) : $strDefault;
+        if ( !$this->_hasParam( $strParam ) ) 
+            return $strDefault;
+        switch ( strtolower( $this->_arrParams[ $strParam ] ) ) {
+            case 'false': return 0;
+            case 'true':  return 1;
+        }
+        
+        return intval( $this->_arrParams[ $strParam ] );
     }
+    
+    /**
+     * 
+     * @param string $strParam
+     * @param mixed $strDefault
+     * @return int
+     */
     public function getIntParam( $strParam, $strDefault = '' ) { return $this->_getIntParam( $strParam, $strDefault ); }
     /**
      * @return int 0 or 1
@@ -81,21 +209,38 @@ class App_AbstractCtrl
         }
     }
 
+    /**
+     * 
+     * @return array
+     */
     protected function _getAllParams()
     {
         return $this->_arrParams;
     }
 
+    /**
+     * 
+     * @return array
+     */
     public function getAllParams()
     {
         return $this->_getAllParams();
     }
 
+    /**
+     * 
+     * @return boolean
+     */
     protected function _isPost()
     {
         return count( $_POST ) > 0;
     }
 
+    /**
+     * 
+     * @param array $arrParams
+     * @throws App_Exception
+     */
     public function __construct( $arrParams = array() )
     {
         $this->_arrParams = $arrParams;
@@ -140,16 +285,29 @@ class App_AbstractCtrl
         return $this->view;
     }
 
+    /**
+     * should not be used
+     * @param type $strAction
+     * @throws App_Exception_Inacceptable
+     */
     public function _forward( $strAction )
     {
-        throw App_Exceptions( "Action forwarding will burn in hell" );
+        throw new App_Exception_Inacceptable( "Action forwarding will burn in hell" );
     }
 
+    /**
+     * 
+     * @param string $strViewName
+     * @return void
+     */
     public function setRender( $strViewName )
     {
         $this->_strScriptName = $strViewName;
     }
 
+    /**
+     * @return string
+     */
     public function getRender()
     {
         return $this->_strScriptName;

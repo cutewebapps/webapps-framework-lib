@@ -493,4 +493,31 @@ abstract class App_DbTableCtrl extends App_AbstractCtrl
     public function indexAction()
     {
     }
+    /**
+     * 
+     * @return string
+     */
+
+    protected function getSortableField()
+    {
+        throw new App_Exception( 'getSortableField must be overloaded' );
+    }
+      
+    public function sortOrderAction()
+    {
+        $strSortableField = $this->getSortableField();
+        
+        $strIds = $this->_getParam('ids');
+        $arrIds = explode( ",", $strIds );
+        if ( count( $arrIds ) == 0 )
+            throw new App_Exception( "ids are not provided" );
+        
+        $strClass = $this->getClassName();
+        $nIterator = 0;
+        foreach ( $arrIds as $nId )  {
+            $objRow = $strClass::Table()->find( $nId )->current();
+            $objRow->$strSortableField = $nIterator ++;
+            $objRow->save( false );
+        }
+    }
 }

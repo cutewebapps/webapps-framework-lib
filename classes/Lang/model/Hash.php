@@ -36,6 +36,7 @@ class Lang_Hash
             if ( $strLang == '' ) {
                 $strLang = App_Application::getInstance()->getConfig()->lang->default_lang;
             }
+            // TODO: lang could be detected in a different way, more sophisticated, depending on project
         }
        
         if ( $strComponent == '' )
@@ -46,39 +47,39 @@ class Lang_Hash
 
             $tbl = Lang_String::Table();
             $x = '';
-            if ( !isset( self::$lstCachedComponents[ $strComponent ] ) ) {
+            if ( !isset( self::$lstCachedComponents[ $strLang.'~'.$strComponent ] ) ) {
                 
                 $selectComponent = $tbl->select()
                         ->where( 'langs_component = ?', $strComponent )
                         ->where( 'langs_lang = ?', $strLang );
                 $listRows = $tbl->fetchAll( $selectComponent );
 
-                self::$lstCachedComponents[ $strComponent ] = array();
+                self::$lstCachedComponents[ $strLang.'~'.$strComponent ] = array();
                 /** @var Lang_String $objString */
                 foreach ( $listRows as $objString) {
-                    self::$lstCachedComponents[ $strComponent ][ $objString->getOriginal() ] = $objString->getTranslation();
+                    self::$lstCachedComponents[ $strLang.'~'.$strComponent ][ strtolower( $objString->getOriginal() ) ] = $objString->getTranslation();
                 }
             }
         } else if ( $strSource == 'json' ) {
 
             $strFileToRead = App_Application::getInstance()->getConfig()->lang->read;
-            if ( !isset( self::$lstCachedComponents[ $strComponent ] ) ) {
+            if ( !isset( self::$lstCachedComponents[ $strLang.'~'.$strComponent ] ) ) {
 
                  //Sys_Debug::dump( (array)json_decode( file_get_contents( $strFileToRead ) ) );
-                 self::$lstCachedComponents[ $strComponent ] = (array)json_decode( file_get_contents( $strFileToRead ));
+                 self::$lstCachedComponents[ $strLang.'~'.$strComponent ] = (array)json_decode( file_get_contents( $strFileToRead ));
             }
             
         } else if ( $strSource == 'csv' ) {
 
             $strFileToRead = App_Application::getInstance()->getConfig()->lang->read;
-            if ( !isset( self::$lstCachedComponents[ $strComponent ] ) ) {
+            if ( !isset( self::$lstCachedComponents[ $strLang.'~'.$strComponent ] ) ) {
                 // fgetcsv($handle, $length)
-                self::$lstCachedComponents[ $strComponent ] = array();
+                self::$lstCachedComponents[ $strLang.'~'.$strComponent ] = array();
 
                 if (($handle = fopen( $strFileToRead, "r" )) !== false) {
                     while (($data = fgetcsv($handle, 4096, ',' )) !== false ) {
                         if ( isset( $data[ 0 ] )  && isset( $data[ 1 ] ) ) {
-                            self::$lstCachedComponents[ $strComponent ][  $data[0]  ] = $data[1];
+                            self::$lstCachedComponents[ $strLang.'~'.$strComponent ][ strtolower( $data[0] ) ] = $data[1];
                         }
                     }
                     fclose($handle);
@@ -87,9 +88,9 @@ class Lang_Hash
 
         }
         
-        if ( isset( self::$lstCachedComponents[ $strComponent ] [ $strKey ] ) &&
-                    self::$lstCachedComponents[ $strComponent ] [ $strKey ] != '')
-                return self::$lstCachedComponents [ $strComponent ][ $strKey ];
+        if ( isset( self::$lstCachedComponents[ $strLang.'~'.$strComponent ] [ $strKey ] ) &&
+                    self::$lstCachedComponents[ $strLang.'~'.$strComponent ] [ $strKey ] != '')
+                return self::$lstCachedComponents [ $strLang.'~'.$strComponent ][ $strKey ];
         
         return $strKey;
     }
@@ -122,7 +123,7 @@ class Lang_Hash
             $objRow->save();
         }
         
-        self::$lstCachedComponents[ $strComponent ] [$strKey] = $strValue;
+        self::$lstCachedComponents[ $strLang.'~'.$strComponent ] [ strtolower( $strKey ) ] = $strValue;
     }
 
     public static function scan( $strPath, $strLang, $strComponent = '' )
@@ -140,10 +141,13 @@ class Lang_Hash
             foreach ( $arrPatterns as $strFunc ) {
                 $arrMatchFunc = Sys_String::xAll( '@'.preg_quote( $strFunc ).'\((.+)\)@simU', $strContents );
                 foreach( $arrMatchFunc as $strFunc ) if ( substr( trim( $strFunc ), 0, 1 ) != '$' ) {
-                    $strFunc = preg_replace( '@(\'|")$@', '', trim( $strFunc ) );
+                    $strFunc = preg_replace( '@(\'|")$@', '', trim( strtolower( $strFunc ) ) );
                     $strFunc = preg_replace( '@^(\'|")@', '', $strFunc );
                     
-                    if ( self::get( $strFunc, $strLang ) == $strFunc ) {
+                    $strValue  = self::get( $strFunc, $strLang );
+                    if ( !isset( self::$lstCachedComponents[ $strLang.'~'.$strComponent ] [ $strFunc ] )
+                         || 
+                         self::$lstCachedComponents[ $strLang.'~'.$strComponent ] [ $strFunc ] == '' ) {
                         self::set( $strFunc, '', $strLang, $strComponent );
                     }
                 }

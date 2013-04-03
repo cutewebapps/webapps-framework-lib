@@ -22,6 +22,9 @@ class Lang_Hash
     */
     public static function get( $strKey, $strLang = '', $strComponent = ''  )
     {
+        $strOrigKey = $strKey;
+        $strKey = strtolower($strKey);
+        
         if ( $strLang == '' ) {
             if ( App_Application::getInstance()->getConfig()->lang->detect_from_browser ) {
                 $arrLanguagesDetectedInBrowser = App_Application::getInstance()->getConfig()->lang->detect_from_browser->toArray();
@@ -60,6 +63,7 @@ class Lang_Hash
                     self::$lstCachedComponents[ $strLang.'~'.$strComponent ][ strtolower( $objString->getOriginal() ) ] = $objString->getTranslation();
                 }
             }
+            
         } else if ( $strSource == 'json' ) {
 
             $strFileToRead = App_Application::getInstance()->getConfig()->lang->read;
@@ -89,10 +93,10 @@ class Lang_Hash
         }
         
         if ( isset( self::$lstCachedComponents[ $strLang.'~'.$strComponent ] [ $strKey ] ) &&
-                    self::$lstCachedComponents[ $strLang.'~'.$strComponent ] [ $strKey ] != '')
+                    self::$lstCachedComponents[ $strLang.'~'.$strComponent ] [ $strKey ] != '' )
                 return self::$lstCachedComponents [ $strLang.'~'.$strComponent ][ $strKey ];
         
-        return $strKey;
+        return $strOrigKey;
     }
 
     /**

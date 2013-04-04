@@ -49,8 +49,11 @@ class Sys_Cache_Memory implements Sys_Cache_Abstract {
     /**
      * @return void 
      */
-    public function clean() {
-        $GLOBALS[ $this->_options['var'] ] = array();
+    public function clean( $strTag = '' ) {
+        if ( $strTag == '' )
+            $GLOBALS[ $this->_options['var'] ] = array();
+        else if ( isset( $GLOBALS[ $this->_options['var'] ][ $strTag ] ))
+            unset( $GLOBALS[ $this->_options['var'] ][ $strTag ] );
     }
 
 }

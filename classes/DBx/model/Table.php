@@ -151,6 +151,18 @@ class DBx_Table extends DBx_Table_Abstract
         return $this->_strControllerName;
     }
 
+    public function createList( array $rows = array() )
+    {
+        $strObjectName = $this->getObjectName();
+        $strListClass = $strObjectName.'_List';
+        
+        return  new $strListClass( array(
+            'data'     => $rows,
+            'table'    => $this,
+            'rowClass' => $strObjectName,
+        ) );
+
+    }
     /**
      * @param array $data
      * @param $defaultSource

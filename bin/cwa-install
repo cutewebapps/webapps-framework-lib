@@ -299,8 +299,8 @@ class Cwa_Package
 <VirtualHost $strIp:$nServerPort>
 	DocumentRoot {$this->env->getVirtualHostsRoot()}/$strName
 	ServerName $strFullHost
-	ErrorLog  "{$this->env->getLogRoot()}/error_{$strDashedHost}.log"
-	CustomLog  "{$this->env->getLogRoot()}/access_{$strDashedHost}.log" common
+	ErrorLog  "{$this->env->getLogRoot()}/apache_error_{$strDashedHost}.log"
+	CustomLog  "{$this->env->getLogRoot()}/apache_access_{$strDashedHost}.log" common
             
         SetEnv CWA_HOME {$this->env->getHome()}
         SetEnv CWA_CLASS_ROOT {$this->env->getClassRoot()}

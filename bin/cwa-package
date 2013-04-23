@@ -38,20 +38,24 @@ if ( file_exists( $strControlFile ) ) {
     $strEx = '';
     if ( !$bIsLibrary ) { 
         $strVirtHost = str_replace( '.', '-', str_replace( 'project-', '', $strPackageName));
-        $strEx  = "\n    \"vhosts\" : { \n"; 
+        $strEx  = "\n    \"vhosts\" : [{ \n"; 
         $strEx .= "\n         \"name\" : \"$strVirtHost\", ";
         $strEx .= "\n         \"copy\" : [\".htaccess\",\"index.php\",\"patch.php\",\"test.php\"], ";
         $strEx .= "\n         \"writable\" : [\"cdn\"] ";
-        $strEx .= "\n    },\n";
+        $strEx .= "\n    }],\n";
     }
+    $arrClasses = array();
+    $strClassesJson = json_encode( $arrClasses );
+    
     $strFileContent =<<< EOF
 {
     "version" : "0.1.0",
     "license" : "Commercial",
     "name" : "{$strPackageName}", $strEx
-    "classes" : [],
+    "classes" : $strClassesJson,
     "deps"    : [
         "webapps-framework-lib",
+        "webapps-everzet-jade-lib",
         "webapps-cms-lib",
         "webapps-user-lib"
     ]

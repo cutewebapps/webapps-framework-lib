@@ -38,6 +38,35 @@ class App_Exception_Handler
         }
     }
 
+    public function alert( $exception )
+    {
+        // preparing message - more detailed than in logs
+            $strMessage = "<pre style='font-size:12px'>"."***\t[".date('Y-m-d H:i:s')."]\n";
+            $strMessage .= "\n***\t<strong>".$exception->getMessage().'</strong>';
+            $strMessage .= "\n".self::backTraceString( $exception->getTrace() ) ."\n\n\n";
+
+            foreach ( $_SERVER as $strKey => $strValue )  {
+                if ( !is_array( $strValue ) ) {
+                    $strMessage .= '_SERVER['.$strKey . ']=' . $strValue ."\n";
+                } else {
+                    ob_start();
+                    print_r( $strValue );
+                    $strContents = ob_get_contents();
+                    ob_end_clean();
+                    $strMessage .= '_SERVER['.$strKey . ']=' .$strContents;
+                }
+            }
+            foreach ( $_POST as $strKey => $strValue )  {
+                $strMessage .= '_POST['.$strKey . ']=' . $strValue ."\n";
+            }
+            foreach ( $_COOKIE as $strKey => $strValue )  {
+                $strMessage .= '_COOKIE['.$strKey . ']=' . $strValue ."\n";
+            }
+            $strMessage .= '</pre>';    
+            
+            Sys_Debug::alert( $strMessage );
+    }
+    
     public function mail( $exception )
     {
         $confException = $this->getConfig()->exceptions;
@@ -134,6 +163,7 @@ class App_Exception_Handler
         if  (is_object(  $confException ) ) {
             if ( $confException->log )  $this->log( $exception );
             if ( $confException->mail ) $this->mail( $exception );
+            if ( $confException->alert ) $this->alert( $exception );
         }
     }
 

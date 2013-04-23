@@ -84,6 +84,7 @@ class App_Http_Browser
 
     /**
      * @param string $strUrl
+     * @return App_Http_Browser
      */
     public function httpGet( $strUrl )
     {
@@ -111,6 +112,7 @@ class App_Http_Browser
      * @param string $strUrl
      * @param array $arrData
      * @param array $arrFiles
+     * @return App_Http_Browser
      */
     public function httpPost( $strUrl, $arrData, $arrFiles = array() )
     {
@@ -146,6 +148,38 @@ class App_Http_Browser
     }
 
     /**
+     * 
+     * @param string  $strUrl
+     * @param string $strRawBody
+     * @return App_Http_Browser
+     */
+    public function httpPostRaw( $strUrl, $strRawBody )
+    {
+         $this->init();
+        if ( $this->LastHttpUrl != '' ) {
+            curl_setopt($this->curl, CURLOPT_REFERER, $this->LastHttpUrl );
+        }
+
+        curl_setopt( $this->curl, CURLOPT_URL, $strUrl );
+	curl_setopt( $this->curl, CURLOPT_POST,1);
+        curl_setopt( $this->curl, CURLOPT_POSTFIELDS, $strRawBody );
+        
+        $buff = curl_exec( $this->curl );
+
+        $this->errorMsg = curl_error( $this->curl );
+        $this->errorNumber = curl_errno( $this->curl );
+        $this->Info = curl_getinfo($this->curl);
+        curl_close( $this->curl );
+        if ( $this->errorNumber != 0 ) {
+            throw new App_Http_Exception( $this->errorMsg );
+        }
+        $this->LastHttpUrl = $strUrl;
+        $this->_parseResponse( $buff );
+        return $this;
+    }
+
+    /**
+     * @return App_Http_Browser
     */
     public function init()
     {

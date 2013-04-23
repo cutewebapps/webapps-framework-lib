@@ -152,9 +152,75 @@ class Sys_Debug
         return self::dumpHtml( $sqlFormatter->toString() );
     }
 
+    /** 
+     * please avoid this function, user dump + die instead separately,
+     * reason: traceback could be useless
+     * 
+     * @param type $arr
+     * @param type $strCaption
+     */
     public static function dumpDie( $arr  = '', $strCaption = "" )
     {
         self::dump( $arr, $strCaption );
         die;
+    }
+    
+    /**
+     * 
+     * @param mixed $arr
+     * @param string $strCaption
+     */
+    public static function alert( $sContent ) 
+    {
+        if ( Sys_Global::isRegistered( "DISABLE_ALERTS" ) ) {
+            // avoid recursion on exceptions, do not produce alerts on alerts
+            return;
+        }
+        $objAppConfig = App_Application::getInstance()->getConfig()->alert;
+        if ( !is_object( $objAppConfig )) return;
+
+        $strHtml  = $sContent; 
+        $strPlain  = $sContent;
+        
+        if ( is_array( $sContent ) || is_object( $sContent ) ) {
+            ob_start(); 
+            self::dumpPlain( $sContent );
+            $strPlain = ob_get_contents();
+            ob_end_clean();
+            
+            ob_start(); 
+            self::dumpHtml( $sContent );
+            $strHtml = ob_get_contents();
+            ob_end_clean();
+            
+        }
+        
+        //  alert could be saved in logs ( ->alert_log )
+        if ( $objAppConfig->log ) {
+            $logFile = new Sys_File( $objAppConfig->log );
+            $logFile->append( "\n\n[".date("Y-m-d H:i:s")."]\n" . $strPlain );
+        }
+        
+        // sending alert to a server
+        Sys_Global::set( "DISABLE_ALERTS", 1);
+        if ( $objAppConfig->server ) {
+            
+            if ( is_string( $objAppConfig->server ) )
+                $arrServers = array( $objAppConfig->server );
+            else
+                $arrServers = $objAppConfig->server->toArray();
+                        
+            foreach( $arrServers as $strServer ) {
+                try {
+                    $browser = new App_Http_Browser();
+                    $browser->ConnectTimeout  = 3;
+                    $browser->DownloadTimeout  = 5;
+                    $browser->httpPostRaw( $strServer, $strHtml );
+                } catch ( Exception $e ) {
+                    // not reaching the server is not a problem to stop at 
+                }
+            }
+        }
+        Sys_Global::set( "DISABLE_ALERTS", "");
     }
 }

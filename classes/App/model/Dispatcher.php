@@ -49,6 +49,30 @@ function shutdownErrorHandler()
             $strFile->append( $strBody );
         }
 
+        if ( $confException->alert ) {
+            $strMessage = "***\t[".date('Y-m-d H:i:s')."]\n";
+            $strMessage .= "\n***\t<strong>".$strErrorMessage.'</strong>'."\n\n";
+            
+            foreach ( $_SERVER as $strKey => $strValue )  {
+                if ( !is_array( $strValue ) ) {
+                    $strMessage .= '_SERVER['.$strKey . ']=' . $strValue ."\n";
+                } else {
+                    ob_start();
+                    print_r( $strValue );
+                    $strContents = ob_get_contents();
+                    ob_end_clean();
+                    $strMessage .= '_SERVER['.$strKey . ']=' .$strContents;
+                }
+            }
+            foreach ( $_POST as $strKey => $strValue )  {
+                $strMessage .= '_POST['.$strKey . ']=' . $strValue ."\n";
+            }
+            foreach ( $_COOKIE as $strKey => $strValue )  {
+                $strMessage .= '_COOKIE['.$strKey . ']=' . $strValue ."\n";
+            }
+            Sys_Debug::alert( $strMessage );
+        }
+        
         if ( $confException->mail ) {
             // mail exception info to somebody
             $strTo = $confException->mail->to;

@@ -29,6 +29,27 @@
  */
 class DBx_Table_Rowset extends DBx_Table_Rowset_Abstract
 {
+    /**
+     * get array of objects from this rowset object,
+     * preimary key of the record will be the key in this array, 
+     * and record objects will be the values
+     */
+    public function getAsArray( $strColumnName = null, $strKeyColumn = null )
+    {
+        $arrRecords = array();
+        foreach ($this as $objRow){
+            $key = $strKeyColumn == null ? $objRow->getId() : $objRow->$strKeyColumn;
+            $val = ( $strColumnName == null ) ? $objRow : $objRow->$strColumnName;
+            $arrRecords[ $key ] = $val;
+        }
+        return $arrRecords;
+    }
+    
+    /**
+     * 
+     * @param string | null  $strColumnName
+     * @return array
+     */
     public function getIds($strColumnName = null)
     {
         $arrValues = array();

@@ -3,17 +3,19 @@ var http  = require('http'), fs = require("fs");
 var sys = require('sys')
 var exec = require('child_process').exec;
 
-ServerThread = function( response, body ) {
+ServerThread = function( response, url, body ) {
 
 	this.sFolder = process.env.TEMP;
 	if  ( !this.sFolder )  this.sFolder = "/tmp";
 
 	this.sFolder += "/nwapp_" + parseInt( Math.random() * 10000 );
 
+        var dt = new Date();
 	this.sIndexHtml = "<!DOCTYPE html>\n" + "<html>\n<head>\n<title>Alert</title>\n" +
 		'<meta name="viewport" content="width=device-width, initial-scale=1.0" />' +
+		'<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' +
 		'</head>' +
-		'<body><pre>' + body + '</pre></body></html>';
+		'<body><h1 style="font-family:arial">' + url + '</h1><strong style="font-family:arial">' + dt + '</strong><pre>' + body + '</pre></body></html>';
 	this.sPackageJson = '{  "name": "Alert", "main": "index.html",  "window": { "toolbar": false, "width": 800 } }';
 
 
@@ -28,8 +30,8 @@ ServerThread = function( response, body ) {
 		fs.writeFileSync( _that.sFolder + "/package.json", _that.sPackageJson );
 
 		exec("nw "+ _that.sFolder, function (error, stdout, stderr) {
-			sys.print('stdout: ' + stdout);
-			sys.print('stderr: ' + stderr);
+			if ( stdout != "" ) sys.print('stdout: ' + stdout);
+			if ( stderr != "" ) sys.print('stderr: ' + stderr);
 			if (error !== null) {
 				console.log('exec error: ' + error);
 			}
@@ -46,6 +48,8 @@ ServerThread = function( response, body ) {
 var port = 6789;
 http.createServer(function (req, res) {
 
+    // console.log( "URL: " + req.url );
+    
     var fullBody = '';
     req.on('data', function(chunk) {
       // append the current chunk of data to the fullBody variable
@@ -55,7 +59,7 @@ http.createServer(function (req, res) {
       // request ended -> do something with the data
       res.writeHead(200, "OK", {'Content-Type': 'application/json'});
       // parse the received body data
-      var thread = new ServerThread( res, fullBody );
+      var thread = new ServerThread( res, req.url, fullBody );
     });
 
 }).listen( port, '0.0.0.0');

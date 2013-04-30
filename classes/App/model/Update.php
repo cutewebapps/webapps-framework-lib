@@ -128,10 +128,12 @@ class App_Update extends DBx_ReadWrite_Object
             Sys_Io::out( 'table was added' );
         }
 
+        // Sys_Debug::dump( $arrNamespaces );
         foreach ( $arrNamespaces as $strNamespace => $strNamespaceDir ) {
             $strUpdateClassFile = $strNamespaceDir . '/Update.php';
+            // Sys_Debug::dump( $strUpdateClassFile );
             if ( file_exists( $strUpdateClassFile )) {
-                include_once( $strUpdateClassFile );
+                require_once( $strUpdateClassFile );
                 // Get Version of namespace
                 $strClass = $strNamespace .'_Update';
                 $objUpdate = new $strClass( $strNamespace, $strConnectionIndex );

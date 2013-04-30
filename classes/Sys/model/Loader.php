@@ -63,17 +63,24 @@ function getClassParts( $strClassName )
  * @return boolean
  * @throws Exception
  */
-function __autoload($strClassName) 
+function __cwa_autoload($strClassName) 
 {
     // hack check for sanitizing paths...
     if ( preg_match( '@[\/\.]@', $strClassName )) 
         throw new Exception( 'Class Name '.$strClassName.' could not be allowed');
+
     
-    $strPath = CWA_DIR_CLASSES . '/' . implode('/', getClassParts( $strClassName) ) . '.php';
+    $strPath = str_replace( "\\", "/", trim( CWA_DIR_CLASSES ) ) 
+            . '/' . implode('/', getClassParts( $strClassName) ) . '.php';
+       // if ( PHP_SAPI == "cli") {
+       //      die( 'PATH: '. $strPath );
+       // }
     if (file_exists($strPath))  {
-        include $strPath; return true;
+        require $strPath; 
+        // die( $strPath .' included' );
+        return true;
     }
     return false;
 }
 
-spl_autoload_register('__autoload');
+spl_autoload_register('__cwa_autoload');

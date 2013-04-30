@@ -360,6 +360,10 @@ class App_Dispatcher
         else if ( $arrThemes instanceof Sys_Config ) $arrThemes = $arrThemes->toArray();
 
         $arrScriptPaths = array();
+        if ( $this->_objCurrentController->getRender() == ""  ) {
+            return "";
+        }
+        
         foreach ( $arrThemes as $strThemeName ) {
             $arrScriptPaths []= implode( '/', array(
                 CWA_APPLICATION_DIR,
@@ -372,6 +376,7 @@ class App_Dispatcher
                     .'.' . $this->_objCurrentController->view->getExtension()
             ));
         }
+
         
         $this->_objCurrentController->view->setPath( $arrScriptPaths );
 

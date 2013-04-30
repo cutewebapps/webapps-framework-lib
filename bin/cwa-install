@@ -10,6 +10,7 @@
  * export CWA_ENV              = local
  * export CWA_FRONTEND*        = apache ( if frontend var would not be defined, no virtual hosts config would be generated )
  * export CWA_FRONTEND_RELOAD* = "sudo /etc/init.d/apache2 reload" (if not set up, no apache restart would be done)
+ *                              for windows, you can use "net stop Apache2.2 && net start Apache2.2"
  * export CWA_MYSQL*           = "/usr/bin/mysql -u root" (if not set up, no database creations will be done)
  * 
  * export CWA_HOME         =/home/user or /home/user/webapps  sometimes
@@ -25,6 +26,8 @@
  * export CWA_LOG_ROOT     =$(CWA_HOME)/log
  * export CWA_PKG_ROOT     =$(CWA_HOME)/log/packages
  * export CWA_TEMP_ROOT    =$(CWA_HOME)/temp
+ * 
+ * export CWA_SRC_ROOT    =$(CWA_HOME)/src - also should be setup
  */
 class Cwa_Env 
 {
@@ -48,7 +51,11 @@ class Cwa_Env
      */
     public function getHome() 
     { 
-        if ( getenv( 'CWA_HOME' ) ) return getenv( 'CWA_HOME' );         
+        if ( getenv( 'CWA_HOME' ) ) 
+            return str_replace( "\\", "/", trim( getenv( 'CWA_HOME' )) );     
+        if ( strtolower( substr( PHP_OS,0,3 )) == "wn")
+            die( 'Please setup CWA_HOME environment variable' );
+        
         return '/home/'.$this->getSystemUser();
     }
     /**
@@ -195,6 +202,16 @@ class Cwa_Package
         return $this->config->version;
     }
     
+    protected function symLink( $src, $strDir )
+    {
+        //echo 'link '.$src.' to '.$strDir."\n";
+        $strCmd = str_replace("\\", "/", 'ln -s '.$src.' '.$strDir);
+        echo 'LINK: ' . $strCmd."\n";
+        if ( ! is_dir( $src ) || strtoupper(substr( PHP_OS,0,3 )) != "WIN" ) {
+            Sys_Cmd::run( $strCmd );
+        } 
+    }
+    
     /**
      * link classes, link static, link files inside HTDOCS except files in root
      */
@@ -220,16 +237,14 @@ class Cwa_Package
                 foreach( $arrDirs as $strDir ) {
                     $strDest = $strDestFolder.'/'.basename( $strDir );
                     if ( !is_dir( $strDest )) {
-                        echo 'link '.$strDest.' to '.$strDir."\n";
-                        Sys_Cmd::run( 'ln -s '.$strDir.' '.$strDest );
+                        $this->symLink( $strDest, $strDir );
                     }
                 }
                 $arrFiles = $dirSrc->getFiles('', false );
                 foreach( $arrFiles as $strFile ) {
                     $strDest = $strDestFolder.'/'.basename( $strFile );
                     if ( !file_exists( $strDest )) {
-                        echo 'link '.$strDest.' to '.$strFile."\n";
-                        Sys_Cmd::run( 'ln -s '.$strFile.' '.$strDest );
+                        $this->symLink( $strDest, $strDir );
                     }
                 }
             }
@@ -283,9 +298,8 @@ class Cwa_Package
         $strSitesAvailableDir =  $this->env->getConfRoot().'/'.$strFrontend .'/sites-available';
         $strIp = '*';
         $nServerPort = 80;
+        if ( getenv('CWA_FRONTEND_PORT') != '' ) $nServerPort = getenv('CWA_FRONTEND_PORT');
 
-     
-        
         foreach( $arrHosts as $objProps ) {
             $strName = $objProps->name;
             
@@ -294,6 +308,15 @@ class Cwa_Package
             print "Preparing Virtual Host ".$strFullHost."\n";
             
             $strAvailableFile  = $strSitesAvailableDir.'/'.$strDashedHost.'.conf';
+            
+            $npmitk = "";
+            if ( $this->env->getSystemUser() != "" &&
+                 strpos( $this->env->getSystemUser(), "\\"  ) === false ) {
+                
+                $npmitk = "<IfModule mpm_itk_module>"."\n"
+                    . "\tAssignUserId {$this->env->getSystemUser()} ".$this->env->getSystemUserGroup()."\n"
+                    . "</IfModule>";
+            }
             
             $strVhostConfig =<<< EOF
 <VirtualHost $strIp:$nServerPort>
@@ -304,9 +327,7 @@ class Cwa_Package
             
         SetEnv CWA_HOME {$this->env->getHome()}
         SetEnv CWA_CLASS_ROOT {$this->env->getClassRoot()}
-        <IfModule mpm_itk_module>
-            AssignUserId {$this->env->getSystemUser()} {$this->env->getSystemUserGroup()}
-        </IfModule>
+        $npmitk
 	<Directory {$this->env->getVirtualHostsRoot()}/$strName>
 		AllowOverride All
 		Order allow,deny
@@ -331,9 +352,10 @@ EOF;
             $dir = new Sys_Dir( $this->getDir().'/htdocs' );
             foreach( $dir->getDirs() as $strDirName ) {
                 if ( !file_exists( $strDestDir .'/'.basename($strDirName) ) ) {
-                    $strCmd = 'ln -s '.$strDirName.' '.$strDestDir.'/';
-                    echo $strCmd."\n";
-                    Sys_Cmd::run( $strCmd );
+                    //$strCmd = 'ln -s '.$strDirName.' '.$strDestDir.'/';
+                    //echo $strCmd."\n";
+                    $this->symLink( $strDirName, $strDestDir .'/'.basename($strDirName) );
+                    // Sys_Cmd::run( $strCmd );
                 }
             }
             foreach ( $dir->getFiles( '', false ) as $strFileName ) {
@@ -344,9 +366,10 @@ EOF;
                         echo 'Copying '.$strFileName."\n";
                         copy( $strFileName, $strDestDir.'/'.basename($strFileName) );
                     } else {
-                        $strCmd = 'ln -s '.$strFileName.' '.$strDestDir.'/';
-                        echo $strCmd."\n";
-                        Sys_Cmd::run( $strCmd );
+                        //$strCmd = 'ln -s '.$strFileName.' '.$strDestDir.'/';
+                        //echo $strCmd."\n";
+                        //Sys_Cmd::run( $strCmd );
+                        $this->symLink( $strFileName, $strDestDir.'/'.basename($strFileName) );
                     }
                 }
             }
@@ -383,7 +406,7 @@ EOF;
                 // creating database 
                 $strSql = 'CREATE DATABASE IF NOT EXISTS '.$strDbName;
                 if ( $strDbCharset ) $strSql.' DEFAULT CHARACTER SET '.$strDbCharset;
-                $strCmd = 'echo "'.$strSql.'" | '. $strMysqlBin;
+                $strCmd = 'echo '.$strSql.' | '. $strMysqlBin;
                 echo $strCmd."\n";
                 Sys_Cmd::run( $strCmd );
                 

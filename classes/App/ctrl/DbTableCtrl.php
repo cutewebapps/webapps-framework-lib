@@ -325,7 +325,8 @@ abstract class App_DbTableCtrl extends App_AbstractCtrl
             }
 
             $this->view->lstMessages = $arrMessages;
-            $this->view->lstErrors = $arrErrors;
+            $this->view->arrError = $this->view->lstErrors = $arrErrors;
+
         }
         $this->view->object = $this->_object;
         $this->view->result = array(); // dummy array for merging with results

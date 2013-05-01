@@ -80,12 +80,38 @@ class Sys_Date
         return $this;
     }
 
+    /**
+     * 
+     * @param int $y 
+     * @param int $m 
+     * @param int $d
+     * @return boolean
+     */
+    protected function isValidYmd( $y, $m, $d )
+    {
+        $arrMinMonthDay = array( 0, 31, 28, 31, 30, 31, 30, 31, 31, 30,31, 30, 30 );
+        if ( $y % 4 == 0 && ($y % 100 != 0 || $y % 1000 == 0) ) $arrMinMonthDay[ 2 ] = 29;
+        if (  $d < 1 || 
+              $m < 1 || $m > 12 || 
+              !isset( $arrMinMonthDay[ intval( $m ) ] ) || 
+              intval( $d ) > $arrMinMonthDay[ intval( $m ) ] ) return false;
+        return true;
+    }
 
+    /**
+     * 
+     * @param string $strDate
+     * @param string $format Sys_Date::US|EURO|ISO
+     * @throws Sys_Date_Exception
+     */
     public function __construct( $strDate, $format  = '' )
     {
         if ( $format == '' ) $format = App_Application::getInstance()->getConfig()->dateformat;
         if ( $format == '' ) $format = self::ISO;
-        
+        else {
+            // if format is given, but no date provided, throw exception
+            if ( $strDate == '' ) throw new Sys_Date_Exception( 'Empty date provided' );
+        }
         $strTime = '';
         if ( preg_match( "@^([\/\.\d]+)\s+(\S+)$@", $strDate, $arrMatch )) {
             // split it, if the date was given with time
@@ -109,20 +135,36 @@ class Sys_Date
         switch( $format ) {
             case self::EURO:
                 $arrParts = explode( ".", $strDate );
+                if ( count( $arrParts ) < 3 )
+                    throw new Sys_Date_Exception( "Error in parsing european date format" );
+                
                 $nDay     = $arrParts[2];
                 $nMonth   = $arrParts[1];
                 $nYear    = $arrParts[0];
+                
+                if ( ! $this->isValidYmd( $nYear, $nMonth, $nDay ) ) 
+                    throw new Sys_Date_Exception( "Invalid date provided" );
+                
                 $this->_datetime = date('Y-m-d', strtotime( $nYear.'-'.$nMonth.'-'.$nDay ) );
                 $this->_datetime .= ' '.$H.':'.$i.':'.$s;
                 break;
+                
             case self::US:
                 $arrParts = explode( "/", $strDate );
+                if ( count( $arrParts ) < 3 )
+                    throw new Sys_Date_Exception( "Error in parsing US date format" );
+                
                 $nMonth   = $arrParts[0];
                 $nDay     = $arrParts[1];
                 $nYear    = $arrParts[2];
+                
+                if ( ! $this->isValidYmd( $nYear, $nMonth, $nDay ) ) 
+                    throw new Sys_Date_Exception( "Invalid date provided" );
+                
                 $this->_datetime = date('Y-m-d', strtotime( $nYear.'-'.$nMonth.'-'.$nDay ) );
                 $this->_datetime .= ' '.$H.':'.$i.':'.$s;
                 break;
+                
             default:
                 $this->_datetime = $strDate;
         }

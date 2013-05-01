@@ -171,19 +171,34 @@ class App_View extends Sys_Editable
 
         $subView = new $strClass();
         $arrPaths = $this->getPath();
-        if ( is_string( $arrPaths )) $arrPaths = array( $arrPaths );
+        if ( is_string( $arrPaths )) {
+            $arrPaths = array( dirname( $arrPaths ).'/'.$strPath );
+            $arrPaths[] =  $this->getPath() .'/'.$strPath;    
+        } else {
+            foreach ( $arrPaths as $key => $val ) {
+                $arrPaths[ $key ] = dirname( $val ).'/'.$strPath;
+                $arrPaths[ $key ] = dirname( dirname( dirname( $val ))).'/'.$strPath;
+                
+            }
+        }
+        $arrPaths[] =  CWA_APPLICATION_DIR.'/theme/'.$strPath; 
         
+       //  Sys_Debug::alert( array('partial' => $strPath ) +  $arrPaths );
+       
+        $arrAttempts = array();
         $strFullPath = '';
         foreach ( $arrPaths as $strFullFile ) {
             // Sys_Io::out( dirname( dirname( dirname( $strFullFile ))) .'/'.$strPath );
-            $strPossiblePath = dirname( dirname( dirname( $strFullFile ))) .'/'.$strPath;
+            $strPossiblePath = $strFullFile;
+            $arrAttempts[] = $strPossiblePath;
             if ( file_exists( $strPossiblePath ) ) {
                $strFullPath = $strPossiblePath;
                break;
             }
         }
-        if ( $strFullPath == '' )
-            throw new App_Exception( 'Cannot find theme path for rendering partial');
+        if ( $strFullPath == '' ) {
+            throw new App_Exception( 'Cannot find theme path for rendering partial '.basename( $strPath ). " tried: ".implode( "\n", $arrAttempts ));
+        }
 
         $subView->setPath( $strFullPath );
         foreach( $arrParams as $strKey => $value ) {

@@ -153,7 +153,7 @@ class App_Http_Browser
      * @param string $strRawBody
      * @return App_Http_Browser
      */
-    public function httpPostRaw( $strUrl, $strRawBody )
+    public function httpPostRaw( $strUrl, $strRawBody, $arrHeaders = array() )
     {
          $this->init();
         if ( $this->LastHttpUrl != '' ) {
@@ -163,6 +163,8 @@ class App_Http_Browser
         curl_setopt( $this->curl, CURLOPT_URL, $strUrl );
 	curl_setopt( $this->curl, CURLOPT_POST,1);
         curl_setopt( $this->curl, CURLOPT_POSTFIELDS, $strRawBody );
+        
+        curl_setopt( $this->curl, CURLOPT_HTTPHEADER, $arrHeaders );
         
         $buff = curl_exec( $this->curl );
 

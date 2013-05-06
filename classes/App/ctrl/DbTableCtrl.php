@@ -510,6 +510,8 @@ abstract class App_DbTableCtrl extends App_AbstractCtrl
         $strSortableField = $this->getSortableField();
         
         $strIds = $this->_getParam('ids');
+        if ( $strIds == '' ) $strIds = $this->_getParam('order'); // old compatibility...
+            
         $arrIds = explode( ",", $strIds );
         if ( count( $arrIds ) == 0 )
             throw new App_Exception( "ids are not provided" );
@@ -518,8 +520,10 @@ abstract class App_DbTableCtrl extends App_AbstractCtrl
         $nIterator = 0;
         foreach ( $arrIds as $nId )  {
             $objRow = $strClass::Table()->find( $nId )->current();
-            $objRow->$strSortableField = $nIterator ++;
-            $objRow->save( false );
+            if ( is_object( $objRow )) {
+                $objRow->$strSortableField = $nIterator ++;
+                $objRow->save( false );
+            }
         }
     }
 }

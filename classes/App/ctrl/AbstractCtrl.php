@@ -89,6 +89,17 @@ class App_AbstractCtrl
     }
     
     /**
+     * @returu
+     */ 
+    protected function _getFile( $strKey )
+    {
+        $arrFiles = $this->_getAllFiles();
+        if ( isset( $arrFiles[ $strKey ] ) )
+            return $arrFiles[ $strKey ];
+        return array();
+    }
+   
+    /**
      * @return array
      */
     protected function _getFileErrors()
@@ -340,14 +351,16 @@ class App_AbstractCtrl
      */
     protected function _adjustIntParam( $strParam )
     {
-        if ( $this->_getParam( $strParam ) == 'true' )
-            $this->_setParam( $strParam, 1 );
-        else if ( $this->_getParam( $strParam ) == 'false' )
-            $this->_setParam( $strParam, 0 );
-        else if ( $this->_getParam( $strParam ) == 'on' )
-            $this->_setParam( $strParam, 1 );
-        else if ( $this->_getParam( $strParam ) == 'off' )
-            $this->_setParam( $strParam, 0 );
+        if ( $this->hasParam( $strParam ) ) {
+            if ( $this->_getParam( $strParam ) == 'true' )
+                $this->_setParam( $strParam, 1 );
+            else if ( $this->_getParam( $strParam ) == 'false' )
+                $this->_setParam( $strParam, 0 );
+            else if ( $this->_getParam( $strParam ) == 'on' )
+                $this->_setParam( $strParam, 1 );
+            else if ( $this->_getParam( $strParam ) == 'off' )
+                $this->_setParam( $strParam, 0 );
+        }
     }
   
     /**

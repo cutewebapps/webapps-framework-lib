@@ -10,12 +10,30 @@ ServerThread = function( response, url, body ) {
 
 	this.sFolder += "/nwapp_" + parseInt( Math.random() * 10000 );
 
+        if ( body.indexOf( 'ALERT_HTML_CONTENTS' ) > -1 ) {
+            var json = JSON.parse( body );
+            // console.log( json );
+            
+            body = "<table border='1' cellspacing='0' cellpadding='3' style='border-color:#eee; width:100%;'><tbody>";
+            for ( var key in json ) {
+                if ( key == "ALERT_HTML_CONTENTS" ) {
+                    body += "<tr><td colspan='2'>" + json[key]  + "</td></tr>";
+                } else {
+                    body += "<tr><td>" + key + "</td><td>" + json[key] + "</td></tr>";
+                }
+            }
+            body += "</tbody></table>";
+            
+        } else {
+            body = '<pre>' + body + '</pre>';
+        }
+
         var dt = new Date();
 	this.sIndexHtml = "<!DOCTYPE html>\n" + "<html>\n<head>\n<title>Alert</title>\n" +
 		'<meta name="viewport" content="width=device-width, initial-scale=1.0" />' +
 		'<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' +
 		'</head>' +
-		'<body><h1 style="font-family:arial">' + url + '</h1><strong style="font-family:arial">' + dt + '</strong><pre>' + body + '</pre></body></html>';
+		'<body><h1 style="font-family:arial">' + url + '</h1><strong style="display:block;font-family:arial">' + dt + '</strong>' + body + '</body></html>';
 	this.sPackageJson = '{  "name": "Alert", "main": "index.html",  "window": { "toolbar": false, "width": 800 } }';
 
 

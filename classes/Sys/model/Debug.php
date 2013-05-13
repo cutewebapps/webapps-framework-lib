@@ -234,7 +234,7 @@ class Sys_Debug
      * @param mixed $arr
      * @param string $strCaption
      */
-    public static function alertHtml( array $arrProperties, $sContent ) 
+    public static function alertHtml( array $arrProperties, $sContent1, $sContent2 = '', $sContent3 = '', $sContent4 = '', $sContent5 = '' ) 
     {
         if ( Sys_Global::isRegistered( "DISABLE_ALERTS" ) ) {
             // avoid recursion on exceptions, do not produce alerts on alerts
@@ -242,13 +242,12 @@ class Sys_Debug
         }
         $objAppConfig = App_Application::getInstance()->getConfig()->alert;
         if ( !is_object( $objAppConfig )) return;
-
-        $strHtml  = $sContent; 
         
         //  alert could be saved in logs ( ->alert_log )
         if ( $objAppConfig->log ) {
             $logFile = new Sys_File( $objAppConfig->log );
-            $logFile->append( "\n\n[".date("Y-m-d H:i:s")."]\n" . print_r( $arrProperties, true )."\n".$strHtml );
+            $logFile->append( "\n\n[".date("Y-m-d H:i:s")."]\n" . print_r( $arrProperties, true )."\n"
+                    . implode( "\n", array( $sContent1, $sContent2, $sContent3, $sContent4, $sContent5 ) ) );
         }
         
         // sending alert to a server
@@ -265,8 +264,15 @@ class Sys_Debug
                     $browser = new App_Http_Browser();
                     $browser->ConnectTimeout  = 3;
                     $browser->DownloadTimeout  = 5;
-                    $browser->httpPostRaw( $strServer, 
-                        json_encode( $arrProperties + array( 'ALERT_HTML_CONTENTS' => $strHtml ) ) );
+                    
+                    $arrResult = $arrProperties;
+                    if ( $sContent1 ) $arrResult[ 'HTML_CONTENTS_1' ] = $sContent1;
+                    if ( $sContent2 ) $arrResult[ 'HTML_CONTENTS_2' ] = $sContent2;
+                    if ( $sContent3 ) $arrResult[ 'HTML_CONTENTS_3' ] = $sContent3;
+                    if ( $sContent4 ) $arrResult[ 'HTML_CONTENTS_4' ] = $sContent4;
+                    if ( $sContent5 ) $arrResult[ 'HTML_CONTENTS_5' ] = $sContent5;
+                    
+                    $browser->httpPostRaw( $strServer, json_encode( $arrResult ) );
                     
                 } catch ( Exception $e ) {
                     // not reaching the server is not a problem to stop at 

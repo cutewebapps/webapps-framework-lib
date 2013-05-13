@@ -10,14 +10,14 @@ ServerThread = function( response, url, body ) {
 
 	this.sFolder += "/nwapp_" + parseInt( Math.random() * 10000 );
 
-        if ( body.indexOf( 'ALERT_HTML_CONTENTS' ) > -1 ) {
+        if ( body.indexOf( 'HTML_CONTENTS' ) > -1 ) {
             var json = JSON.parse( body );
             // console.log( json );
             
             body = "<table border='1' cellspacing='0' cellpadding='3' style='border-color:#eee; width:100%;'><tbody>";
             for ( var key in json ) {
-                if ( key == "ALERT_HTML_CONTENTS" ) {
-                    body += "<tr><td colspan='2'>" + json[key]  + "</td></tr>";
+                if ( key.indexOf( "HTML_CONTENTS" ) == 0 ) {
+                    body += "<tr><td colspan='2' style='padding:20px'>" + json[key]  + "</td></tr>";
                 } else {
                     body += "<tr><td>" + key + "</td><td>" + json[key] + "</td></tr>";
                 }

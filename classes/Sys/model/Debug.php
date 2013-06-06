@@ -142,6 +142,37 @@ class Sys_Debug
         return self::dumpHtml( $string );
     }
 
+    
+    public static  function dumpTable( $arr )
+    {
+        $arrColumns = array();
+        $arrColumnsIndex = array();
+        $nMaxColumn = 1;
+        foreach ( $arr as $keyRow => $arrFields ) {
+            foreach ( $arrFields as $key => $value ) {
+                if ( !isset( $arrColumns[ $key ] ) ) {
+                    $arrColumns[ $key ] = '<th>'.$key.'</th>';
+                    $arrColumnsIndex[ $nMaxColumn  ] = $key;
+                    $nMaxColumn ++;
+                }
+            }
+        }
+        
+        $strOut = '<table border cellspacing="0" cellpaddin="3" class="table table-bordered table-striped"><thead><tr><th>#</th>'.implode( "", $arrColumns ).'</tr></thead>';
+        $strOut .= '<tbody>';
+        foreach ( $arr as $keyRow => $arrFields ) {
+            $strOut .= '<tr><td>'.$keyRow.'</td>';
+            for( $i = 1; $i < $nMaxColumn; $i ++ ) {
+                $strKey = $arrColumnsIndex[ $i  ];
+                if ( isset( $arrFields[ $strKey ] ) ) $strOut .= '<td>'.$arrFields[ $strKey ].'</td>';
+            }
+            $strOut .= '</tr>'."\n";
+        }
+        $strOut .= '</tbody></table>';
+        
+        return $strOut;
+    }
+    
     /**
      * Get dump of array in PHP syntax
      *
@@ -155,7 +186,7 @@ class Sys_Debug
     }
 
     /** 
-     * please avoid this function, user dump + die instead separately,
+     * @warning: please avoid this function, user dump + die instead separately,
      * reason: traceback could be useless
      * 
      * @param type $arr

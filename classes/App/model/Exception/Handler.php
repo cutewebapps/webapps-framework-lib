@@ -103,7 +103,11 @@ class App_Exception_Handler
                 }
             }
             foreach ( $_POST as $strKey => $strValue )  {
-                $strMessage .= '_POST['.$strKey . ']=' . $strValue ."\n";
+                if ( is_string( $strValue ) ) {
+                    $strMessage .= '_POST['.$strKey . ']=' . $strValue ."\n";
+                } else {
+                    $strMessage .= '_POST['.$strKey . ']=' . print_r( $strValue, true ) ."\n";
+                }
             }
             foreach ( $_COOKIE as $strKey => $strValue )  {
                 $strMessage .= '_COOKIE['.$strKey . ']=' . $strValue ."\n";

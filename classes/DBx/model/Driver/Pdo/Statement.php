@@ -272,7 +272,8 @@ class DBx_Driver_Pdo_Statement extends DBx_Adapter_Statement implements Iterator
                 return $this->_stmt->fetchAll($style);
             }
         } catch (PDOException $e) {
-            throw new DBx_Statement_Exception($e->getMessage(), $e->getCode(), $e);
+            // throw new DBx_Statement_Exception($e->getMessage(), $e->getCode(), $e);
+            throw new DBx_Statement_Exception($e->getMessage());
         }
     }
 

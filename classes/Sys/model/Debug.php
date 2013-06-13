@@ -15,6 +15,7 @@ class Sys_Debug
 {
     public static function dumpRequest( $strFile  = '' )
     {
+        global $HTTP_RAW_POST_DATA;
         ob_start();
         
         Sys_Io::out( 'GET' );       print_r( $_GET );
@@ -27,7 +28,12 @@ class Sys_Debug
             Sys_Io::out( 'HTTP_RAW_POST_DATA' );
             Sys_Io::out( $HTTP_RAW_POST_DATA );
         }
-
+        $strInput = file_get_contents( 'php://input' );
+        if ( $strInput) {
+            Sys_Io::out( 'php://input' );
+            Sys_Io::out( $strInput );
+        }
+        
         $strContents = ob_get_contents();
         ob_end_clean();
 
@@ -203,7 +209,7 @@ class Sys_Debug
      * @param mixed $arr
      * @param string $strCaption
      */
-    public static function alert( $sContent ) 
+    public static function alert( $sContent, $strPath = '' ) 
     {
 
         if ( Sys_Global::isRegistered( "DISABLE_ALERTS" ) ) {
@@ -250,7 +256,7 @@ class Sys_Debug
                     $browser = new App_Http_Browser();
                     $browser->ConnectTimeout  = 3;
                     $browser->DownloadTimeout  = 5;
-                    $browser->httpPostRaw( $strServer, $strHtml );
+                    $browser->httpPostRaw( $strServer.$strPath, $strHtml );
                 } catch ( Exception $e ) {
                     // not reaching the server is not a problem to stop at 
                 }
@@ -281,6 +287,12 @@ class Sys_Debug
                     . implode( "\n", array( $sContent1, $sContent2, $sContent3, $sContent4, $sContent5 ) ) );
         }
         
+        $strPath = 'alert';
+        if ( isset( $arrProperties['alert'] ) ) {
+            $strPath = $arrProperties['alert'];
+            unset( $arrProperties['alert'] );
+        }
+        
         // sending alert to a server
         Sys_Global::set( "DISABLE_ALERTS", 1);
         if ( $objAppConfig->server ) {
@@ -303,7 +315,7 @@ class Sys_Debug
                     if ( $sContent4 ) $arrResult[ 'HTML_CONTENTS_4' ] = $sContent4;
                     if ( $sContent5 ) $arrResult[ 'HTML_CONTENTS_5' ] = $sContent5;
                     
-                    $browser->httpPostRaw( $strServer, json_encode( $arrResult ) );
+                    $browser->httpPostRaw( $strServer.$strPath, json_encode( $arrResult ) );
                     
                 } catch ( Exception $e ) {
                     // not reaching the server is not a problem to stop at 

@@ -116,16 +116,16 @@ class Sys_Date
         if ( preg_match( "@^([\/\.\d]+)\s+(\S+)$@", $strDate, $arrMatch )) {
             // split it, if the date was given with time
             $strDate = $arrMatch[ 1 ];
-            $strTime = $arrMatch[ 2 ];
+            $strTime = trim( $arrMatch[ 2 ] );
         }
 
         $H = '00'; $i = '00'; $s = '00';
         if ( $strTime ) {
-            if ( preg_match( "@^(\d]+):(\d]+):(\d]+)@", $strDate, $arrMatch )) {
+            if ( preg_match( "@^(\d+):(\d+):(\d+)$@", $strTime, $arrMatch )) {
                 $H = $arrMatch[1];
                 $i = $arrMatch[2];
                 $s = $arrMatch[3];
-            } else if ( preg_match( "@^(\d]+):(\d]+)@", $strDate, $arrMatch )) {
+            } else if ( preg_match( "@^(\d+):(\d+)$@", $strTime, $arrMatch )) {
                 $H = $arrMatch[1];
                 $i = $arrMatch[2];
                 $s = '00';
@@ -143,7 +143,7 @@ class Sys_Date
                 $nYear    = $arrParts[0];
                 
                 if ( ! $this->isValidYmd( $nYear, $nMonth, $nDay ) ) 
-                    throw new Sys_Date_Exception( "Invalid date provided" );
+                    throw new Sys_Date_Exception( "Invalid european date provided" );
                 
                 $this->_datetime = date('Y-m-d', strtotime( $nYear.'-'.$nMonth.'-'.$nDay ) );
                 $this->_datetime .= ' '.$H.':'.$i.':'.$s;
@@ -159,10 +159,12 @@ class Sys_Date
                 $nYear    = $arrParts[2];
                 
                 if ( ! $this->isValidYmd( $nYear, $nMonth, $nDay ) ) 
-                    throw new Sys_Date_Exception( "Invalid date provided" );
+                    throw new Sys_Date_Exception( "Invalid US date provided" );
                 
                 $this->_datetime = date('Y-m-d', strtotime( $nYear.'-'.$nMonth.'-'.$nDay ) );
                 $this->_datetime .= ' '.$H.':'.$i.':'.$s;
+                
+                // if ( $strTime ) Sys_Debug::alert(  $this->_datetime.' <br />'.$strTime );
                 break;
                 
             default:

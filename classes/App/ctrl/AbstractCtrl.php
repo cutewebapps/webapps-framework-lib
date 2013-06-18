@@ -377,6 +377,21 @@ class App_AbstractCtrl
         $this->_setParam( $strParam, $dt->getDate( Sys_Date::ISO ));
     }
     
+     /**
+     * @param string $strParam
+     * @throws Sys_Date_Exception
+     */
+    protected function _adjustDateTimeParam( $strParam )
+    {
+        $format = App_Application::getInstance()->getConfig()->dateformat;
+        if ( !$format )
+            throw new App_Exception( 'dateformat was not configured for this application' );
+        
+        $dt = new Sys_Date( $this->_getParam( $strParam ), $format );
+        $this->_setParam( $strParam, $dt->getDate( Sys_Date::ISO ).' '.$dt->getTime24());
+    }
+    
+    
     protected function _require( $arrConfiguration )
     {
         $arrErrors = array();
@@ -414,7 +429,15 @@ class App_AbstractCtrl
                         $arrPushed[ $field ] = 1;
                     }                    
                     break;
-                
+                case 'datetime': 
+                    // require non-empty value
+                    try{ 
+                        $this->_adjustDateTimeParam( $field );
+                    } catch ( Sys_Date_Exception $e ) {
+                        array_push( $arrErrors, array( $field => $e->getMessage() ) ) ;
+                        $arrPushed[ $field ] = 1;
+                    }                    
+                    break;
                 case 'min':
                     if ( ! isset( $arrParam['value'] ) )
                         throw new App_Exception('value expected in require configuration');

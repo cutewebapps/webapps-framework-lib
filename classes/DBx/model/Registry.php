@@ -183,6 +183,18 @@ class DBx_Registry
         return $this->_arrDbHandlers[ $strConnectionName ];
     }
 
+    /**
+     * get whether connection is configured
+     * 
+     * @param string $strConnectionName
+     * @return boolean
+     */
+    public function hasConnection( $strConnectionName )
+    {
+        return isset( $this->_arrDbConfigs[ $strConnectionName ] );
+    }
+    
+    
     /** @return void */
     public function setConnection( $strConnectionName, array $config ) {
 

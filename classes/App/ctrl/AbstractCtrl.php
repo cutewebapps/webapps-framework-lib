@@ -22,6 +22,12 @@ class App_AbstractCtrl
      */
     protected function _hasParam( $strParam )
     {
+        if ( is_array( $strParam ) ) {
+            // if we have array on input - every param must match
+            foreach( $strParam as $scalarValue )
+                if ( !isset( $this->_arrParams[ $scalarValue ] ) ) return false;
+            return true; 
+        }
         return isset( $this->_arrParams[ $strParam ]  );
     }
     /**

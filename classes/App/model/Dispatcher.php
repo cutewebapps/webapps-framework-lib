@@ -802,8 +802,7 @@ class App_Dispatcher
                 if ( $confException->throw ) {
                     // displaying exception for debug simplicity
                     if ( $confException->html && isset($_SERVER['HTTP_HOST'] ) ) echo '<pre>';
-
-                    throw new App_Exception( $exception );
+                    throw $exception;
                 } else {
                     // hiding exception, displaying Server Error Page
                     echo $this->runControllerAction(  'server-error',

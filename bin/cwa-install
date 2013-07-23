@@ -319,7 +319,7 @@ EOF;
         } else {
             echo 'NGINX CONFIG FOLDER NOT FOUND: '.$fDirNginx->getName()."\n";
         }
-        $fDirPhpFpm = new Sys_Dir( $this->env->getDir().'/'.$this->getPackageName().'/conf/php-fpm/'.$this->env->getName() );
+        $fDirPhpFpm = new Sys_Dir( $this->getDir().'/'.$this->getPackageName().'/conf/php-fpm/'.$this->env->getName() );
         if ( $fDirPhpFpm->exists() ) {
             // foreach nginx configuration fire for this environment, link it to nginx config
             echo 'PHP-FPM CONFIG FOLDER: '.$fDirNginx->getName()."\n";

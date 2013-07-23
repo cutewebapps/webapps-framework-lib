@@ -307,12 +307,25 @@ EOF;
     {
         $strFrontend = 'nginx';
         $strName = $objProps->name;
-        $strFullHost = $strName .'.'. trim( shell_exec( 'hostname' ) );
-        $strDashedHost = str_replace( '.', '_', $strName );
-        print "Preparing $strFrontend Virtual Host ".$strFullHost."\n";
+        ///$strFullHost = $strName .'.'. trim( shell_exec( 'hostname' ) );
+        //$strDashedHost = str_replace( '.', '_', $strName );
+        print "Preparing $strFrontend Virtual Host ".$strName."\n";
 
         // TODO: link correct  /etc/nginx and /etc/php-fpm config from ~/src/<project>/conf/
-        
+        $fDirNginx = new Sys_Dir( $this->env->getDir().'/'.$this->getPackageName().'/conf/nginx/'.$this->env->getName() );
+        if ( $fDirNginx->exists() ) {
+            // foreach nginx configuration fire for this environment, link it to nginx config
+            echo 'NGINX CONFIG FOLDER: '.$fDirNginx->getName()."\n";
+        } else {
+            echo 'NGINX CONFIG FOLDER NOT FOUND: '.$fDirNginx->getName()."\n";
+        }
+        $fDirPhpFpm = new Sys_Dir( $this->env->getDir().'/'.$this->getPackageName().'/conf/php-fpm/'.$this->env->getName() );
+        if ( $fDirPhpFpm->exists() ) {
+            // foreach nginx configuration fire for this environment, link it to nginx config
+            echo 'PHP-FPM CONFIG FOLDER: '.$fDirNginx->getName()."\n";
+        } else {
+            echo 'PHP-FPM CONFIG FOLDER NOT FOUND: '.$fDirNginx->getName()."\n";
+        }
     }
     
     /**
@@ -350,8 +363,10 @@ EOF;
 
         foreach( $arrDirs as $strMandatoryDir ) {
             $dir = new Sys_Dir( $strMandatoryDir );
-            Sys_Io::out( $dir->getName() );
-            if ( !$dir->exists() ) $dir->create();
+            if ( !$dir->exists() ) { 
+                Sys_Io::out( $dir->getName() );
+                $dir->create();
+            }
         }
         
         // creating apache aliases for static libraries
@@ -428,7 +443,8 @@ EOF;
             }
             
             // TODO: update version.txt file
-            // 'svn info $this->getPackageName().' | grep Revision | sed s/Revision:\ // > ~/htdocs/$strDestDir/cdn/version.txt
+            $strCmdVersion = 'svn info '.$this->getPackageName().' | grep Revision | sed s/Revision:\ // > ~/htdocs/'.$strDestDir.'/cdn/version.txt';
+            Sys_Io::out( $strCmdVersion );
         }
         
         if ( getenv('CWA_FRONTEND_RELOAD') != ''  ) {

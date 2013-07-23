@@ -482,7 +482,7 @@ EOF;
     
     public function updateCrontab()
     {
-        $fCrontab = $this->env->getPackageRoot().'/'.$this->getPackageName().'/conf/cron.d/'.$this->env->getName();
+        $fCrontab = new Sys_File( $this->env->getPackageRoot().'/'.$this->getPackageName().'/conf/cron.d/'.$this->env->getName() );
         if ( $fCrontab->exists() ) {
             Sys_Io::out( "updating cron from ".$fCrontab->getName() );    
             $strCmd = 'crontab '.$fCrontab->getName();

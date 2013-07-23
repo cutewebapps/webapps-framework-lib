@@ -157,7 +157,7 @@ $env->logPublish( 'Publish started '.date('Y-m-d H:i:s') );
 
 Sys_Io::out( "Seeking in ".$env->getSrcRoot() );
 $dir = new Sys_Dir( $env->getSrcRoot() );
-$arrProjectFolders = $dir->getDirs( "@project-(.+)@", false );
+$arrProjectFolders = $dir->getDirs( "@(project|ds)-(.+)@", false );
 // print_r( $arrProjectFolders ) ;
 
 $arrDeps     = array();

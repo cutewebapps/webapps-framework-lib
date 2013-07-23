@@ -1,6 +1,11 @@
 #!/usr/bin/php
 <?php
 
+date_default_timezone_set( "America/New_York" );
+set_time_limit( 0 );
+error_reporting( E_ALL );
+ini_set( "display_errors", 1 );
+
 class Cwa_Env 
 {
     /**
@@ -153,7 +158,7 @@ $env->logPublish( 'Publish started '.date('Y-m-d H:i:s') );
 Sys_Io::out( "Seeking in ".$env->getSrcRoot() );
 $dir = new Sys_Dir( $env->getSrcRoot() );
 $arrProjectFolders = $dir->getDirs( "@project-(.+)@", false );
-print_r( $arrProjectFolders ) ;
+// print_r( $arrProjectFolders ) ;
 
 $arrDeps     = array();
 // go to each project-*/control.json files
@@ -177,14 +182,17 @@ foreach ( $arrProjectFolders as $strProject ) {
     }
 }
 
-print_r( $arrDeps );
+// print_r( $arrDeps );
 
 foreach ( $arrDeps as $strPackage => $strSource ) {
     $dirPackage = new Sys_Dir( $env->getSrcRoot().'/'.$strPackage );
-
-    // if there is no folder, download (svn/git ) from $strSource 
-    // for each dependency 
-    // go to each and (svn update/git pull) dependencies
+    if ( !$dirPackage->exists() ) {
+        echo 'Installing '.$strPackage.'from '.$strSource."\n";
+        // if there is no folder, download (svn/git ) from $strSource 
+        if ( preg_match( '@\.git$@', $strSource )) {
+            Sys_Cmd::run( 'cd '.$env->getSrcRoot() .'; git clone '.$strSource );
+        }
+    }
 }
 
 // for each project

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [ "`whoami`" != "root" ]; then
+  echo "Must be root to run this script"
+  exit;
+fi
+
+service nginx reload
+
+if [ -f /etc/init.d/mysql ]; then
+    /etc/init.d/mysqld reload
+fi
+if [ -f /etc/init.d/php-fpm ]; then
+    /etc/init.d/php-fpm reload
+fi
+if [ -f /etc/init.d/php5-fpm ]; then
+    /etc/init.d/php5-fpm reload
+fi

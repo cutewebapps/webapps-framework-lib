@@ -38,6 +38,7 @@ class App_Update extends DBx_ReadWrite_Object
     protected $_strComponent;
     protected $_strOldVersion = '0.0.0';
     protected $_objPackage = null;
+    
     public static function getClassName() { return 'App_Update'; }
     protected function _getComponentName() { return $this->_strComponent; }
     protected function _getOldVersion() { return $this->_strOldVersion; }
@@ -51,8 +52,15 @@ class App_Update extends DBx_ReadWrite_Object
         $this->_strOldVersion = $this->_getPackageVersion( $strComponent );
         Sys_Io::out( 'Component: ' . $strComponent . ', old version: '.$this->_strOldVersion.' ', false );
 
-        $this->_objAdapterR = DBx_Registry::getInstance()->get( $strConnectionIndex )->getDbAdapterRead();
-        $this->_objAdapterW = DBx_Registry::getInstance()->get( $strConnectionIndex )->getDbAdapterWrite();
+        $this->_objAdapterR = null;
+        $this->_objAdapterW = null;
+        
+        if ( DBx_Registry::getInstance()->hasConnection( $strConnectionIndex )) {
+            $objConnection = DBx_Registry::getInstance()->get( $strConnectionIndex );
+            $this->_objAdapterR = $objConnection->getDbAdapterRead();
+            $this->_objAdapterW = $objConnection->getDbAdapterWrite();
+        }
+        
     }
     public function isVersionBelow($version)
     {
@@ -60,6 +68,7 @@ class App_Update extends DBx_ReadWrite_Object
         $version = preg_replace('/(\d)pr(\d?)/', '$1a$2', $version);
         return version_compare($version, strtolower( $this->_getOldVersion() )) > 0;
     }
+    
     public function save( $strNewVersion )
     {
         if ( $strNewVersion == $this->_getOldVersion() )
@@ -104,7 +113,8 @@ class App_Update extends DBx_ReadWrite_Object
         if ( Sys_Global::get( 'Environment') == '' )
             throw new App_Exception( 'Running patch interface without environment defined' );
 
-        
+        if ( ! DBx_Registry::getInstance()->hasConnection( $strConnectionIndex ))
+            return ;
         
         /* @var DBx_Adapter_Read */
         $objReadDb = DBx_Registry::getInstance()->get( $strConnectionIndex )->getDbAdapterRead();

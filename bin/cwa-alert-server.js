@@ -66,7 +66,7 @@ ServerThread = function( response, url, body ) {
 var port = 6789;
 http.createServer(function (req, res) {
 
-    // console.log( "URL: " + req.url );
+    console.log( "URL: " + req.url );
     
     var fullBody = '';
     req.on('data', function(chunk) {

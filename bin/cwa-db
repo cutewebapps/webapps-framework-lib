@@ -1,2 +1,60 @@
 #!/usr/bin/php
 <?php
+
+if ( count( $argv ) < 2 ) 
+	die( 'ERROR: usage: 2 arguments expected' );
+
+$strDb = $argv[1];
+$strUrl = $argv[2];
+
+echo shell_exec( 'mysql -u root -e "create database if not exists '.$strDb.' "' );
+
+// - - - - - - - - - - - - - - - - - - - - - - - - 
+// 1. Download file
+$strExtension = strtolower( pathinfo ( $strUrl, PATHINFO_EXTENSION  ) );
+$strOutputFile = $strDb ."." . $strExtension;
+
+if ( $strExtension != 'zip' && $strExtension != 'gz' && $strExtension != 'sql' )
+	die( 'ERROR: check file extension, SQL|GZ|ZIP expected' );
+
+
+
+
+$strLoader = 'aria2c --check-certificate=false';
+// in future: check the loader, there could be wget as an option
+echo $strLoader.' '.$strUrl."\n";
+
+if ( file_exists( $strOutputFile ))
+	unlink( $strOutputFile );
+
+echo shell_exec( $strLoader.' '.$strUrl." -o ".$strOutputFile );
+
+if ( !file_exists( $strOutputFile ))
+	die( "ERROR: file was not downloaded" );
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - 
+// 2. Unpack file if .zip or .gz
+if ( $strExtension == 'zip' ) {
+	echo 'unpacking zip...';
+	shell_exec( 'unzip '.$strOutputFile );
+
+	$strOutputFile = preg_replace( '@\.zip$@', '.sql', $strOutputFile );
+	if ( file_exists( $strOutputFile )) unlink( $strOutputFile );
+
+	die( 'ZIP...' );
+
+} else if ( $strExtension == 'gz' ) {
+	echo 'unpacking gz...';
+	shell_exec( 'gzip -d '.$strOutputFile );
+	if ( file_exists( $strOutputFile )) unlink( $strOutputFile );
+
+	$strOutputFile = preg_replace( '@\.gz$@', '', $strOutputFile );
+	// die( 'GZ...' );
+} // else no npacking,we have SQL
+
+// - - - - - - - - - - - - - - - - - - - - - - - - 
+// 3. Install mysql dump
+echo 'Installing mysql dump...';
+shell_exec( 'mysql -u root '.$strDb.' -e "\. '.$strOutputFile.' "' );
+// if ( file_exists( $strOutputFile )) unlink( $strOutputFile );

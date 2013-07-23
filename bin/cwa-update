@@ -191,6 +191,8 @@ foreach ( $arrDeps as $strPackage => $strSource ) {
         // if there is no folder, download (svn/git ) from $strSource 
         if ( preg_match( '@\.git$@', $strSource )) {
             Sys_Cmd::run( 'cd '.$env->getSrcRoot() .'; git clone '.$strSource );
+        } else if ( preg_match( '@svn\.$@', $strSource )) {
+            Sys_Cmd::run( 'cd '.$env->getSrcRoot() .'; svn checkout --non-interactive '.$strSource );
         }
     }
     if ( file_exists( $dirPackage->getName().'/control.json' )) {

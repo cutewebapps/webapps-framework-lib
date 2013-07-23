@@ -179,27 +179,33 @@ foreach ( $arrProjectFolders as $strProject ) {
                 $arrDeps[ $strName ] = $strSource;
             }
         }
-    }
+    } 
 }
 
 // print_r( $arrDeps );
-
 foreach ( $arrDeps as $strPackage => $strSource ) {
     $dirPackage = new Sys_Dir( $env->getSrcRoot().'/'.$strPackage );
     if ( !$dirPackage->exists() ) {
-        echo 'Installing '.$strPackage.'from '.$strSource."\n";
+
+        echo 'Installing '.$strPackage.' from '.$strSource."\n";
         // if there is no folder, download (svn/git ) from $strSource 
         if ( preg_match( '@\.git$@', $strSource )) {
             Sys_Cmd::run( 'cd '.$env->getSrcRoot() .'; git clone '.$strSource );
         }
     }
+    if ( file_exists( $dirPackage->getName().'/control.json' )) {
+        // do cwa-install
+        $strCmd = "cd ".$dirPackage->getName()."; php ".$env->getHome()."/bin/cwa-install";
+        echo $strCmd."\n";
+        Sys_Cmd::run( $strCmd );
+    }
 }
 
-// for each project
-    // do cwa-install if it was not installed
-
+// for each project do cwa-install if it was not installed
 foreach ( $arrProjectFolders as $strProject ) {
-     // Sys_Cmd::run( "cd $strProject; php ".$env->getHome()."/bin/cwa-install" );
+     $strCmd = "cd $strProject; php ".$env->getHome()."/bin/cwa-install";
+     echo $strCmd."\n";
+     Sys_Cmd::run( $strCmd );
 }
 
 $env->logPublish( 'Publish finished '.date('Y-m-d H:i:s') );

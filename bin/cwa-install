@@ -251,72 +251,19 @@ class Cwa_Package
         }        
     }    
     
-    /**
-     * TODO: create virtual host for nginx
-     * //- update version.txt file
-     * //- update crontab for current environment (if svn)
-     * 
-     * @return type
-     */
-    
-    public function createVirtualHosts()
+    protected function _prepareApacheVirtualHost( $objProps )
     {
-        // vhost
-        $config = $this->getConfig();
-        $strFrontend = getenv( 'CWA_FRONTEND' );
-        if ( $strFrontend == '' ) {
-            echo  "no frontend for virtual hosts (export CWA_FRONTEND=apache)"; return;
-        }
-        if ( $strFrontend != 'apache' ) {
-            echo  "unknown frontend for virtual hosts (export CWA_FRONTEND=apache)"; return;
-        }       
-        
-        $arrDirs = array(
-            $this->env->getVirtualHostsRoot(),
-            $this->env->getConfRoot(),
-            $this->env->getConfRoot().'/'.$strFrontend,
-        );
-        
-        if ( $strFrontend == 'apache' ) {
-            $arrDirs []= $this->env->getConfRoot().'/'.$strFrontend.'/conf.d';
-            $arrDirs []= $this->env->getConfRoot().'/'.$strFrontend.'/sites-available';
-        }
-
-        foreach( $arrDirs as $strMandatoryDir ) {
-            $dir = new Sys_Dir( $strMandatoryDir );
-            Sys_Io::out( $dir->getName() );
-            if ( !$dir->exists() ) $dir->create();
-        }
-        
-        
-        if ( is_object( $config->static ) ) {
-             $strAliasDir =  $this->env->getConfRoot().'/'.$strFrontend .'/conf.d';
-             foreach( $config->static as $strStaticDir ) {
-                 Sys_Io::out( 'creating alias /'.$strStaticDir.'/');
-                 
-                 $file = new Sys_File ( $strAliasDir.'/'.$strStaticDir.'.conf' );
-                 $file->save( "Alias /static/$strStaticDir/ " . $this->env->getStaticRoot() . "/$strStaticDir/ \n" );
-             }
-        }
-        
-        if ( empty( $config->vhosts ) ) return;
-        
-       
-        $arrHosts = $config->vhosts;
-        if ( !is_object( $config->vhosts ) ) $arrHosts = array( $config->vhosts );
+        $strFrontend = 'apache';
+        $strName = $objProps->name;
+        $strFullHost = $strName .'.'. trim( shell_exec( 'hostname' ) );
+        $strDashedHost = str_replace( '.', '_', $strName );
+        print "Preparing $strFrontend Virtual Host ".$strFullHost."\n";
 
         $strSitesAvailableDir =  $this->env->getConfRoot().'/'.$strFrontend .'/sites-available';
         $strIp = '*';
         $nServerPort = 80;
         if ( getenv('CWA_FRONTEND_PORT') != '' ) $nServerPort = getenv('CWA_FRONTEND_PORT');
 
-        foreach( $arrHosts as $objProps ) {
-            $strName = $objProps->name;
-            
-            $strFullHost = $strName .'.'. trim( shell_exec( 'hostname' ) );
-            $strDashedHost = str_replace( '.', '_', $strName );
-            print "Preparing Virtual Host ".$strFullHost."\n";
-            
             $strAvailableFile  = $strSitesAvailableDir.'/'.$strDashedHost.'.conf';
             
             $npmitk = "";
@@ -347,6 +294,83 @@ class Cwa_Package
 EOF;
             $file = new Sys_File ( $strAvailableFile );
             $file->save( $strVhostConfig );
+    }
+    
+    protected function _prepareNginxVirtualHost( $objProps )
+    {
+        $strFrontend = 'nginx';
+        $strName = $objProps->name;
+        $strFullHost = $strName .'.'. trim( shell_exec( 'hostname' ) );
+        $strDashedHost = str_replace( '.', '_', $strName );
+        print "Preparing $strFrontend Virtual Host ".$strFullHost."\n";
+
+        
+    }
+    
+    /**
+     * TODO: create virtual host for nginx
+     * //- update version.txt file
+     * //- update crontab for current environment (if svn)
+     * 
+     * @return type
+     */
+    
+    public function createVirtualHosts()
+    {
+        // vhost
+        $config = $this->getConfig();
+        $strFrontend = getenv( 'CWA_FRONTEND' );
+        if ( $strFrontend == '' ) {
+            echo  "no frontend for virtual hosts (export CWA_FRONTEND=apache)"; return;
+        }
+        if ( $strFrontend != 'apache' ) {
+            // echo  "unknown frontend for virtual hosts (export CWA_FRONTEND=apache)"; return;
+            $strFrontend = 'nginx';
+        }       
+        
+        $arrDirs = array(
+            $this->env->getVirtualHostsRoot(),
+            $this->env->getConfRoot(),
+            $this->env->getConfRoot().'/'.$strFrontend,
+        );
+        
+        if ( $strFrontend == 'apache' ) {
+            $arrDirs []= $this->env->getConfRoot().'/'.$strFrontend.'/conf.d';
+            $arrDirs []= $this->env->getConfRoot().'/'.$strFrontend.'/sites-available';
+        } else {
+            $arrDirs []= $this->env->getConfRoot().'/php-fpm';
+        }
+
+        foreach( $arrDirs as $strMandatoryDir ) {
+            $dir = new Sys_Dir( $strMandatoryDir );
+            Sys_Io::out( $dir->getName() );
+            if ( !$dir->exists() ) $dir->create();
+        }
+        
+        // creating apache aliases for static libraries
+        if ( $strFrontend == 'apache' && is_object( $config->static ) ) {
+             $strAliasDir =  $this->env->getConfRoot().'/'.$strFrontend .'/conf.d';
+             foreach( $config->static as $strStaticDir ) {
+                 Sys_Io::out( 'creating alias /'.$strStaticDir.'/');
+                 
+                 $file = new Sys_File ( $strAliasDir.'/'.$strStaticDir.'.conf' );
+                 $file->save( "Alias /static/$strStaticDir/ " . $this->env->getStaticRoot() . "/$strStaticDir/ \n" );
+             }
+        }
+        
+        if ( empty( $config->vhosts ) ) return;
+        
+        $arrHosts = $config->vhosts;
+        if ( !is_object( $config->vhosts ) ) $arrHosts = array( $config->vhosts );
+
+        foreach( $arrHosts as $objProps ) {
+            $strName = $objProps->name;
+            
+            if ( $strFrontend == 'apache' ) {
+                $this->_prepareApacheVirtualHost( $objProps );
+            } else {
+                $this->_prepareNginxVirtualHost( $objProps );
+            }
             
             $strDestDir = $this->env->getVirtualHostsRoot()."/".$strName;
             // link all directories in $strSrcDir to destination
@@ -395,6 +419,8 @@ EOF;
                     }
                 }
             }
+            
+            // TODO: update version.txt file
         }
         
         if ( getenv('CWA_FRONTEND_RELOAD') != ''  ) {

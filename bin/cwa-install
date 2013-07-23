@@ -312,7 +312,7 @@ EOF;
         print "Preparing $strFrontend Virtual Host ".$strName."\n";
 
         // TODO: link correct  /etc/nginx and /etc/php-fpm config from ~/src/<project>/conf/
-        $fDirNginx = new Sys_Dir( $this->env->getDir().'/'.$this->getPackageName().'/conf/nginx/'.$this->env->getName() );
+        $fDirNginx = new Sys_Dir( $this->getDir().'/'.$this->getPackageName().'/conf/nginx/'.$this->env->getName() );
         if ( $fDirNginx->exists() ) {
             // foreach nginx configuration fire for this environment, link it to nginx config
             echo 'NGINX CONFIG FOLDER: '.$fDirNginx->getName()."\n";

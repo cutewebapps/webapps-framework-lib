@@ -1,0 +1,197 @@
+#!/usr/bin/php
+<?php
+
+class Cwa_Env 
+{
+    /**
+     * @return string
+     */
+    public function getSystemUser() 
+    {
+        return trim( shell_exec( 'whoami') );
+    }
+    /**
+     * @return string
+     */
+    public function getSystemUserGroup() 
+    {
+        return trim( shell_exec( 'whoami') );
+    }
+    /**
+     * Get root path for CWA installation
+     * @return string
+     */
+    public function getHome() 
+    { 
+        if ( getenv( 'CWA_HOME' ) ) 
+            return str_replace( "\\", "/", trim( getenv( 'CWA_HOME' )) );     
+        if ( strtolower( substr( PHP_OS,0,3 )) == "wn")
+            die( 'Please setup CWA_HOME environment variable' );
+        
+        return '/home/'.$this->getSystemUser();
+    }
+    /**
+     * @return string
+     */
+    public function getClassRoot() 
+    { 
+        if ( getenv( 'CWA_CLASS_ROOT' ) ) return getenv( 'CWA_CLASS_ROOT'); 
+        return $this->getHome().'/classes';
+    }
+    /**
+     * @return string
+     */
+    public function getStaticRoot() 
+    { 
+        if ( getenv( 'CWA_STATIC_ROOT' ) ) return getenv( 'CWA_STATIC_ROOT'); 
+        return $this->getHome().'/static';
+    }
+    /**
+     * @return string
+     */
+    public function getPackageRoot() 
+    { 
+        if ( getenv( 'CWA_PKG_ROOT' ) ) return getenv( 'CWA_PKG_ROOT'); 
+        return $this->getHome().'/log/package';
+    }
+    /**
+     * @return string
+     */
+    public function getConfRoot() 
+    { 
+        if ( getenv( 'CWA_CONF_ROOT' ) ) return getenv( 'CWA_CONF_ROOT'); 
+        return $this->getHome().'/etc';
+    }    
+
+    /**
+     * @return string
+     */
+    public function getSrcRoot() 
+    { 
+        if ( getenv( 'CWA_CONF_ROOT' ) ) return getenv( 'CWA_CONF_ROOT'); 
+        return $this->getHome().'/src';
+    }    
+    /**
+     * @return string
+     */
+    public function getBinRoot() 
+    { 
+        if ( getenv( 'CWA_BIN_ROOT' ) ) return getenv( 'CWA_BIN_ROOT'); 
+        return $this->getHome().'/bin';
+    }        
+    /**
+     * @return string
+     */
+    public function getDataRoot() 
+    { 
+        if ( getenv( 'CWA_DATA_ROOT' ) ) return getenv( 'CWA_DATA_ROOT'); 
+        return $this->getHome().'/data';
+    }    
+    /**
+     * @return string
+     */
+    public function getLibRoot() 
+    { 
+        if ( getenv( 'CWA_LIB_ROOT' ) ) return getenv( 'CWA_LIB_ROOT'); 
+        return $this->getHome().'/lib';
+    }        
+    /**
+     * @return string
+     */
+    public function getLogRoot() 
+    { 
+        if ( getenv( 'CWA_LOG_ROOT' ) ) return getenv( 'CWA_LOG_ROOT'); 
+        return $this->getHome().'/log';
+    }          
+    /**
+     * @return string
+     */
+    public function getVirtualHostsRoot() 
+    { 
+        if ( getenv( 'CWA_VHOST_ROOT' ) ) return getenv( 'CWA_VHOST_ROOT'); 
+        return $this->getHome().'/htdocs';
+    }
+    /**
+     * @return boolean
+     */
+    public function hasFramework()
+    {
+        return file_exists( $this->getClassRoot().'/Sys/model/Loader.php' );
+    }
+    /**
+     * launch framework autoloader
+     * @return void
+     */
+    public function init()
+    {
+        define( 'CWA_DIR_CLASSES', $this->getClassRoot() );
+        require_once $this->getClassRoot().'/Sys/model/Loader.php';
+    }
+    
+    protected $_log = '';
+    public function logPublish( $strContent ) 
+    {
+        if ( $this->_log == '' )
+        {
+            if ( !is_dir( $this->getLogRoot().'/publish') )
+                mkdir( $this->getLogRoot().'/publish' );
+            
+            $this->_log = $this->getLogRoot().'/publish/'.date('Y-m-d_H-i-s').'.log';
+        }
+        $file = new Sys_File( $this->_log );
+        $file->append( $strContent ."\n" );
+    }
+}
+
+$env = new Cwa_Env();
+if ( $env->getSystemUser()  == "root" )
+    die( "ERROR: this action is not for root" );
+
+$env->init();
+$env->logPublish( 'Publish started '.date('Y-m-d H:i:s') );
+
+Sys_Io::out( "Seeking in ".$env->getSrcRoot() );
+$dir = new Sys_Dir( $env->getSrcRoot() );
+$arrProjectFolders = $dir->getDirs( "@project-(.+)@", false );
+print_r( $arrProjectFolders ) ;
+
+$arrDeps     = array();
+// go to each project-*/control.json files
+foreach ( $arrProjectFolders as $strProject ) {
+    Sys_Io::out( basename( $strProject ) );
+    
+    // 1) svn update | git pull 
+    if ( is_dir( $strProject.'/.svn') ) 
+        Sys_Cmd::run( "cd $strProject; svn update --force --non-interactive .", '', true );
+    else if ( is_dir( $strProject.'/.git') )
+        Sys_Cmd::run( "cd $strProject; git pull", '', true );
+
+    // 2) collect dependencies to be updated
+    if ( file_exists( $strProject.'/control.json' ) ) {
+        $arrJson = json_decode( file_get_contents( $strProject.'/control.json' ), true );
+        if ( isset( $arrJson['source'] )) {
+            foreach ( $arrJson['source'] as $strName => $strSource ) {
+                $arrDeps[ $strName ] = $strSource;
+            }
+        }
+    }
+}
+
+print_r( $arrDeps );
+
+foreach ( $arrDeps as $strPackage => $strSource ) {
+    $dirPackage = new Sys_Dir( $env->getSrcRoot().'/'.$strPackage );
+
+    // if there is no folder, download (svn/git ) from $strSource 
+    // for each dependency 
+    // go to each and (svn update/git pull) dependencies
+}
+
+// for each project
+    // do cwa-install if it was not installed
+
+foreach ( $arrProjectFolders as $strProject ) {
+     // Sys_Cmd::run( "cd $strProject; php ".$env->getHome()."/bin/cwa-install" );
+}
+
+$env->logPublish( 'Publish finished '.date('Y-m-d H:i:s') );

@@ -207,9 +207,9 @@ class Cwa_Package
         //echo 'link '.$src.' to '.$strDir."\n";
         $strCmd = str_replace("\\", "/", 'ln -s '.$src.' '.$strDir);
         echo 'LINK: ' . $strCmd."\n";
-        if ( ! is_dir( $src ) || strtoupper(substr( PHP_OS,0,3 )) != "WIN" ) {
-            Sys_Cmd::run( $strCmd );
-        } 
+        //if ( ! is_dir( $src ) || strtoupper(substr( PHP_OS,0,3 )) != "WIN" ) {
+        //    Sys_Cmd::run( $strCmd );
+        //} 
     }
     
     /**
@@ -251,6 +251,14 @@ class Cwa_Package
         }        
     }    
     
+    /**
+     * TODO: create virtual host for nginx
+     * //- update version.txt file
+     * //- update crontab for current environment (if svn)
+     * 
+     * @return type
+     */
+    
     public function createVirtualHosts()
     {
         // vhost
@@ -267,9 +275,12 @@ class Cwa_Package
             $this->env->getVirtualHostsRoot(),
             $this->env->getConfRoot(),
             $this->env->getConfRoot().'/'.$strFrontend,
-            $this->env->getConfRoot().'/'.$strFrontend.'/conf.d',
-            $this->env->getConfRoot().'/'.$strFrontend.'/sites-available'
         );
+        
+        if ( $strFrontend == 'apache' ) {
+            $arrDirs []= $this->env->getConfRoot().'/'.$strFrontend.'/conf.d';
+            $arrDirs []= $this->env->getConfRoot().'/'.$strFrontend.'/sites-available';
+        }
 
         foreach( $arrDirs as $strMandatoryDir ) {
             $dir = new Sys_Dir( $strMandatoryDir );
@@ -287,7 +298,6 @@ class Cwa_Package
                  $file->save( "Alias /static/$strStaticDir/ " . $this->env->getStaticRoot() . "/$strStaticDir/ \n" );
              }
         }
-        
         
         if ( empty( $config->vhosts ) ) return;
         

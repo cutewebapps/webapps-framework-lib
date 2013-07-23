@@ -112,15 +112,18 @@ class Sys_Dir
     
     public function getDirs( $strRegex = '' ) {
         $h = opendir( $this->getName() );
-        $arrInner = array();
+        $rz = array(); // collecting result
         while( $h && $pn = readdir( $h ) ) 
             if ( substr( $pn, 0, 1 ) != '.' ) {
                 
                 $strFull = $this->getName() . '/' . $pn;
-                if ( is_dir( $strFull ) )
-                    $arrInner[] = $strFull;
+                // Sys_Io::out( $strFull );
+                
+                if ( is_dir( $strFull ) && ( $strRegex == '' || preg_match( $strRegex, $pn ) ) ) { 
+                    $rz [] = $strFull;
+                }
             }
         if ( $h ) closedir( $h );
-        return $arrInner;        
+        return $rz;        
     }
 }

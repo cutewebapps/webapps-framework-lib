@@ -211,7 +211,7 @@ class Cwa_Package
     protected function symLink( $src, $strDir )
     {
         //echo 'link '.$src.' to '.$strDir."\n";
-        $strCmd = str_replace("\\", "/", 'ln -s '.$src.' '.$strDir);
+        $strCmd = str_replace("\\", "/", 'ln -sf '.$src.' '.$strDir);
         echo 'LINK: ' . $strCmd."\n";
         if ( ! is_dir( $src ) || strtoupper(substr( PHP_OS,0,3 )) != "WIN" ) {
             Sys_Cmd::run( $strCmd );
@@ -243,7 +243,7 @@ class Cwa_Package
                 foreach( $arrDirs as $strDir ) {
                     $strDest = $strDestFolder.'/'.basename( $strDir );
                     if ( !is_dir( $strDest )) {
-                        $this->symLink( $strDest, $strDir );
+                        $this->symLink( $strDir, $strDest );
                     }
                 }
                 // link files
@@ -251,7 +251,7 @@ class Cwa_Package
                 foreach( $arrFiles as $strFile ) {
                     $strDest = $strDestFolder.'/'.basename( $strFile );
                     if ( !file_exists( $strDest )) {
-                        $this->symLink( $strDest, $strDir );
+                        $this->symLink( $strFile, $strDest );
                     }
                 }
             }
@@ -311,18 +311,24 @@ EOF;
         //$strDashedHost = str_replace( '.', '_', $strName );
         print "Preparing $strFrontend Virtual Host ".$strName."\n";
 
-        // TODO: link correct  /etc/nginx and /etc/php-fpm config from ~/src/<project>/conf/
-        $fDirNginx = new Sys_Dir( $this->getDir().'/'.$this->getPackageName().'/conf/nginx/'.$this->env->getName() );
+        // link correct  /etc/nginx and /etc/php-fpm config from ~/src/<project>/conf/
+        $fDirNginx = new Sys_Dir( $this->getDir().'/conf/nginx/'.$this->env->getName() );
         if ( $fDirNginx->exists() ) {
             // foreach nginx configuration fire for this environment, link it to nginx config
             echo 'NGINX CONFIG FOLDER: '.$fDirNginx->getName()."\n";
+            foreach( $fDirNginx->getFiles( '@\.conf$@' ) as $strFileToLink ) {
+		$this->symLink( $strFileToLink, $this->env->getConfRoot().'/nginx/'.basename( $strFileToLink ) );
+	    }
         } else {
             echo 'NGINX CONFIG FOLDER NOT FOUND: '.$fDirNginx->getName()."\n";
         }
-        $fDirPhpFpm = new Sys_Dir( $this->getDir().'/'.$this->getPackageName().'/conf/php-fpm/'.$this->env->getName() );
+        $fDirPhpFpm = new Sys_Dir( $this->getDir().'/conf/php-fpm/'.$this->env->getName() );
         if ( $fDirPhpFpm->exists() ) {
             // foreach nginx configuration fire for this environment, link it to nginx config
             echo 'PHP-FPM CONFIG FOLDER: '.$fDirNginx->getName()."\n";
+            foreach( $fDirPhpFpm->getFiles( '@\.conf$@' ) as $strFileToLink ) {
+		$this->symLink( $strFileToLink, $this->env->getConfRoot().'/php-fpm/'.basename( $strFileToLink ) );
+	    }
         } else {
             echo 'PHP-FPM CONFIG FOLDER NOT FOUND: '.$fDirNginx->getName()."\n";
         }

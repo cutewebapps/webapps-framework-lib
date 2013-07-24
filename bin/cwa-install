@@ -322,7 +322,7 @@ EOF;
         } else {
             echo 'NGINX CONFIG FOLDER NOT FOUND: '.$fDirNginx->getName()."\n";
         }
-        $fFilePhpFpm = new Sys_File( $this->getDir().'/conf/php-fpm/'.$this->env->getSystemUser() );
+        $fFilePhpFpm = new Sys_File( $this->getDir().'/conf/php-fpm/'.$this->env->getSystemUser().'.conf' );
         if ( $fFilePhpFpm->exists() ) {
 
             // sylink php-fpm pool

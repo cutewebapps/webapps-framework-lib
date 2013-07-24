@@ -322,15 +322,15 @@ EOF;
         } else {
             echo 'NGINX CONFIG FOLDER NOT FOUND: '.$fDirNginx->getName()."\n";
         }
-        $fDirPhpFpm = new Sys_Dir( $this->getDir().'/conf/php-fpm/'.$this->env->getName() );
-        if ( $fDirPhpFpm->exists() ) {
-            // foreach nginx configuration fire for this environment, link it to nginx config
-            echo 'PHP-FPM CONFIG FOLDER: '.$fDirNginx->getName()."\n";
-            foreach( $fDirPhpFpm->getFiles( '@\.conf$@' ) as $strFileToLink ) {
-		$this->symLink( $strFileToLink, $this->env->getConfRoot().'/php-fpm/'.basename( $strFileToLink ) );
-	    }
+        $fFilePhpFpm = new Sys_File( $this->getDir().'/conf/php-fpm/'.$this->env->getSystemUser() );
+        if ( $fFilePhpFpm->exists() ) {
+
+            // sylink php-fpm pool
+            echo 'PHP-FPM OOL: '.$fFilePhpFpm->getName()."\n";
+            $this->symLink( $fFilePhpFpm->getName(), $this->env->getConfRoot().'/php-fpm/'.basename( $fFilePhpFpm->getName() ) );
+	    
         } else {
-            echo 'PHP-FPM CONFIG FOLDER NOT FOUND: '.$fDirNginx->getName()."\n";
+            echo 'PHP-FPM POOL NOT FOUND: '.$fFilePhpFpm->getName()."\n";
         }
     }
     

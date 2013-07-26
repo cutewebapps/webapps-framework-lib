@@ -182,6 +182,18 @@ class DBx_Registry
         }
         return $this->_arrDbHandlers[ $strConnectionName ];
     }
+    /**
+     * 
+     * @return array of DBx_ReadWrite_Object
+     */
+    public function getConnected()
+    {
+        $arrConn = array();
+        foreach ( $this->_arrDbHandlers as $conn ) {
+            if ( $conn->isConnected() ) { $arrConn[] = $conn; }
+        }
+        return $arrConn;
+    }
 
     /**
      * get whether connection is configured

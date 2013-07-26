@@ -833,6 +833,30 @@ class App_Dispatcher
                     $strBottom .= ' Build #'. file_get_contents( $strVersionFile ) .' from '.date('m/d/Y H:i', filemtime( $strVersionFile ) ).'';
                 }
             }
+            
+            if ( App_Application::getInstance()->getConfig()->display_mysql_stat ) {
+                /* @var DBx_Adapter_Read */
+                $arrConns = DBx_Registry::getInstance()->getConnected();
+                if ( count( $arrConns ) > 0 ) {
+                    if ( count( $arrConns ) > 1 ) 
+                        $strBottom .= ' '.count( $arrConns ).' db connection';
+                    foreach( $arrConns as $conn ) {
+                        if ( $conn->canRead() ) {
+                            $arrSelect = $conn->getDbAdapterRead()->queryRead( 'SHOW STATUS LIKE \'com_select\'' )->fetchAll();
+                            $strBottom .= ' select: '.print_r( $arrSelect[0]['Value'], true );
+                        }
+                        if ( $conn->canWrite() ) {
+                            $arrWrite = array( 'update', 'insert', 'delete' );
+                            foreach( $arrWrite as $strSqlAction ) {
+                                $arrSelect = $conn->getDbAdapterRead()->queryRead( 'SHOW STATUS LIKE \'com_'.$strSqlAction.'\'' )->fetchAll();
+                                $strBottom .= ' '.$strSqlAction.': '.print_r( $arrSelect[0]['Value'], true);
+                            }
+                        }
+                    }
+                    
+                }
+                
+            }
         }
         if ( $bAutoAppend && $strBottom != '' ) {
             echo '<div style="margin-top:10px;font-size:10px;text-align:center">'.$strBottom.'</div>';

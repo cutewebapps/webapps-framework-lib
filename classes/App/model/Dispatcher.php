@@ -846,7 +846,12 @@ class App_Dispatcher
                             $strBottom .= ' '.print_r( $arrSelect[0]['Value'], true ).' selects';
                             
                             $arrQCache = $conn->getDbAdapterRead()->queryRead( 'SHOW STATUS LIKE \'Qcache_hits\'' )->fetchAll();
-                            $strBottom .= ' '.print_r( $arrQCache[0]['Value'], true ).' from cache';
+                            if ( $arrQCache[0]['Value'] > 0 )
+                                $strBottom .= ' '.print_r( $arrQCache[0]['Value'], true ).' cache hits';
+                            
+                            $arrFullJoin = $conn->getDbAdapterRead()->queryRead( 'SHOW STATUS LIKE \'Select_full_join\'' )->fetchAll();
+                            if ( $arrFullJoin[0]['Value'] > 0 )
+                                $strBottom .= ' '.print_r( $arrFullJoin[0]['Value'], true ).' full joins';
                         }
                         // if ( $conn->canWrite() ) {
                         //    $arrWrite = array( 'update', 'insert', 'delete' );

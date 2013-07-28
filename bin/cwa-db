@@ -57,4 +57,4 @@ if ( $strExtension == 'zip' ) {
 // 3. Install mysql dump
 echo 'Installing mysql dump...';
 shell_exec( 'mysql -u root '.$strDb.' -e "\. '.$strOutputFile.' "' );
-// if ( file_exists( $strOutputFile )) unlink( $strOutputFile );
+if ( file_exists( $strOutputFile )) unlink( $strOutputFile );

@@ -315,29 +315,26 @@ EOF;
         $fDirNginx = new Sys_Dir( $this->getDir().'/conf/nginx/'.$this->env->getName() );
         if ( $fDirNginx->exists() ) {
             // foreach nginx configuration fire for this environment, link it to nginx config
-            echo 'NGINX config folder: '.$fDirNginx->getName()."\n";
+            //echo 'NGINX config folder: '.$fDirNginx->getName()."\n";
             foreach( $fDirNginx->getFiles( '@\.conf$@' ) as $strFileToLink ) {
 		$this->symLink( $strFileToLink, $this->env->getConfRoot().'/nginx/'.basename( $strFileToLink ) );
 	    }
         } else {
-            echo 'NGINX config folder not found: '.$fDirNginx->getName()."\n";
+            //echo 'NGINX config folder not found: '.$fDirNginx->getName()."\n";
         }
         $fFilePhpFpm = new Sys_File( $this->getDir().'/conf/php-fpm/'.$this->env->getSystemUser().'.conf' );
         if ( $fFilePhpFpm->exists() ) {
 
             // sylink php-fpm pool
-            echo 'PHP-FPM pool found: '.$fFilePhpFpm->getName()."\n";
+            //echo 'PHP-FPM pool found: '.$fFilePhpFpm->getName()."\n";
             $this->symLink( $fFilePhpFpm->getName(), $this->env->getConfRoot().'/php-fpm/'.basename( $fFilePhpFpm->getName() ) );
 	    
         } else {
-            echo 'PHP-FPM pool not found: '.$fFilePhpFpm->getName()."\n";
+            //echo 'PHP-FPM pool not found: '.$fFilePhpFpm->getName()."\n";
         }
     }
     
     /**
-     * TODO: create virtual host for nginx
-     * //- update version.txt file
-     * 
      * @return type
      */
     
@@ -448,9 +445,19 @@ EOF;
                 }
             }
             
-            // TODO: update version.txt file
-            $strCmdVersion = 'svn info '.$this->getPackageName().' | grep Revision | sed s/Revision:\ // > ~/htdocs/'.$strDestDir.'/cdn/version.txt';
-            Sys_Io::out( $strCmdVersion );
+            // update version.txt file
+            $strSvnInfoOut = Sys_Cmd::run( 'svn info '.$this->getPackageName(), '', false );
+            foreach ( explode( "\n", $strSvnInfoOut ) as $strLine ) {
+                if ( preg_match( "@revision: (\d+)\s*$@i", $strLine, $arrMatches  ) ) {
+                    $nVersion = $arrMatches[1];
+                    Sys_Io::out( 'version saved from svn revision: '. $nVersion );
+                    $fVersion = new Sys_File( $strDestDir.'/cdn/version.txt' );
+                    $fVersion->save( $nVersion );
+                    break;
+                }
+            }
+            
+            
         }
         
         if ( getenv('CWA_FRONTEND_RELOAD') != ''  ) {

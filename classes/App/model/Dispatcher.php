@@ -839,19 +839,22 @@ class App_Dispatcher
                 $arrConns = DBx_Registry::getInstance()->getConnected();
                 if ( count( $arrConns ) > 0 ) {
                     if ( count( $arrConns ) > 1 ) 
-                        $strBottom .= ' '.count( $arrConns ).' db connection';
+                        $strBottom .= ' '.count( $arrConns ).' db connections';
                     foreach( $arrConns as $conn ) {
                         if ( $conn->canRead() ) {
                             $arrSelect = $conn->getDbAdapterRead()->queryRead( 'SHOW STATUS LIKE \'com_select\'' )->fetchAll();
-                            $strBottom .= ' select: '.print_r( $arrSelect[0]['Value'], true );
+                            $strBottom .= print_r( $arrSelect[0]['Value'], true ).' selects';
+                            
+                            $arrQCache = $conn->getDbAdapterRead()->queryRead( 'SHOW STATUS LIKE \'qcache_hists\'' )->fetchAll();
+                            $strBottom .= print_r( $arrQCache[0]['Value'], true ).' from cache';
                         }
-                        if ( $conn->canWrite() ) {
-                            $arrWrite = array( 'update', 'insert', 'delete' );
-                            foreach( $arrWrite as $strSqlAction ) {
-                                $arrSelect = $conn->getDbAdapterRead()->queryRead( 'SHOW STATUS LIKE \'com_'.$strSqlAction.'\'' )->fetchAll();
-                                $strBottom .= ' '.$strSqlAction.': '.print_r( $arrSelect[0]['Value'], true);
-                            }
-                        }
+                        // if ( $conn->canWrite() ) {
+                        //    $arrWrite = array( 'update', 'insert', 'delete' );
+                        //    foreach( $arrWrite as $strSqlAction ) {
+                        //        $arrSelect = $conn->getDbAdapterRead()->queryRead( 'SHOW STATUS LIKE \'com_'.$strSqlAction.'\'' )->fetchAll();
+                        //        $strBottom .= ' '.$strSqlAction.': '.print_r( $arrSelect[0]['Value'], true);
+                        //    }
+                        // }
                     }
                     
                 }

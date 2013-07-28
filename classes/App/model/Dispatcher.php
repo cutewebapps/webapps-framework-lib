@@ -843,10 +843,10 @@ class App_Dispatcher
                     foreach( $arrConns as $conn ) {
                         if ( $conn->canRead() ) {
                             $arrSelect = $conn->getDbAdapterRead()->queryRead( 'SHOW STATUS LIKE \'com_select\'' )->fetchAll();
-                            $strBottom .= print_r( $arrSelect[0]['Value'], true ).' selects';
+                            $strBottom .= ' '.print_r( $arrSelect[0]['Value'], true ).' selects';
                             
-                            $arrQCache = $conn->getDbAdapterRead()->queryRead( 'SHOW STATUS LIKE \'qcache_hists\'' )->fetchAll();
-                            $strBottom .= print_r( $arrQCache[0]['Value'], true ).' from cache';
+                            $arrQCache = $conn->getDbAdapterRead()->queryRead( 'SHOW STATUS LIKE \'Qcache_hits\'' )->fetchAll();
+                            $strBottom .= ' '.print_r( $arrQCache[0]['Value'], true ).' from cache';
                         }
                         // if ( $conn->canWrite() ) {
                         //    $arrWrite = array( 'update', 'insert', 'delete' );

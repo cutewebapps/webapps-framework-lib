@@ -394,7 +394,32 @@ EOF;
             if ( $strFrontend == 'apache' ) {
                 $this->_prepareApacheVirtualHost( $objProps );
             } else {
+                
+                
                 $this->_prepareNginxVirtualHost( $objProps );
+                
+                // update version.txt file
+                if ( is_dir( $this->getDir().'/.svn' )) {
+                    $strSvnInfoOut = Sys_Cmd::run( 'svn info '.$this->getDir(), '', false );
+                    // Sys_Io::out( $strSvnInfoOut );
+                    foreach ( explode( "\n", $strSvnInfoOut ) as $strLine ) {
+                        if ( preg_match( "@revision: (\d+)\s*$@i", $strLine, $arrMatches  ) ) {
+                            $nVersion = $arrMatches[1];
+                            Sys_Io::out( 'version saved from svn revision: '. $nVersion );
+                            $fVersion = new Sys_File( $strDestDir.'/cdn/version.txt' );
+                            $fVersion->save( $nVersion );
+                            break;
+                        }
+                    }
+                } else if ( is_dir( $this->getDir().'/.git' )) {
+                    $strGitRevision = trim( Sys_Cmd::run( 'git rev-parse HEAD', '', false ));
+                    if ( $strGitRevision != '' ) {
+                        Sys_Io::out( 'version saved from git head revision: '. $strGitRevision );
+                        $fVersion = new Sys_File( $strDestDir.'/cdn/version.txt' );
+                        $fVersion->save( $nVersion );
+                    }    
+                    break;
+                }                
             }
             
             $strDestDir = $this->env->getVirtualHostsRoot()."/".$strName;
@@ -445,19 +470,6 @@ EOF;
                 }
             }
             
-            // update version.txt file
-            $strSvnInfoOut = Sys_Cmd::run( 'svn info '.$this->getPackageName(), '', false );
-            foreach ( explode( "\n", $strSvnInfoOut ) as $strLine ) {
-                if ( preg_match( "@revision: (\d+)\s*$@i", $strLine, $arrMatches  ) ) {
-                    $nVersion = $arrMatches[1];
-                    Sys_Io::out( 'version saved from svn revision: '. $nVersion );
-                    $fVersion = new Sys_File( $strDestDir.'/cdn/version.txt' );
-                    $fVersion->save( $nVersion );
-                    break;
-                }
-            }
-            
-            
         }
         
         if ( getenv('CWA_FRONTEND_RELOAD') != ''  ) {
@@ -495,11 +507,15 @@ EOF;
     
     public function updateCrontab()
     {
-        $fCrontab = new Sys_File( $this->env->getPackageRoot().'/'.$this->getPackageName().'/conf/cron.d/'.$this->env->getName() );
-        if ( $fCrontab->exists() ) {
-            Sys_Io::out( "updating cron from ".$fCrontab->getName() );    
-            $strCmd = 'crontab '.$fCrontab->getName();
-            Sys_Cmd::run( $strCmd );
+        if ( strtoupper( substr( PHP_OS, 0, 3 )) != 'WIN' ) {
+            $strCronFile = $this->getDir().'/conf/cron.d/'.$this->env->getName();
+            // Sys_Io::out( 'Cron file: '. $strCronFile );
+            $fCrontab = new Sys_File( $strCronFile );
+            if ( $fCrontab->exists() ) {
+                Sys_Io::out( 'Cron file: '. $strCronFile );
+                $strCmd = 'crontab '.$fCrontab->getName();
+                Sys_Cmd::run( $strCmd, '', false  );
+            }
         }
     }
     
@@ -521,13 +537,13 @@ EOF;
 $pkg = new Cwa_Package();
 
 // checking package dependencies
-$pkg->checkDependencies();
+//$pkg->checkDependencies();
 // link classes and static
-$pkg->linkContent();
+//$pkg->linkContent();
 // prepare files for virtual host and apache configuration
-$pkg->createVirtualHosts();
+//$pkg->createVirtualHosts();
 // install typical database
-$pkg->createDatabase();
+//$pkg->createDatabase();
 $pkg->updateCrontab();
 // save version information
 $pkg->save();

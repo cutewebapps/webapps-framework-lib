@@ -1,23 +1,21 @@
 <?php
 
-class DBx_Profiler_WriteLog extends DBx_Profiler
+class DBx_Profiler_ReadLog extends DBx_Profiler
 {
     public function __construct()
     {
         parent::__construct();
-        $this->setFilterQueryType ( DBx_Profiler::INSERT |
-                                    DBx_Profiler::UPDATE | 
-                                    DBx_Profiler::DELETE );
+        $this->setFilterQueryType ( DBx_Profiler::SELECT );
     }
     
     public function queryEnd($queryId)
     {
         $result = parent::queryEnd( $queryId );
-        $strLogFile  = App_Application::getInstance()->getConfig()->dbwrite_log;
+        $strLogFile  = App_Application::getInstance()->getConfig()->dbread_log;
         
         if ( $strLogFile && isset( $this->_queryProfiles[$queryId] )) {
             $qp = $this->_queryProfiles[$queryId];
-            // Sys_Debug::dump( $qp );
+            //Sys_Debug::dump( $qp );
             
             $strIp = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'LOCAL';
             // Sys_Debug::dump( $qp );

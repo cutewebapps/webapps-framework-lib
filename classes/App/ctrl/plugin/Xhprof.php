@@ -13,12 +13,26 @@ class App_Xhprof_CtrlPlugin extends App_Dispatcher_CtrlPlugin
         
         return true;
     }
+    
+    /**
+     * Sort by descending wall time function
+     * 
+     * @param array $v1
+     * @param array $v2
+     * @return integer
+     */
+    public static function sortByWallTime( $v1, $v2 )
+    {
+        return ($v1['wt'] - $v2['wt']);
+    }
 
     public function postDispatch()
     {
         $bEnabled = App_Application::getInstance()->getConfig()->xhprof;
         if ( $bEnabled ) {
             $xhprof_data = xhprof_disable();
+            uasort( $xhprof_data, array( self, 'sortByWallTime' ) );
+            
             // ct=1 wt=18(wall time) cpu=0 mu=5472 (memory usage) pmu=4720 (peak memory usage)
             
             $strId = date('His').'~'.mt_rand(10000,99999);

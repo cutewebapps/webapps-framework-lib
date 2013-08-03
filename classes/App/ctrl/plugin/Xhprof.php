@@ -23,7 +23,7 @@ class App_Xhprof_CtrlPlugin extends App_Dispatcher_CtrlPlugin
      */
     public static function sortByWallTime( $v1, $v2 )
     {
-        return ($v1['wt'] - $v2['wt']);
+        return ($v2['wt'] - $v1['wt']);
     }
     
     public function postDispatch()

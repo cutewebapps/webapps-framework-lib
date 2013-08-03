@@ -19,8 +19,14 @@ class App_Xhprof_CtrlPlugin extends App_Dispatcher_CtrlPlugin
         $bEnabled = App_Application::getInstance()->getConfig()->xhprof;
         if ( $bEnabled ) {
             $xhprof_data = xhprof_disable();
+            // ct=1 wt=18(wall time) cpu=0 mu=5472 (memory usage) pmu=4720 (peak memory usage)
             
-            $strId = date('His').'.'.mt_rand(10000,99999);
+            $strId = date('His').'~'.mt_rand(10000,99999);
+            if ( isset( $_SERVER['REQUEST_URI'] ) )
+                $strId .= '~'.urlencode( $_SERVER['REQUEST_URI'] );
+            if ( isset( $_SERVER['REMOTE_ADDR'] ) )
+                $strId .= '~'.$_SERVER['REMOTE_ADDR'];
+                
             $dir = new Sys_Dir( App_Application::getInstance()->getConfig()->xhprof.'/'.date('Ymd') );
             if ( !$dir->exists() ) $dir->create( '', true );
                 
@@ -29,7 +35,7 @@ class App_Xhprof_CtrlPlugin extends App_Dispatcher_CtrlPlugin
             foreach( $xhprof_data as $key => $arrStat ) {
                 $arrColumns = array( $key );
                 foreach ( $arrStat as $k => $v ) $arrColumns[] = $k.'='.$v;
-                $strOut .= implode( "", $arrColumns ) . "\n";
+                $strOut .= implode( " ", $arrColumns ) . "\n";
             }
             $debugFile->save( $strOut );
         }

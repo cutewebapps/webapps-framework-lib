@@ -5,9 +5,9 @@ class App_Xhprof_CtrlPlugin extends App_Dispatcher_CtrlPlugin
  
     public function preDispatch()
     {
-        $bEnabled = App_Application::getInstance()->config->xhprof;
+        $bEnabled = App_Application::getInstance()->getConfig()->xhprof;
         if ( $bEnabled ) {
-            ini_set( 'xhprof.output_dir', App_Application::getInstance()->config->xhprof );
+            ini_set( 'xhprof.output_dir', App_Application::getInstance()->getConfig()->xhprof );
             xhprof_enable(XHPROF_FLAGS_CPU + XHPROF_FLAGS_MEMORY);
         }
         

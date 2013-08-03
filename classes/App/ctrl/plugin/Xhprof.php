@@ -19,6 +19,20 @@ class App_Xhprof_CtrlPlugin extends App_Dispatcher_CtrlPlugin
         $bEnabled = App_Application::getInstance()->config->xhprof;
         if ( $bEnabled ) {
             $xhprof_data = xhprof_disable();
+            
+            $strId = date('His').'.'.mt_rand(10000,99999);
+            $dir = new Sys_Dir( App_Application::getInstance()->config->xhprof.'/'.date('Ymd') );
+            if ( !$dir->exists() ) $dir->create( '', true );
+                
+            $debugFile = new Sys_File( $dir.'/'.$strId.'.txt' );
+            $strOut = '';
+            foreach( $xhprof_data as $key => $arrStat ) {
+                $arrColumns = array( $key );
+                foreach ( $arrStat as $k => $v ) $arrColumns[] = $k.'='.$v;
+                $strOut .= implode( "", $arrColumns ) . "\n";
+            }
+            $debugFile->save( $strOut );
+            
 //            $XHPROF_ROOT = "/tools/xhprof/";
 //            include_once $XHPROF_ROOT . "/xhprof_lib/utils/xhprof_lib.php";
 //            include_once $XHPROF_ROOT . "/xhprof_lib/utils/xhprof_runs.php";

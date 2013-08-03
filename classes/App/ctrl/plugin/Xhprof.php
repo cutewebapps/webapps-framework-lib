@@ -7,7 +7,7 @@ class App_Xhprof_CtrlPlugin extends App_Dispatcher_CtrlPlugin
     {
         $bEnabled = App_Application::getInstance()->config->xhprof;
         if ( $bEnabled ) {
-            ini_set( 'xhprof.output_dir', '' );
+            ini_set( 'xhprof.output_dir', App_Application::getInstance()->config->xhprof );
             xhprof_enable(XHPROF_FLAGS_CPU + XHPROF_FLAGS_MEMORY);
         }
         

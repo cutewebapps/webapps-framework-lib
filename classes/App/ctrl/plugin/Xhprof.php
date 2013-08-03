@@ -24,7 +24,7 @@ class App_Xhprof_CtrlPlugin extends App_Dispatcher_CtrlPlugin
             $dir = new Sys_Dir( App_Application::getInstance()->getConfig()->xhprof.'/'.date('Ymd') );
             if ( !$dir->exists() ) $dir->create( '', true );
                 
-            $debugFile = new Sys_File( $dir.'/'.$strId.'.txt' );
+            $debugFile = new Sys_File( $dir->getName().'/'.$strId.'.txt' );
             $strOut = '';
             foreach( $xhprof_data as $key => $arrStat ) {
                 $arrColumns = array( $key );

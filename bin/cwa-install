@@ -537,13 +537,13 @@ EOF;
 $pkg = new Cwa_Package();
 
 // checking package dependencies
-//$pkg->checkDependencies();
+$pkg->checkDependencies();
 // link classes and static
-//$pkg->linkContent();
+$pkg->linkContent();
 // prepare files for virtual host and apache configuration
-//$pkg->createVirtualHosts();
+$pkg->createVirtualHosts();
 // install typical database
-//$pkg->createDatabase();
+$pkg->createDatabase();
 $pkg->updateCrontab();
 // save version information
 $pkg->save();

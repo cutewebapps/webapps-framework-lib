@@ -325,10 +325,19 @@ abstract class DBx_Adapter_Read extends DBx_Adapter_Abstract
         }
     }
 
-    public function hasTable( $strTable )
+    public function hasTable( $strTable, $strSchema = null )
     {
-        $arrTables = $this->listTables( true );
-        // Sys_Io_Debug::dump( $arrTables );
+        if ( $strSchema == null ) {
+            $arrTables = $this->listTables( true );
+        } else {
+            // if we will me looking in foreign database
+            $lstTables = $this->fetchAll( 'SHOW TABLE STATUS IN '.$strSchema );
+            foreach( $lstTables as $arrTable ) {
+                if ( strtolower( $arrTable['Name'] ) == strtolower( $strTable ))
+                    return true;
+            }
+            return false;
+        }
         return in_array( $strTable, $arrTables );
     }
 

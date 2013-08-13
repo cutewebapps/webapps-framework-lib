@@ -48,7 +48,7 @@ class DBx_Driver_Pdo_Statement extends DBx_Adapter_Statement implements Iterator
         try {
             $this->_stmt = $this->_adapterRead->getConnection()->prepare($sql);
         } catch (PDOException $e) {
-            throw new DBx_Statement_Exception($e->getMessage(), $e->getCode(), $e);
+           throw new DBx_Statement_Exception($e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -214,7 +214,7 @@ class DBx_Driver_Pdo_Statement extends DBx_Adapter_Statement implements Iterator
                 return $this->_stmt->execute();
             }
         } catch (PDOException $e) {
-            throw new DBx_Statement_Exception($e->getMessage(), (int) $e->getCode());
+            throw new DBx_Statement_Exception( $e->getMessage()."\n".$this->_stmt->queryString."\n", (int) $e->getCode());
         }
     }
 

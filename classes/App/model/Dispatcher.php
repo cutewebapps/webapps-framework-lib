@@ -591,8 +591,22 @@ class App_Dispatcher
             $strLogFile = new Sys_File( $this->getConfig()->action_log );
             $strLogFile->append( "\n".$strLine. "\n" );
         }
-
-        
+        if ( $this->getConfig()->ip_log ) {
+            $strIp = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR']  : '';
+            
+            $strLine =  date('Y-m-d H:i:s').' '.$strUrl.' ';
+            $strLogFile = new Sys_File( $this->getConfig()->ip_log.'/'.$strIp.'/'.date('Y-m-d').'.log' );
+            $strLogFile->checkDirectory();
+            $strLogFile->append( "\n".$strLine. "\n" );
+            if ( isset( $_SERVER['HTTP_USER_AGENT'] ))
+                $strLogFile->append( "-- UA: ".$_SERVER['HTTP_USER_AGENT']. "\n" );
+            if ( count( $_POST ) > 0 )
+                $strLogFile->append( "-- POST: ".json_encode( $_POST ). "\n" );
+            if ( count( $_SESSION ) > 0 )
+                $strLogFile->append( "-- SESSION: ".json_encode( $_SESSION ). "\n" );
+            if ( count( $_COOKIE ) > 0 )
+                $strLogFile->append( "-- COOKIE: ".json_encode( $_COOKIE ). "\n" );
+        }
         
         $strBase = $this->getConfig()->base;
         if ( $strBase != '' && $strBase != '/' ) {

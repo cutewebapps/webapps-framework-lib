@@ -595,7 +595,7 @@ class App_Dispatcher
             $strIp = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR']  : '';
             
             $strLine =  date('Y-m-d H:i:s').' '.$strUrl.' ';
-            $strLogFile = new Sys_File( $this->getConfig()->ip_log.'/'.$strIp.'/'.date('Y-m-d').'.log' );
+            $strLogFile = new Sys_File( $this->getConfig()->ip_log.'/'.date('Y-m-d').'/'.$strIp.'.log' );
             $strLogFile->checkDirectory();
             $strLogFile->append( "\n".$strLine. "\n" );
             if ( isset( $_SERVER['HTTP_USER_AGENT'] ))

@@ -602,9 +602,9 @@ class App_Dispatcher
                 $strLogFile->append( "-- UA: ".$_SERVER['HTTP_USER_AGENT']. "\n" );
             if ( count( $_POST ) > 0 )
                 $strLogFile->append( "-- POST: ".json_encode( $_POST ). "\n" );
-            if ( count( $_SESSION ) > 0 )
+            if ( isset( $_SESSION ) &&  count( $_SESSION ) > 0 )
                 $strLogFile->append( "-- SESSION: ".json_encode( $_SESSION ). "\n" );
-            if ( count( $_COOKIE ) > 0 )
+            if ( isset( $_COOKIE ) && count( $_COOKIE ) > 0 )
                 $strLogFile->append( "-- COOKIE: ".json_encode( $_COOKIE ). "\n" );
         }
         

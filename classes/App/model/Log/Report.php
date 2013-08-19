@@ -13,27 +13,30 @@ class App_Log_Report
     
     protected $_minTime = 0;
     protected $_maxTime = 0;
-    
+    protected $_bDebug = 0;
     
    public function __construct( $strReportName )
    {
-        $this->_objConfig = App_Application::getInstance()->getConfig()->log_parser->$strReportName;
+        $this->_objConfig = App_Application::getInstance()->getConfig()->log_report->$strReportName;
         if ( !is_object( $this->_objConfig ))
             throw new App_Exception( 'log parser report '.$strReportName.' was not configured' );
 
-        $this->_arrTypes = trim(preg_replace( '\s+', '', $this->_objConfig->check ));
+        $this->_arrTypes = explode( ",", trim(preg_replace( '@\s+@', '', $this->_objConfig->check )));
         
         $this->_minTime = time() - $this->_objConfig->frequency;
         $this->_maxTime = time();
     }
     
-    public function build()
+    public function build( $bDebug )
     {
+        $this->_bDebug = $bDebug;
+        
         $arrFiles  = $this->_objConfig->files;
         foreach( $arrFiles as $strFile ) {
-            Sys_Io::out( 'parsing '.$strFile );
+            if ( $this->_bDebug )
+                Sys_Io::out( 'parsing '.$strFile );
             
-            $f = fopen( $strFile );
+            $f = fopen( $strFile,  'r' );
             if ( $f ) {
                 while( ( $strLine = fgets( $f )) !== false ) {
                     $this->_parseLine( $strLine );
@@ -61,6 +64,8 @@ class App_Log_Report
     protected function _parseLine( $strLine )
     {
         $line = new App_Log_Line( $strLine );
+        $line->debug(); die;
+        
         //we'll only match the time
         $nTime = strtotime( $line->getDate() );        
         if ( $this->_minTime <= $nTime && $this->_maxTime >= $nTime )

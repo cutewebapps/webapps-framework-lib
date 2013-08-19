@@ -600,6 +600,8 @@ class App_Dispatcher
             $strLogFile->append( "\n".$strLine. "\n" );
             if ( isset( $_SERVER['HTTP_USER_AGENT'] ))
                 $strLogFile->append( "-- UA: ".$_SERVER['HTTP_USER_AGENT']. "\n" );
+            if ( isset( $_SERVER['HTTP_REFERER'] ))
+                $strLogFile->append( "-- REF: ".$_SERVER['HTTP_REFERER']. "\n" );
             if ( count( $_POST ) > 0 )
                 $strLogFile->append( "-- POST: ".json_encode( $_POST ). "\n" );
             if ( isset( $_SESSION ) &&  count( $_SESSION ) > 0 )

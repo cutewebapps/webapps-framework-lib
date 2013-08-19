@@ -209,7 +209,8 @@ class App_View extends Sys_Editable
 
     /**
      * @param string|array $path
-     * @return void */
+     * @return void
+     */
     public function setPath( $path )
     {
         $this->_path = $path;
@@ -224,11 +225,20 @@ class App_View extends Sys_Editable
     {
         return $this->_strContents;
     }
+    
+    public function append( $strContent )
+    {
+        $this->_strContents .= $strContent;
+        return $this;
+    }
     /**
      * @return string
      */
     public function render()
     {
+        if ( $this->_strContents != '' )
+            return $this->_strContents;
+        
         ob_start();
         $arrPaths = $this->getPath();
         if ( is_string( $arrPaths )) $arrPaths = array( $arrPaths );

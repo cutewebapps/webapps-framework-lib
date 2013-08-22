@@ -23,8 +23,11 @@ class App_Log_Report
 
         $this->_arrTypes = explode( ",", trim(preg_replace( '@\s+@', '', $this->_objConfig->check )));
         
-        $this->_minTime = time() - $this->_objConfig->frequency;
+        $this->_minTime = time() - intval( $this->_objConfig->frequency );
         $this->_maxTime = time();
+        
+        if ( $this->_bDebug )
+            Sys_Io::out( 'from '. date('Y-m-d H:i:s', $this->_minTime ).' to '. date( 'Y-m-d H:i:s', $this->_maxTime ) );
     }
     
     public function build( $bDebug )
@@ -44,7 +47,16 @@ class App_Log_Report
                 fclose( $f );
             }
         }        
-        // TODO: sort each report by v desc
+        //sort each report by v desc
+        foreach ( $this->_arrReports as $strReportName => $arrRows ) {
+            uasort( $arrRows, array( $this, 'sort' ) );
+            $this->_arrReports[ $strReportName ] = $arrRows;
+        }
+    }
+    
+    public function sort( $v1, $v2 )
+    {
+        return ( $v2['q'] - $v1['q'] );
     }
     
     protected function _add( $strKey, $strUrl, $value )
@@ -64,16 +76,25 @@ class App_Log_Report
     protected function _parseLine( $strLine )
     {
         $line = new App_Log_Line( $strLine );
-        $line->debug(); die;
+        // $line->debug(); die;
         
         //we'll only match the time
-        $nTime = strtotime( $line->getDate() );        
-        if ( $this->_minTime <= $nTime && $this->_maxTime >= $nTime )
+        $nTime = $line->getUnixTime();        
+        if ( $this->_minTime > $nTime || $this->_maxTime < $nTime )
             return;
         
+        // Sys_Io::out( $nTime );
         $strStatus = $line->getHttpStatus();
         $strUrl = $line->getUrl();
 
+        //we'll only match allowed URLs
+        if ( is_object( $this->_objConfig->exclude )) {
+            foreach ( $this->_objConfig->exclude as $strExclude ) {
+                if ( substr( $strUrl,0, strlen( $strExclude ) ) == $strExclude )
+                        return;
+            }
+        }
+        
         foreach ( $this->_arrTypes as $strType ) {
             switch ( $strType ) {
                 case 'SLOW':
@@ -97,9 +118,45 @@ class App_Log_Report
     
     public function save()
     {
-        // TODO:
+        if ( !$this->_objConfig->save_path )
+            throw new App_Exception( 'save_path was not configured for the report' );
+            
+        $dir = new Sys_Dir( $this->_objConfig->save_path .'/'
+               . date( $this->_objConfig->dir_format ? $this->_objConfig->dir_format : 'Ymd/Hi' ) );
+        
+        foreach ( $this->_arrReports as $strReportName => $arrRows ) {
+            if( !$dir->exists() ) $dir->create( '', true );
+            $file = new Sys_File( $dir->getName().'/'.$strReportName.'.csv' );
+            
+            $strOut = '';
+            foreach( $arrRows as $strUrl => $arrProps ) {
+                $strOut .= '"'.$strUrl.'",'.implode( ',', $arrProps )."\n";
+            }
+            $file->save( $strOut );
+        }
     }
     
+    /**
+     * 
+     * @return string
+     */
+    public function getSavePath()
+    {
+        return $this->_objConfig->save_path;
+    }
+    
+    /**
+     * 
+     * @return int
+     */
+    public function count()
+    {
+        return count( $this->_arrReports  );
+    }
+    
+    /**
+     * @return void
+     */
     public function debug()
     {
         print_r( $this->_arrReports );

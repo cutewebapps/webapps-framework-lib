@@ -687,11 +687,11 @@ class App_Dispatcher
                             $arrMap       = isset( $arrRouteProperties['map'] ) ? $arrRouteProperties['map'] : array();
                             $strControllerClass = Sys_String::toCamelCase( $arrDefaults['module'] )
                                     .'_'.Sys_String::toCamelCase( $arrDefaults['controller'] ).'Ctrl';
-                            $strControllerAction = $arrDefaults['action'];
                             $arrControllerParams = $arrDefaults;
                             foreach( $arrMap as $nIndex => $strParamName ) {
                                 $arrControllerParams[ $strParamName ] = $arrMatches[ $nIndex ];
                             }
+                            $strControllerAction = $arrControllerParams['action'];
                             $bDetected = 1;
                         }
                         break;

@@ -14,18 +14,18 @@ class App_Log_Line
     public function __construct( $strLine )
     {
         $this->_strLine = $strLine;
+        // Sys_Io::out( $this->_strLine );
     }
     
     protected function _endOfUrl()
     {
-        
+        return Sys_String::x( '@ HTTP/\d+\.\d+\"(.+)$@', $this->_strLine );
     }
-    
     
     public function getUrl()
     {
         $arrMatches = array();
-        if ( preg_match( '@"(GET|POST|HEAD) (.+)"@', $this->_strLine, $arrMatches ) ) {
+        if ( preg_match( '@"(GET|POST|HEAD) (.+) HTTP@', $this->_strLine, $arrMatches ) ) {
             return $arrMatches[2];
         }
         return '';
@@ -33,27 +33,34 @@ class App_Log_Line
     
     public function getHttpStatus()
     {
-        
+        $sEnd = trim( $this->_endOfUrl());
+        return Sys_String::x( '@^(\d+)@', $sEnd );
     }
     
     public function getRequestTime()
     {
+        $sEnd = trim( $this->_endOfUrl());
+        return Sys_String::x( '@\[\[(\d+)\]\]@', $sEnd );
     }
 
     public function getBodySize()
     {
+        $sEnd = trim( $this->_endOfUrl());
+        return Sys_String::x( '@^(\d+)\s+(\d+)@sim', $sEnd, 2 );
     }
     
     public function getDate()
     {
+        return date( 'Y-m-d H:i:s', strtotime( Sys_String::x( '@\[(.+)\]@simU', $this->_strLine ) ));
+    }
+    public function getUnixTime()
+    {
+        return strtotime( Sys_String::x( '@\[(.+)\]@simU', $this->_strLine ) );
     }
  
     public function getIp()
     {
-        if ( preg_match( '@(\d+\.\d+\.\d+\.\d+)@', $this->_strLine, $arrMatches ) ) {
-            return $arrMatches[2];
-        }
-        return '';
+        return Sys_String::x( '@^([\d\.]+)@', $this->_strLine );
     }
     
     public function debug()

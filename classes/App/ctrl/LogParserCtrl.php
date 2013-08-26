@@ -17,14 +17,14 @@ class App_LogParserCtrl extends App_AbstractCtrl
             
         $objReport = new App_Log_Report( $this->_getParam( 'report', 'default' ) );
         
-        $strLine= '91.219.233.53 - - [19/Aug/2013:10:16:12 +0200] [[0.113]] "GET /fjernkontroll/garasjeporter/ HTTP/1.1" 200 14630 "http://new.portspesialisten.com/fjernkontroll/" "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.95 Safari/537.36" "-"';
-        $line = new App_Log_Line( $strLine );
-        $line->debug(); die;
-        
+        //$strLine= '91.219.233.53 - - [19/Aug/2013:10:16:12 +0200] [[0.113]] "GET /fjernkontroll/garasjeporter/ HTTP/1.1" 200 14630 "http://new.portspesialisten.com/fjernkontroll/" "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.95 Safari/537.36" "-"';
+        //$line = new App_Log_Line( $strLine );
+        //$line->debug(); die;
         
         
         $objReport->build( $this->_getIntParam("debug", 0 ) );
-        $objReport->debug();
+        $objReport->save();
+        Sys_Io::out( $objReport->count().' reports were generated into '.$objReport->getSavePath() );
         die;
     }
     

@@ -346,6 +346,23 @@ abstract class DBx_Adapter_Write extends DBx_Adapter_Abstract
     	return $result;
     }
 
+    /**
+     * 
+     * @param string $strTableName
+     * @param string $strSql
+     * @return mixed
+     */
+    public function alterTableSql( $strTableName, $strSql ) {
+        
+        $strSql = preg_replace( '/--.*$/imU', '', $strSql ); //
+    	// remove comma at the end of statement (as it will be often left there by accident)
+    	$strSql = preg_replace( '/\,\s*$/i', '', $strSql );
+
+        $result = $this->_query( 'ALTER TABLE '.$strTableName.' '.$strSql );
+        return $result;
+    }
+    
+    
     public function addTableSql(
             $strTableName, 
             $strSql, 

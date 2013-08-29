@@ -398,6 +398,7 @@ EOF;
                 
                 $this->_prepareNginxVirtualHost( $objProps );
                 
+                $strDestDir = $this->env->getVirtualHostsRoot().'/'.$strName;
                 // update version.txt file
                 if ( is_dir( $this->getDir().'/.svn' )) {
                     $strSvnInfoOut = Sys_Cmd::run( 'svn info '.$this->getDir(), '', false );

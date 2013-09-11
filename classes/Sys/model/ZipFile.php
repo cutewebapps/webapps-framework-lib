@@ -40,9 +40,9 @@ class Sys_ZipFile
         $fr .= pack("v", strlen($name) );
         $fr .= pack("v", 0 );
         $fr .= $name;
-        $fr .= pack("V",@$crc);
-        $fr .= pack("V",@$c_len);
-        $fr .= pack("V",@$unc_len);
+        $fr .= pack("V",isset( $crc ) ? $crc : '');
+        $fr .= pack("V",isset( $c_len ) ? $c_len  : '' );
+        $fr .= pack("V",isset( $unc_len ) ? $unc_len : '' );
         $this -> datasec[] = $fr;
         $new_offset = strlen(implode("", $this->datasec));
         $cdrec = "\x50\x4b\x01\x02";

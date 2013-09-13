@@ -99,12 +99,55 @@ class App_Log_Report
             switch ( $strType ) {
                 case 'SLOW':
                     // slowliness information - for all requests
-                    $this->_add( 'SLOW', $strUrl, $line->getRequestTime() );
+                    if ( $line->getRequestTime() != "") {
+                        $this->_add( 'SLOW', $line->getUrlWithoutParams(), $line->getRequestTime() );
+                        // echo $line->debug(); die;
+                    }
                     break;
                 
                 case 'VOLUME':
                     // collect all traffic information (regardless statuses)
-                    $this->_add( 'VOLUME', $strUrl, $line->getBodySize() );
+                    $this->_add( 'VOLUME', $line->getUrlWithoutParams(), $line->getBodySize() );
+                    break;
+               
+                case 'ADWORDS':
+                    
+                    $arrP = $line->getUrlParams();
+                    if ( isset( $arrP['gclid'] )) {
+                        
+                        if ( !isset( $this->_arrReports[ 'ADWORDS' ] ))
+                            $this->_arrReports[ 'ADWORDS' ] = array();
+
+                        $this->_arrReports['ADWORDS'][ $line->getIp() ] = array(
+                            'start'  => $line->getDate(),
+                            'url'    => $line->getUrlWithoutParams(),
+                            'gclid'  => $arrP['gclid'], 
+                            'ip'     => $line->getIp(),
+                            'status' => $line->getHttpStatus(),
+                            'requests'  => 0
+                        );
+                        
+                        if ( is_object( $this->_objConfig->goal ) ) {
+                            foreach(   $this->_objConfig->goal  as $strGoal => $strRegex  ){
+                                $this->_arrReports['ADWORDS'][ $line->getIp() ][  $strGoal ] = $strGoal.':NEVER';
+                            }
+                        }
+                    }
+                    
+                    if ( isset( $this->_arrReports['ADWORDS'][ $line->getIp() ] ) ) {
+                        
+                        $this->_arrReports['ADWORDS'][ $line->getIp() ]['requests']  ++;
+
+                        if ( is_object( $this->_objConfig->goal ) ) {
+                            foreach(  $this->_objConfig->goal as $strGoal => $strRegex  ){
+
+                                if ( preg_match( '@'.$strRegex.'@i', $line->getUrlWithoutParams() ) ) { 
+                                    $this->_arrReports['ADWORDS'][ $line->getIp() ][  $strGoal ] 
+                                            = $strGoal.':'.$line->getDate();
+                                }
+                            }
+                        }
+                    }
                     break;
                 
                 default:

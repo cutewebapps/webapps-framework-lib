@@ -49,13 +49,15 @@ class App_Log_Report
         }        
         //sort each report by v desc
         foreach ( $this->_arrReports as $strReportName => $arrRows ) {
-            uasort( $arrRows, array( $this, 'sort' ) );
+   	    if ( count( $arrRows ) > 0 ) 
+            	uasort( $arrRows, array( $this, 'sort' ) );
             $this->_arrReports[ $strReportName ] = $arrRows;
         }
     }
     
     public function sort( $v1, $v2 )
     {
+	if ( !isset( $v2['q'] )) return 0;
         return ( $v2['q'] - $v1['q'] );
     }
     

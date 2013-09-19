@@ -444,6 +444,16 @@ class App_AbstractCtrl
                         $arrPushed[ $field ] = 1;
                     }                    
                     break;
+		case 'overzero':
+                    $bCondition = ( $val < 0 );
+                    
+                    if ( $bCondition ) {
+                        array_push( $arrErrors, array( $field => $strMessage ) ) ;
+                        $arrPushed[ $field ] = 1;
+                    }
+		    break;
+
+
                 case 'min':
                     if ( ! isset( $arrParam['value'] ) )
                         throw new App_Exception('value expected in require configuration');

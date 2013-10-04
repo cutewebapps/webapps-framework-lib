@@ -64,12 +64,12 @@ class App_Test_Case
 
     public function assertFileExists( $strFileName, $strMessage = 'Failed assertFileExists' )
     {
-        if ( !file_exists($strFileName) ) throw new App_Test_Exception( $strMessage );
+        if ( !file_exists($strFileName) ) throw new App_Test_Exception( $strMessage.' '.$strFileName );
     }
 
     public function assertFileNotExists( $strFileName, $strMessage = 'Failed assertFileExists' )
     {
-        if ( file_exists($strFileName) ) throw new App_Test_Exception( $strMessage );
+        if ( file_exists($strFileName) ) throw new App_Test_Exception( $strMessage.' '.$strFileName );
     }
 
     public function assertLessThanOrEqual($expected, $actual, $strMessage = 'Failed assertLessThanOrEqual'  )

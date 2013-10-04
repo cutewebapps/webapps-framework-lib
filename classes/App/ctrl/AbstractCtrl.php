@@ -343,7 +343,7 @@ class App_AbstractCtrl
     * class for future overloading
     * @return mixed
     */
-    protected function getClassName()
+    public function getClassName()
     {
         $strControllerClassName = get_class( $this );
         if ( substr( $strControllerClassName, -4 ) == 'Ctrl' ) {

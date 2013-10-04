@@ -236,6 +236,17 @@ function cwa_test_web_application()
         } else {
             $arrGroups = $argv;
             unset( $arrGroups[0 ] );
+            
+            if ( isset( $arrGroups[ 1 ] ) ) {
+                if ( $arrGroups[ 1 ] == "group" ) {
+                    $loader->run( $arrGroups[ 2 ] );
+                    return;
+                } else if ( $arrGroups[ 1 ] == "single" ) {
+                    $loader->runSingle( $arrGroups[ 2 ] );
+                    return;
+                }
+            }
+            
             $loader->run( $arrGroups );
         }
     }

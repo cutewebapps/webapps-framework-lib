@@ -21,7 +21,7 @@ function exceptionErrorHandler($errno, $errstr, $errfile, $errline )
 function shutdownErrorHandler()
 {
     global $_EXCEPTION_WAS_CAUGHT;
-    if ( isset( $_EXCEPTION_WAS_CAUGHT) ) return;
+    if ( isset( $_EXCEPTION_WAS_CAUGHT) && $_EXCEPTION_WAS_CAUGHT == 1 ) return;
     
     $last_error = error_get_last();
     if ( !isset( $last_error['message'] ) ) return;
@@ -77,6 +77,7 @@ function shutdownErrorHandler()
             Sys_Debug::alert( $strMessage );
         }
         
+        
         if ( $confException->mail ) {
             // mail exception info to somebody
             $strTo = $confException->mail->to;
@@ -117,15 +118,22 @@ function shutdownErrorHandler()
             // using php mailer to send
             if ($confException->mail->method == 'php-mailer') {
                 
+                
                 $mail = new App_Mailer();
 
                 $mail->IsSMTP();
                 $mail->Host     = $confException->smtp->host;
+                if ( $confException->smtp->port ) {
+                    $mail->Port = $confException->smtp->port;
+		}
                 if ( $confException->smtp->username != "" ) {
                     $mail->SMTPAuth = true;
                     $mail->Username = $confException->smtp->username;
                     $mail->Password = $confException->smtp->password;
                 }
+		if ( $confException->smtp->ssl ) {
+                    $mail->SMTPSecure  = $confException->smtp->ssl;
+		}                
 
                 // from
                 $arrFrom = explode(' ', $confException->mail->headers);
@@ -158,7 +166,7 @@ function shutdownErrorHandler()
                 mail( $strTo, $strSubject, $strMessage, $strHeaders );
             }
         }
-
+        
         if ( $confException->render ) {
             echo file_get_contents( CWA_APPLICATION_DIR.'/'.$confException->render  );
         }

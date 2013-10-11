@@ -138,9 +138,9 @@ class Sys_Date
                 if ( count( $arrParts ) < 3 )
                     throw new Sys_Date_Exception( "Error in parsing european date format" );
                 
-                $nDay     = $arrParts[2];
+                $nDay     = $arrParts[0];
                 $nMonth   = $arrParts[1];
-                $nYear    = $arrParts[0];
+                $nYear    = $arrParts[2];
                 
                 if ( ! $this->isValidYmd( $nYear, $nMonth, $nDay ) ) 
                     throw new Sys_Date_Exception( "Invalid european date provided" );

@@ -37,6 +37,16 @@ class App_HeadTitleHelper extends App_ViewHelper_Abstract
         $this->_strTitle = $strTitle;
         return $this;
     }
+    
+    public function hasTitle()
+    {
+        if ( $this->_strTitle == '' ) {
+            return FALSE;
+        } else {
+            return TRUE;
+        }
+    }
+
     /**
      * Output of the title as class
      * @return App_HeadTitleHelper

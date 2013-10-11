@@ -42,6 +42,15 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
         // echo( 'added: '. $name. ' = '.$content );
         return $this;
     }
+    
+    public function hasName( $name )
+    {
+        if ( isset( $this->_arrName[ $name ] ) ) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
 
     /**
      * @return App_HeadMetaHelper
@@ -52,6 +61,14 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
         return $this;
     }
 
+    public function hasHttpEquiv( $name )
+    {
+        if ( isset( $this->_arrHttpEquiv[ $name ] ) ) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
 
     /**
      * @return App_HeadMetaHelper

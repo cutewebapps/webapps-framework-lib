@@ -13,6 +13,7 @@ define( 'DEBUG_COOKIE_NAME', 'debug_123123' );
 
 class Sys_Debug
 {
+    
     public static function dumpRequest( $strFile  = '' )
     {
         global $HTTP_RAW_POST_DATA;
@@ -59,17 +60,21 @@ class Sys_Debug
 
     public static function dumpHtml( $x, $caption = '' )
     {
-            $backtrace = debug_backtrace();
-            $head_color = '#777';
-            echo '<pre style="text-align:left; padding: 3px; border:1px solid #bcbcbc; background: #fff;">';
-            $head = '';
-            if ($caption != '') $head .= '<strong>' . $caption . '</strong>  '; else $head .= '<strong>DEBUG</strong>';
-            $head .='  <span style="font: 10px/1.3 Tahoma;">at <strong>'
-                    . $backtrace[1]['file'] . ' in line ' . $backtrace[1]['line'] . '</strong></span>';
-            echo '<h4 style="padding: 2px 5px; margin:0 0 10px 0; text-align:left; font:14px/1.4 Tahoma;background: '
-                    .$head_color.';color: #fff;">' . $head . '</h4>';
-            print_r( $x );
-            echo '</pre>';
+        $nOffset = 1;
+        if ( Sys_Global::isRegistered( "DEBUG_OFFSET" ) )
+            $nOffset = Sys_Global::get( "DEBUG_OFFSET" );
+
+        $backtrace = debug_backtrace();
+        $head_color = '#777';
+        echo '<pre style="text-align:left; padding: 3px; border:1px solid #bcbcbc; background: #fff;">';
+        $head = '';
+        if ($caption != '') $head .= '<strong>' . $caption . '</strong>  '; else $head .= '<strong>DEBUG</strong>';
+        $head .='  <span style="font: 10px/1.3 Tahoma;">at <strong>'
+                . $backtrace[ $nOffset ]['file'] . ' in line ' . $backtrace[ $nOffset ]['line'] . '</strong></span>';
+        echo '<h4 style="padding: 2px 5px; margin:0 0 10px 0; text-align:left; font:14px/1.4 Tahoma;background: '
+                .$head_color.';color: #fff;">' . $head . '</h4>';
+        print_r( $x );
+        echo '</pre>';
     }
 
     public static function dumpXml( $arr )
@@ -90,9 +95,13 @@ class Sys_Debug
         echo "\n\n";
         if ( $caption != "" ) echo $caption."\n";
 
+        $nOffset = 1;
+        if ( Sys_Global::isRegistered( "DEBUG_OFFSET" ) )
+            $nOffset = Sys_Global::get( "DEBUG_OFFSET" );
+        
         $backtrace = debug_backtrace();
-	if ( isset( $backtrace[1] )) {
-	        echo $backtrace[1]['file'] . ' in line ' . $backtrace[1]['line'];
+	if ( isset( $backtrace[ $nOffset ] )) {
+	        echo $backtrace[ $nOffset ]['file'] . ' in line ' . $backtrace[ $nOffset ]['line'].' ';
 	}
     	print_r( $arr );
         
@@ -200,6 +209,8 @@ class Sys_Debug
      */
     public static function dumpDie( $arr  = '', $strCaption = "" )
     {
+        Sys_Global::set( "DEBUG_OFFSET", "2" );
+        
         self::dump( $arr, $strCaption );
         die;
     }

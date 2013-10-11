@@ -33,6 +33,10 @@ class DBx_Table_Rowset extends DBx_Table_Rowset_Abstract
      * get array of objects from this rowset object,
      * preimary key of the record will be the key in this array, 
      * and record objects will be the values
+     * 
+     * @param string|null $strColumnName
+     * @param string|null $strKeyColumn
+     * @return array
      */
     public function getAsArray( $strColumnName = null, $strKeyColumn = null )
     {
@@ -41,6 +45,24 @@ class DBx_Table_Rowset extends DBx_Table_Rowset_Abstract
             $key = $strKeyColumn == null ? $objRow->getId() : $objRow->$strKeyColumn;
             $val = ( $strColumnName == null ) ? $objRow : $objRow->$strColumnName;
             $arrRecords[ $key ] = $val;
+        }
+        return $arrRecords;
+    }
+    /**
+     * get array of array of objects from this rowset object,
+     * @param string|null $strColumnName
+     * @param string|null $strKeyColumn
+     * @return array
+     */
+    public function getAsArrays( $strColumnName = null, $strKeyColumn = null )
+    {
+        $arrRecords = array();
+        foreach ($this as $objRow){
+            $key = $strKeyColumn == null ? $objRow->getId() : $objRow->$strKeyColumn;
+            $val = ( $strColumnName == null ) ? $objRow : $objRow->$strColumnName;
+            
+            if ( !isset( $arrRecords[ $key ] ) ) $arrRecords[ $key ]= array();
+            $arrRecords[ $key ][] = $val;
         }
         return $arrRecords;
     }

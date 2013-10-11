@@ -343,7 +343,7 @@ class App_AbstractCtrl
     * class for future overloading
     * @return mixed
     */
-    protected function getClassName()
+    public function getClassName()
     {
         $strControllerClassName = get_class( $this );
         if ( substr( $strControllerClassName, -4 ) == 'Ctrl' ) {
@@ -444,6 +444,16 @@ class App_AbstractCtrl
                         $arrPushed[ $field ] = 1;
                     }                    
                     break;
+		case 'overzero':
+                    $bCondition = ( $val < 0 );
+                    
+                    if ( $bCondition ) {
+                        array_push( $arrErrors, array( $field => $strMessage ) ) ;
+                        $arrPushed[ $field ] = 1;
+                    }
+		    break;
+
+
                 case 'min':
                     if ( ! isset( $arrParam['value'] ) )
                         throw new App_Exception('value expected in require configuration');

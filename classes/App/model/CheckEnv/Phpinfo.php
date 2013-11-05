@@ -56,7 +56,7 @@ class App_CheckEnv_Phpinfo {
     // Returns true if loaded, false if not
     public function isLoaded($moduleName) 
     {
-        if ($this->Modules[$moduleName]) {
+        if ( isset( $this->Modules[$moduleName] ) && $this->Modules[$moduleName] ) {
             return true;
         }
         return false;

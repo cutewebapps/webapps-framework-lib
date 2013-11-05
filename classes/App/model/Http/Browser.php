@@ -17,6 +17,7 @@ class App_Http_Browser
     public $Info = array(); //info from last request
 
 
+    public $bNoFollow = false;
     /**
      * @var integer
      */
@@ -82,6 +83,15 @@ class App_Http_Browser
 	$this->HttpBody    = implode("\r\n\r\n", $a );
     }
 
+    /**
+     * Get location of redirection
+     * @return string
+     */
+    public function getLocation()
+    {
+        return trim( Sys_String::x( '@Location:(.+)\s@simU', $this->HttpHeaders.' ' ) );
+    }
+    
     /**
      * @param string $strUrl
      * @return App_Http_Browser
@@ -195,7 +205,7 @@ class App_Http_Browser
         curl_setopt( $this->curl, CURLOPT_HTTP_VERSION,  CURL_HTTP_VERSION_1_0 );
 
         // follow redirects, this can get errors on hostings with safe-mode
-        if ( !ini_get('safe_mode') ) {
+        if ( ! $this->bNoFollow ) {
             curl_setopt($this->curl,  CURLOPT_FOLLOWLOCATION, 1 );
             curl_setopt($this->curl,  CURLOPT_MAXREDIRS, 5);
         }

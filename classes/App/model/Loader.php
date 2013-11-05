@@ -230,6 +230,8 @@ function cwa_test_web_application()
 
     if ( isset( $_REQUEST['test'] )) {
         $loader->runSingle( $_REQUEST['test'] );
+    } else if ( isset( $_REQUEST['json'] )) {
+        $loader->runJson( $_REQUEST['json'] );
     } else {
         if ( isset( $_REQUEST['run'] )) {
             $loader->run( $_REQUEST['run'] );
@@ -238,7 +240,10 @@ function cwa_test_web_application()
             unset( $arrGroups[0 ] );
             
             if ( isset( $arrGroups[ 1 ] ) ) {
-                if ( $arrGroups[ 1 ] == "group" ) {
+                if ( $arrGroups[ 1 ] == "json" ) {
+                    $loader->runJson( $arrGroups[ 2 ] );
+                    return;
+                } else if ( $arrGroups[ 1 ] == "group" ) {
                     $loader->run( $arrGroups[ 2 ] );
                     return;
                 } else if ( $arrGroups[ 1 ] == "single" ) {

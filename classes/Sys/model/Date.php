@@ -89,7 +89,7 @@ class Sys_Date
      */
     protected function isValidYmd( $y, $m, $d )
     {
-        $arrMinMonthDay = array( 0, 31, 28, 31, 30, 31, 30, 31, 31, 30,31, 30, 30 );
+        $arrMinMonthDay = array( 0, 31, 28, 31, 30, 31, 30, 31, 31, 30,31, 30, 31 );
         if ( $y % 4 == 0 && ($y % 100 != 0 || $y % 1000 == 0) ) $arrMinMonthDay[ 2 ] = 29;
         if (  $d < 1 || 
               $m < 1 || $m > 12 || 

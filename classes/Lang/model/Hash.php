@@ -24,8 +24,15 @@ class Lang_Hash
     {
         $strOrigKey = $strKey;
         $strKey = strtolower($strKey);
-        
+
+	// skip everything if language it not configured
+	if ( !is_object( App_Application::getInstance()->getConfig()->lang ) )
+	    return $strOrigKey;
+        if ( strlen( $strKey ) > 255 )
+	    throw new App_Exception( "Language key length cannot exceed 255 chars" );
+
         if ( $strLang == '' ) {
+
             if ( App_Application::getInstance()->getConfig()->lang->detect_from_browser ) {
                 $arrLanguagesDetectedInBrowser = App_Application::getInstance()->getConfig()->lang->detect_from_browser->toArray();
                 if ( isset( $_SERVER["HTTP_ACCEPT_LANGUAGE"] )) {

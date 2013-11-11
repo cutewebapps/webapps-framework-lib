@@ -706,7 +706,8 @@ class App_Dispatcher
                         }
                         break;
                     case 'static' : default:
-                        if ( $bShouldBeChecking && $strUrl == $strRoute ) {
+                        
+                        if ( $bShouldBeChecking && ( $strUrl == $strRoute || $strUrl == $strRoute .'/' ) ) {
                             $strControllerClass = Sys_String::toCamelCase( $arrDefaults['module'] )
                                     .'_'.Sys_String::toCamelCase( $arrDefaults['controller'] ).'Ctrl';
                             $strControllerAction = $arrDefaults['action'];

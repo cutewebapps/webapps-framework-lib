@@ -140,11 +140,11 @@ class Sys_File
             return false;
         }
         if ($this->exists() and ! $this->isWritable()) {
-            throw new Sys_File_Exception( 'Cannot write to a file - file is not writable');
+            throw new Sys_File_Exception( 'Cannot write to a file - file is not writable '.$this->getName());
         }
         $f = fopen($this->getName(), 'wb');
         if (! $f) {
-            throw new Sys_File_Exception( 'Cannot write to a file - file cannot be opened');
+            throw new Sys_File_Exception( 'Cannot write to a file - file cannot be opened '.$this->getName());
         }
         if (flock($f, LOCK_EX)) {
             fwrite($f, $c);
@@ -165,10 +165,10 @@ class Sys_File
         if (! $this->exists())
             return $this->write($c);
         if ($this->exists() and ! $this->isWritable())
-            throw new Sys_File_Exception( 'Cannot append to a file - file is not writable');
+            throw new Sys_File_Exception( 'Cannot append to a file - file is not writable '.$this->getName());
         $f = fopen($this->getName(), 'ab');
         if (! $f)
-            throw new Sys_File_Exception( 'Cannot append to a file - file cannot be opened');
+            throw new Sys_File_Exception( 'Cannot append to a file - file cannot be opened  '.$this->getName());
         fwrite($f, $c);
         fclose($f);
         

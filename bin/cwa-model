@@ -134,10 +134,9 @@ EOF;
         fclose( $f );
         echo " created successfully\n";
     }
-    // BUG: name of controller, first part still should be separated by "_" underscore
-    // TODO: if name is too complicated, add a class name
-    $strControllerClassBase = str_replace ('/', '', str_replace( '_', '', $strClassBase ));
-
+    
+    $strControllerClassBase = $strNameSpace.'_'.str_replace ('/', '', str_replace( '_', '', $strModel ));
+    echo( "controller class: ". $strControllerClassBase."Ctrl".' from '.$strClassBase).PHP_EOL;
 // CREATING Controller File
     
     $strFileContent = '<'.'?php'."\n";

@@ -95,7 +95,15 @@ class Cwa_Env
     { 
         if ( getenv( 'CWA_CONF_ROOT' ) ) return getenv( 'CWA_CONF_ROOT'); 
         return $this->getHome().'/etc';
-    }    
+    }   
+    /**
+     * @return string
+     */
+    public function getTempRoot() 
+    { 
+        if ( getenv( 'CWA_TEMP_ROOT' ) ) return getenv( 'CWA_TEMP_ROOT'); 
+        return $this->getHome().'/temp';
+    }        
     /**
      * @return string
      */
@@ -429,6 +437,18 @@ EOF;
             if ( !$dirDest->exists() ) {
                 echo 'creating directory '.$dirDest->getName()."\n";
                 $dirDest->create();
+            }
+            
+            $strTempDir = $this->env->getTempRoot()."/".$strName;
+            if ( is_object( $config->temp ) ) {
+                foreach( $config->temp as $strTemp ) {
+                    $dirTempDest = new Sys_Dir( $strTempDir.'/'.$strTemp );
+                    if ( !$dirTempDest->exists() ) {
+                        echo 'dir 0777 '.$dirTempDest->getName()."\n";
+                        $dirTempDest->create( '', true ); 
+                        chmod( $dirTempDest->getName(), 0777 );
+                    }
+                }
             }
 
             $arrFiles2Copy = array();

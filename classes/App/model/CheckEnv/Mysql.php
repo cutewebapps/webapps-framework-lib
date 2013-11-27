@@ -16,7 +16,7 @@ class App_CheckEnv_Mysql
     public function __construct()
     {
         App_CheckEnv::assert( extension_loaded("pdo_mysql"),     "MySQL PDO extension is not loaded" );
-        App_CheckEnv::assert( function_exists("mysql_connect"),     "MySQL connect function was not found" );
+        // App_CheckEnv::assert( function_exists("mysql_connect"),     "MySQL connect function was not found" );
         
         // checking all connections with given credentials
         $connections = App_Application::getInstance()->getConfig()->connections;
@@ -33,10 +33,10 @@ class App_CheckEnv_Mysql
                 $strPassword = isset( $arrParams['password'] ) ? $arrParams['password'] : '' ;
                 $strDatabase = $arrParams['dbname'];
                 
-                App_CheckEnv::assert( mysql_connect( $strHost, $strUsername, $strPassword ),
-                        "no mysql connection for ".$strConnIndex );
-                App_CheckEnv::assert( mysql_selectdb( $strDatabase ),
-                        "mysql database cannot be selected for ".$strConnIndex );
+                // App_CheckEnv::assert( mysql_connect( $strHost, $strUsername, $strPassword ),
+                  //      "no mysql connection for ".$strConnIndex );
+                // App_CheckEnv::assert( mysql_selectdb( $strDatabase ),
+                  //      "mysql database cannot be selected for ".$strConnIndex );
             }
         }
     }

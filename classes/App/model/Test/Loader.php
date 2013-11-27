@@ -11,6 +11,44 @@
 class App_Test_Loader
 {
 
+    public function runJson( $strFile )
+    {
+        Sys_Io::out( "Running ".$strFile );
+        
+        $strClassName = str_replace( '-', '/', $strFile );
+        $file = new Sys_File( CWA_APPLICATION_DIR.'/test/json/'.$strClassName.'.json' );
+        if ( !$file->exists() )
+            throw new App_Exception( "File was not found ".$file->getName() );
+        
+        $arrTests = json_decode( file_get_contents( $file->getName() ), true );
+        if ( PHP_SAPI !== "cli" )
+            echo '<table><thead><tr><th>#</th><th>Test</th><th>Result</th></tr></thead><tbody>';
+        
+        $nIterator = 1;
+        foreach ( $arrTests as $arrTestProps ) {
+            
+            $objTest  = new App_Test_Json( $arrTestProps );
+            $objTest->run();
+            
+            if ( PHP_SAPI !== "cli" ) {
+                echo '<tr><td>'.$nIterator.'.</td>'
+                        .'<td>'.$objTest->getTitle().'</td>'
+                        .'<td style="'.$objTest->getResultStyle().'">'
+                            .$objTest->getResultString().'</td>'
+                        .'<td>'.$objTest->getTimeFinished().'</td>'
+                        .'</tr>';
+            } else {
+                Sys_Io::out( '[' . $objTest->getResultString() . '] '. $objTest->getTitle() );
+            }
+            // if ( $nIterator == 3 )break;
+            $nIterator ++;
+        }
+        
+        if ( PHP_SAPI !== "cli" )
+            echo '</tbody></table>';
+    }
+    
+    
     public function runTestCase( $strFile )
     {
         $strClassName = preg_replace( '@\.(.*)$@', '', basename( $strFile ) );

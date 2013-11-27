@@ -20,8 +20,9 @@ class App_CheckEnv_Gd
         App_CheckEnv::assert( function_exists( 'imagecreatefrompng' ), "GD doesnt have PNG support" );
         
         $modules = new App_CheckEnv_Phpinfo();
-        App_CheckEnv::assert( $modules->getModuleSetting('gd', 'FreeType Support') == 'enabled',
-                'GD is Compiled without FreeType support');
+	if ( PHP_SAPI != "cli" )
+        	App_CheckEnv::assert( $modules->getModuleSetting('gd', 'FreeType Support') == 'enabled',
+                	'GD is Compiled without FreeType support');
 	 
     }
 }

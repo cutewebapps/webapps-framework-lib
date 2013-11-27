@@ -483,7 +483,7 @@ class App_AbstractCtrl
                 
                 case 'email': 
                     if ( !Sys_String::isEmail( $val ) ) {
-                        array_push( $arrErrors, array( $field => $e->getMessage() ) ) ;
+                        array_push( $arrErrors, array( $field => $strMessage ) ) ;
                         $arrPushed[ $field ] = 1;
                     }
                     break;

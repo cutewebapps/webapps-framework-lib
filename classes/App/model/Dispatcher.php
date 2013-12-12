@@ -431,7 +431,7 @@ class App_Dispatcher
             // TODO: think of layouts in different contexts
             $this->_objCurrentController->view->getLayout()->disableLayout();
 
-            if ( !isset( $arrParams['output'] ) && !$arrParams['output'] == '' ) { 
+            if ( !isset( $arrParams['output'] ) || $arrParams['output'] == '' ) { 
                 switch ( $arrParams['format' ] ) {
                     case 'xml' :
                         header( 'Content-Type: text/xml; charset='.$strCharset );

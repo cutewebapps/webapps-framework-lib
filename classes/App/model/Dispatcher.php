@@ -467,7 +467,7 @@ class App_Dispatcher
                 if ( ! in_array( $strFiltered, $arrOutput )) {
                     throw new App_Exception( 'No such output entry in a config' );
                 }
-            } else {
+            } else if ( $this->getConfig()->output  != '*' ) {
                 throw new App_Exception( 'No output entry in a config' );
             }
             

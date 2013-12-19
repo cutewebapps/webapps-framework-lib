@@ -380,7 +380,7 @@ abstract class App_DbTableCtrl extends App_AbstractCtrl
 
         if (!$prmNoPager) $this->_select->calcFoundRows();
         $listObjects = $this->_model->fetchAll($this->_select);
-        if (!$prmNoPager) $allRowsCount = $this->_getRowsCount();
+        $allRowsCount = $this->_getRowsCount();
         $pagesCount = ceil($allRowsCount / $paramResults);
 
         $this->_list = $listObjects;

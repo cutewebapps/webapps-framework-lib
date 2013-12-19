@@ -431,15 +431,16 @@ class App_Dispatcher
             // TODO: think of layouts in different contexts
             $this->_objCurrentController->view->getLayout()->disableLayout();
 
-            switch ( $arrParams['format' ] ) {
-                case 'xml' :
-                    header( 'Content-Type: text/xml; charset='.$strCharset );
-                    break;
-                case 'csv' :
-                    header( 'Content-Type: text/plain; charset='.$strCharset );
-                    break;
+            if ( !isset( $arrParams['output'] ) || $arrParams['output'] == '' ) { 
+                switch ( $arrParams['format' ] ) {
+                    case 'xml' :
+                        header( 'Content-Type: text/xml; charset='.$strCharset );
+                        break;
+                    case 'csv' :
+                        header( 'Content-Type: text/plain; charset='.$strCharset );
+                        break;
+                }
             }
-
 
         } else  if ( isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) &&
                      $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest' ) {
@@ -467,8 +468,8 @@ class App_Dispatcher
                 if ( ! in_array( $strFiltered, $arrOutput )) {
                     throw new App_Exception( 'No such output entry in a config' );
                 }
-            } else {
-                throw new App_Exception( 'No output entry in a config' );
+            } else if ( $this->getConfig()->output  != '*' ) {
+                throw new App_Exception( 'No output entry in application config' );
             }
             
             $file = new Sys_File( CWA_APPLICATION_DIR . $strFiltered );

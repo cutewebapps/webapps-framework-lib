@@ -2695,7 +2695,7 @@ class App_Mailer {
 /**
  * Exception handling
  */
-class phpmailerException extends App_Exception 
+class phpmailerException extends Exception 
 {
   
 }

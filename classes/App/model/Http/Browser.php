@@ -158,7 +158,11 @@ class App_Http_Browser
         if ( count( $arrFiles ) > 0 ) {
             $arrParams = $arrData;
             foreach ( $arrFiles as $strFieldName => $strFileName ) {
-                $arrParams[ $strFieldName ] = new CurlFile( $strFileName, $this->_get_mime( $strFileName ), basename( $strFileName ) );
+
+		if ( class_exists( "CurlFile" ))
+	                $arrParams[ $strFieldName ] = new CurlFile( $strFileName, $this->_get_mime( $strFileName ), basename( $strFileName ) );
+		else 
+			$arrParams[ $strFieldName ] = '@'.$strFileName;
             }
             curl_setopt( $this->curl, CURLOPT_POSTFIELDS, $arrParams );
         } else {

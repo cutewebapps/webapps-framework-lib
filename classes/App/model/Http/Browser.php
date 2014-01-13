@@ -96,13 +96,14 @@ class App_Http_Browser
      * @param string $strUrl
      * @return App_Http_Browser
      */
-    public function httpGet( $strUrl )
+    public function httpGet( $strUrl, $arrHeaders = array() )
     {
         $this->init();
         if ( $this->LastHttpUrl != '' ) {
             curl_setopt($this->curl, CURLOPT_REFERER, $this->LastHttpUrl );
         }
 
+        curl_setopt( $this->curl, CURLOPT_HTTPHEADER, $arrHeaders );
         curl_setopt( $this->curl, CURLOPT_URL, $strUrl );
         $buff = curl_exec( $this->curl );
 
@@ -118,13 +119,32 @@ class App_Http_Browser
         return $this;
     }
 
+    
+    function _get_mime($file) {
+        if (function_exists("finfo_file")) {
+          $finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type ala mimetype extension
+          $mime = finfo_file($finfo, $file);
+          finfo_close($finfo);
+          return $mime;
+        } else if (function_exists("mime_content_type")) {
+          return mime_content_type($file);
+        } else if (!stristr(ini_get("disable_functions"), "shell_exec")) {
+          // http://stackoverflow.com/a/134930/1593459
+          $file = escapeshellarg($file);
+          $mime = shell_exec("file -bi " . $file);
+          return $mime;
+        } else {
+          return false;
+        }
+      }
+
     /**
      * @param string $strUrl
      * @param array $arrData
      * @param array $arrFiles
      * @return App_Http_Browser
      */
-    public function httpPost( $strUrl, $arrData, $arrFiles = array() )
+    public function httpPost( $strUrl, $arrData, $arrFiles = array(), $arrHeaders = array() )
     {
         $this->init();
         if ( $this->LastHttpUrl != '' ) {
@@ -133,14 +153,20 @@ class App_Http_Browser
 
         curl_setopt( $this->curl, CURLOPT_URL, $strUrl );
 	curl_setopt( $this->curl, CURLOPT_POST,1);
+        curl_setopt( $this->curl, CURLOPT_HTTPHEADER, $arrHeaders );
+        
         if ( count( $arrFiles ) > 0 ) {
             $arrParams = $arrData;
             foreach ( $arrFiles as $strFieldName => $strFileName ) {
-                $arrParams[ $strFieldName ] = '@'.$strFileName;
+
+		if ( class_exists( "CurlFile" ))
+	                $arrParams[ $strFieldName ] = new CurlFile( $strFileName, $this->_get_mime( $strFileName ), basename( $strFileName ) );
+		else 
+			$arrParams[ $strFieldName ] = '@'.$strFileName;
             }
             curl_setopt( $this->curl, CURLOPT_POSTFIELDS, $arrParams );
         } else {
-            curl_setopt( $this->curl, CURLOPT_POSTFIELDS, $this->_mergeParams( $arrData ) );
+            curl_setopt( $this->curl, CURLOPT_POSTFIELDS, http_build_query( $arrData ) );
         }
 
         $buff = curl_exec( $this->curl );

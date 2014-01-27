@@ -68,7 +68,7 @@ class App_PagerHelper extends App_ViewHelper_Abstract
         ?>
         <select class="inputbox" onchange="changePagerResults(this, '<?php echo $strBaseUrl ?>');">
         <?php
-            $arrayItemsCount = array( '10', '15', '20', '25', '50', '75', '100', '200', '500', '1000');
+            $arrayItemsCount = array( '10', '15', '20', '25', '50', '75', '100', '200', '500', '1000', '5000', '10000' );
             foreach($arrayItemsCount as $numberItemsCount) {
                 echo '<option ' .($numberItemsCount == $this->getView()->results ? 'selected="selected" ' : '')
                     . 'value="' . $numberItemsCount . '">' . $numberItemsCount . '</option>';

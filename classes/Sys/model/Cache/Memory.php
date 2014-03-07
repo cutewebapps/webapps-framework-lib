@@ -47,6 +47,7 @@ class Sys_Cache_Memory implements Sys_Cache_Abstract {
     }
     
     /**
+     * cleaning memory cache globally
      * @return void 
      */
     public function clean( $strTag = '' ) {

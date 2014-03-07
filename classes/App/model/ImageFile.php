@@ -140,6 +140,14 @@ class App_ImageFile {
     }
 
 
+    /**
+     * IMPORTANT: if $strImagePath starts from slash, it will mean relative to CWA_APPLICATION_DIR path
+     * otherwise, use "file://" prefix for your $strImagePath
+     * 
+     * @param string $strImagePath
+     * @param int $nWidth (optional, autodetect by default) 
+     * @param int $nHeight (optional, autodetect by default)
+     */
     public function __construct( $strImagePath, $nWidth = 0, $nHeight = 0 )
     {
         $this->_strPath = $strImagePath;

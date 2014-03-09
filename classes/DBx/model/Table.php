@@ -449,4 +449,24 @@ class DBx_Table extends DBx_Table_Abstract
         $result = $stmt->rowCount();
         return $result;
     }
+
+    /**
+     * 
+     * @param string $strId
+     */
+    public function fetchById( $strId )
+    {
+        $cache = new Sys_Cache_Memory();
+        $strIndex  = 'Table:'.$this->getTableName().':'.__FUNCTION__.':'.$strId;
+        $res = $cache->load( $strIndex );
+        if ( $res === false ) {
+
+	    $strPrimaryKey = $this->_primary;
+            $select = $this->select()->where(  $strPrimaryKey .' = ?', $strId );
+
+            $res = $this->fetchRow( $select );
+            $cache->save( $res, $strIndex );
+        }
+        return $res;
+    }
 }

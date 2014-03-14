@@ -7,35 +7,64 @@ class App_MailCtrl extends App_AbstractCtrl
         if ( $this->_isPost() && is_object( App_Application::getInstance()->mail ) ) {
             $objConfig = App_Application::getInstance()->mail->contact;
             if ( is_object( $objConfig )) {
-                $mail = new App_Mail_Contact();
-                $mail->setBody( "New contact message: <br />".implode( "<br />", $arrLines ) );
+
+                $mail = new App_Mail_Contact( $objConfig->toArray() );
+                $arrLines = array();
+                foreach ( $this->_getAllParams() as $strKey => $strValue ) {
+                    $arrLines []= $strKey.': '.$strValue;
+                }
+                if ( $this->_getParam( 'email' ) ) {
+                    $mail->setReplyTo( $this->_getParam( 'email' ) );
+                }
+                $mail->setBody( "<pre style='font-size:14px'>" . "New contact message: <br />". implode( "<br />", $arrLines )."</pre>"       
+                                ." Date: ".date("Y-m-d H:i:s") );
                 $mail->send();
             }
         }
     }
-    
+    /**
+     * This is a very basic action that can be used tor subscriptions
+     * As a result of subscription
+     * 
+     */
     public function subscribeAction()
     {
         if ( $this->_isPost() && is_object( App_Application::getInstance()->mail ) ) {
-            // TODO: validation for valid email
-
+            $arrErrors  = array();
+            
+            // validation for valid email
+            $strEmail = $this->_getParam( 'subscribe_email' );
+            if ( trim( $strEmail ) == '' ) {
+                array_push( $arrErrors, array( 'subscribe_email' => 'Email was not provided' ) );
+            } else if ( ! Sys_String::isEmail( $strEmail ) ) {
+                array_push( $arrErrors, array( 'subscribe_email' => 'Please provide valid e-mail' ) );
+            }
+            
             $objConfig = App_Application::getInstance()->mail->subscribe;
             if ( is_object( $objConfig )) {
-                // send mail about subscription (if configured)
-                $mail = new App_Mail_Subscription( $objConfig );
 
-                $arrLines = array();
-                $arrLines []= 'Email: '.$this->_getParam( 'subscribe_email' );
-                if ( $this->_hasParam( 'subscribe_event' ) )
-                    $arrLines []= 'Event ID: '.$this->_getParam( 'subscribe_event' );
-                if ( $this->_hasParam( 'subscribe_first' ) )
-                    $arrLines []= 'First Name: '.$this->_getParam( 'subscribe_first' );
-                if ( $this->_hasParam( 'subscribe_last' ) )
-                    $arrLines []= 'Last Name: '.$this->_getParam( 'subscribe_last' );
+                if ( count( $arrErrors ) == 0 ) {
+                    // send mail about subscription (if configured)
+                    $mail = new App_Mail_Abstract( $objConfig->toArray()  );
+                    $arrLines = array();
+                    $arrLines []= 'Email: '.$this->_getParam( 'subscribe_email' );
+                    if ( $this->_hasParam( 'subscribe_event' ) )
+                        $arrLines []= 'Event ID: '.$this->_getParam( 'subscribe_event' );
+                    if ( $this->_hasParam( 'subscribe_first' ) )
+                        $arrLines []= 'First Name: '.$this->_getParam( 'subscribe_first' );
+                    if ( $this->_hasParam( 'subscribe_last' ) )
+                        $arrLines []= 'Last Name: '.$this->_getParam( 'subscribe_last' );
 
-                $mail->setBody( "New subscription: <br />".implode( "<br />", $arrLines ) );
-                $mail->send();
+                    $mail->setReplyTo( $strEmail );
+                    $mail->setBody( "New subscription: <br />".implode( "<br />", $arrLines ) );
+                    $mail->send();
+                }
+                
+            } else {
+                array_push( $arrErrors, array( 'message' => 'Subscription was not configured' ) );
             }
+            
+            $this->view->arrError = $arrErrors;
         }
     }
     

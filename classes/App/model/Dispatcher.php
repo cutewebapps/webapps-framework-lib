@@ -264,6 +264,9 @@ class App_Dispatcher
     }
     protected function _getSectionFromSlug( $strSlug )
     {
+        if ( !$this->getConfig()->user )
+            return '';
+        
         $areas = $this->getConfig()->user->area;
         if ( is_object( $areas )) {
             $arrSections = $areas->toArray();

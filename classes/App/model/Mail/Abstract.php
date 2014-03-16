@@ -34,7 +34,15 @@ class App_Mail_Abstract
     /**
      * @var array
      */
-    public $arrCc = array();
+    public $arrCC = array();
+    /**
+     * @var array
+     */
+    public $arrBCC = array();
+    /**
+     * @var array
+     */
+    public $arrEmbed = array();
     /**
      * Alternative Message
      * @var string
@@ -65,6 +73,25 @@ class App_Mail_Abstract
     public function __construct( $arrProperties = array() )
     {
         $this->arrParams = $arrProperties;
+        
+        if  (isset( $this->arrParams['from'] ))
+            $this->strFrom = $this->arrParams['from'];
+        else if  (isset( $this->arrParams['from_emal'] ))
+            $this->strFrom = $this->arrParams['from_email'];
+        
+        if  (isset( $this->arrParams['from_name'] ))
+            $this->strFromName = $this->arrParams['from_name'];
+        
+        
+        if  (isset( $this->arrParams['to'] ))
+            $this->strTo = $this->arrParams['to'];
+        if  (isset( $this->arrParams['subject'] ))
+            $this->strSubject = $this->arrParams['subject'];
+
+        if  (isset( $this->arrParams['cc'] ))
+            $this->arrCC = $this->arrParams['cc'];
+        if  (isset( $this->arrParams['bcc'] ))
+            $this->arrBCC = $this->arrParams['bcc'];
     }
 
     /**
@@ -196,7 +223,7 @@ class App_Mail_Abstract
             $mail->Password = $this->objConfig->smtp->password;
         }
 
-        Sys_Debug::dump( $this->arrParams ); Sys_Debug::dump( $mail ); die;
+        // Sys_Debug::dump( $this->arrParams ); Sys_Debug::dump( $mail ); die;
 
         // from
         $mail->From = ( isset( $this->arrParams['from_email'] ) ) ? $this->arrParams['from_email'] : $this->strFrom;
@@ -205,9 +232,18 @@ class App_Mail_Abstract
         if ( $strReplyTo ) $mail->AddReplyTo( $strReplyTo );
 
         $mail->ReturnPath = ( isset( $this->arrParams['return_path'] ) ) ? $this->arrParams['return_path'] : $this->strReturnPath ;
-        if( is_string( $this->strCC ) && trim($this->strCC) != "" ){
-            $mail->AddCC( $this->strCC );
+        // if( is_string( $this->strCC ) && trim($this->strCC) != "" ){
+        
+        foreach ( $this->arrCC as $strCc ) {
+            if ( $strCc != '' ) continue;
+            $mail->AddCC( $strCc );
         }
+        foreach ( $this->arrBCC as $strCc ) {
+            if ( $strCc != '' ) continue;
+            $mail->AddBCC( $strCc );
+        }
+        
+        //}
         if ( $this->strAltBody ) {
             $mail->AltBody = $this->strAltBody;
         }
@@ -241,6 +277,8 @@ class App_Mail_Abstract
                 'reply_to' => $strReplyTo,
                 'return_path' => $mail->ReturnPath,
                 'to' => $this->strTo,
+                'cc' => implode( ",", $this->arrCC ),
+                'bcc' => implode( ",", $this->arrBCC ),
                 'host' => $mail->Host.':'.$mail->Port
         ), $this->strBody );        
         

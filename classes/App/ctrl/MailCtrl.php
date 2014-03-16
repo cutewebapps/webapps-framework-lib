@@ -4,22 +4,39 @@ class App_MailCtrl extends App_AbstractCtrl
 {
     public function contactAction()
     {
-        if ( $this->_isPost() && is_object( App_Application::getInstance()->mail ) ) {
-            $objConfig = App_Application::getInstance()->mail->contact;
+        if ( $this->_isPost() && is_object( App_Application::getInstance()->getConfig()->mail ) ) {
+            $arrErrors = array();
+            $objConfig = App_Application::getInstance()->getConfig()->mail->contact;
             if ( is_object( $objConfig )) {
 
-                $mail = new App_Mail_Contact( $objConfig->toArray() );
-                $arrLines = array();
-                foreach ( $this->_getAllParams() as $strKey => $strValue ) {
-                    $arrLines []= $strKey.': '.$strValue;
+                $strEmail = $this->_getParam( 'email' );
+                if ( trim( $strEmail ) == '' ) {
+                    array_push( $arrErrors, array( 'email' => 'Email was not provided' ) );
+                } else if ( ! Sys_String::isEmail( $strEmail ) ) {
+                    array_push( $arrErrors, array( 'email' => 'Please provide valid e-mail' ) );
                 }
-                if ( $this->_getParam( 'email' ) ) {
-                    $mail->setReplyTo( $this->_getParam( 'email' ) );
+                
+                if ( count( $arrErrors ) == 0 ) {
+                    $mail = new App_Mail_Contact( $objConfig->toArray() );
+                    $arrLines = array();
+                    foreach ( $this->_getAllParams() as $strKey => $strValue ) {
+                        $arrLines []= $strKey.': '.$strValue;
+                    }
+                    if ( $this->_getParam( 'email' ) ) {
+                        $mail->setReplyTo( $this->_getParam( 'email' ) );
+                    }
+                    $mail->setBody( "<pre style='font-size:14px'>" . "New contact message: <br />". implode( "<br />", $arrLines )."</pre>"       
+                                    ." Date: ".date("Y-m-d H:i:s") );
+                    $mail->send();
                 }
-                $mail->setBody( "<pre style='font-size:14px'>" . "New contact message: <br />". implode( "<br />", $arrLines )."</pre>"       
-                                ." Date: ".date("Y-m-d H:i:s") );
-                $mail->send();
+                
+            } else {
+                array_push( $arrErrors, array( 'message' => 'Contact form was not configured' ) );
             }
+            
+            $this->view->arrError = $arrErrors;
+            if ( count( $arrErrors ) == 0 )
+                $this->view->lstMessages = array( 'Message was successfully delivered.' );
         }
     }
     /**
@@ -29,7 +46,7 @@ class App_MailCtrl extends App_AbstractCtrl
      */
     public function subscribeAction()
     {
-        if ( $this->_isPost() && is_object( App_Application::getInstance()->mail ) ) {
+        if ( $this->_isPost() && is_object( App_Application::getInstance()->getConfig()->mail ) ) {
             $arrErrors  = array();
             
             // validation for valid email
@@ -40,7 +57,7 @@ class App_MailCtrl extends App_AbstractCtrl
                 array_push( $arrErrors, array( 'subscribe_email' => 'Please provide valid e-mail' ) );
             }
             
-            $objConfig = App_Application::getInstance()->mail->subscribe;
+            $objConfig = App_Application::getInstance()->getConfig()->mail->subscribe;
             if ( is_object( $objConfig )) {
 
                 if ( count( $arrErrors ) == 0 ) {
@@ -65,6 +82,8 @@ class App_MailCtrl extends App_AbstractCtrl
             }
             
             $this->view->arrError = $arrErrors;
+            if ( count( $arrErrors ) == 0 )
+                $this->view->lstMessages = array( 'You were successfully subscribed' );
         }
     }
     

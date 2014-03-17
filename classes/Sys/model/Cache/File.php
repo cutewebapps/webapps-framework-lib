@@ -20,8 +20,10 @@ class Sys_Cache_File implements Sys_Cache_Abstract {
         foreach( $options as $strKey => $strValue ) {
             $this->_options[ $strKey ] = $strValue;
         }
-        if ( $this->_options['cache_dir'] == '' )  {
-            throw new Sys_Exception( 'Cache Dir was not set up correctly' );
+        if ( $this->_options['cache_dir'] == '' ) {
+            $this->_options['cache_dir']  = App_Application::getInstance()->getConfig()->cache_dir;
+            if ( $this->_options['cache_dir'] == '' ) 
+                throw new Sys_Exception( 'Cache Dir was not set up correctly' );
         }
         
         $dir = new Sys_Dir( $this->_options['cache_dir'] );
@@ -70,10 +72,20 @@ class Sys_Cache_File implements Sys_Cache_Abstract {
     }
     
     /**
+     * clean all file cache if no tag was given
      * @return void 
      */
-    public function clean() {
-         $dir = new Sys_Dir( $this->_options['cache_dir'] );
-         $dir->clean();
+    public function clean( $strTag = '' ) {
+        $strPath = $this->_options['cache_dir'];
+        if ( $strTag != '' ) {
+            $strPath = $this->_options['cache_dir'].'/'.$strTag;
+        }
+        
+        if ( is_dir( $strPath ) )  {
+            $dir = new Sys_Dir( $strPath );
+            $dir->delete();
+        } else if ( file_exists( $strPath ) )  {
+            unlink( $strPath );
+        }
     }    
 }

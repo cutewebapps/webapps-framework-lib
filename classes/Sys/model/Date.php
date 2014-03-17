@@ -143,7 +143,7 @@ class Sys_Date
                 $nYear    = $arrParts[2];
                 
                 if ( ! $this->isValidYmd( $nYear, $nMonth, $nDay ) ) 
-                    throw new Sys_Date_Exception( "Invalid european date provided" );
+                    throw new Sys_Date_Exception( "Invalid european date provided ".$nYear.'-'.$nMonth.'-'.$nDay );
                 
                 $this->_datetime = date('Y-m-d', strtotime( $nYear.'-'.$nMonth.'-'.$nDay ) );
                 $this->_datetime .= ' '.$H.':'.$i.':'.$s;
@@ -159,7 +159,7 @@ class Sys_Date
                 $nYear    = $arrParts[2];
                 
                 if ( ! $this->isValidYmd( $nYear, $nMonth, $nDay ) ) 
-                    throw new Sys_Date_Exception( "Invalid US date provided" );
+                    throw new Sys_Date_Exception( "Invalid US date provided ".$nYear.'-'.$nMonth.'-'.$nDay );
                 
                 $this->_datetime = date('Y-m-d', strtotime( $nYear.'-'.$nMonth.'-'.$nDay ) );
                 $this->_datetime .= ' '.$H.':'.$i.':'.$s;

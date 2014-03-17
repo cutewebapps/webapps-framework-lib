@@ -250,8 +250,15 @@ class App_View extends Sys_Editable
             }
         }
         if ( !$bSuccess ) {
-            ob_end_clean();
-            throw new App_Exception( 'Template was not found at '.implode( ",", $arrPaths ));
+            
+            if ( $this->getInflection( 'format') == 'json' ) {
+                echo json_encode( ( is_object($this->object) ? $this->object->toArray() : array() ) 
+                    + array('errors' => $this->arrError, 'message' => $this->lstMessages ) );
+ 
+            } else {
+                ob_end_clean();
+                throw new App_Exception( 'Template was not found at '.implode( ",", $arrPaths ));
+            }
         }
 
         $this->_strContents = ob_get_contents();

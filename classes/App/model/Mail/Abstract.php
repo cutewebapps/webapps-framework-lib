@@ -88,10 +88,26 @@ class App_Mail_Abstract
         if  (isset( $this->arrParams['subject'] ))
             $this->strSubject = $this->arrParams['subject'];
 
-        if  (isset( $this->arrParams['cc'] ))
-            $this->arrCC = $this->arrParams['cc'];
-        if  (isset( $this->arrParams['bcc'] ))
-            $this->arrBCC = $this->arrParams['bcc'];
+        if  ( isset( $this->arrParams['cc'] ) ) {
+            $this->addCC( $this->arrParams['cc'] );
+        }
+        if  ( isset( $this->arrParams['bcc'] ) ) {
+            $this->addBCC( $this->arrParams['bcc'] );
+        }
+        
+        if  (isset( $this->arrParams['template'] ) && $this->arrParams['template'] != '' ) {
+            
+            $strRendererClass = 'App_View';
+            if  (isset( $this->arrParams['renderer'] ) && class_exists( $this->arrParams['renderer'] ) ) {
+                $strRendererClass = $this->arrParams['renderer'];
+            }
+
+            $view = new $strRendererClass();
+            $view->setPath( $this->arrParams['template'] );
+            foreach( $this->arrParams as $key => $value ) $view->$key = $value;
+            
+            $this->strBody = $view->render();
+        }
     }
 
     /**
@@ -107,11 +123,58 @@ class App_Mail_Abstract
     
     /**
      * Set cc email
-     * @param string $strCC
+     * @param mixed $strCC
      */
     public function setCC( $strCC )
     {
-        $this->arrCc = $strCC;
+        if ( is_array( $strCC ))
+            $this->arrCC = $strCC;
+        else 
+            $this->arrCC = array( $strCC );
+        return $this;
+    }
+    /**
+     * 
+     * @param mixed $strCC
+     * @return App_Mail_Abstract
+     */
+    public function addCC( $strCC )
+    {
+        if ( is_array( $strCC )) {
+            foreach ( $strCC as $sCC )
+                if ( !in_array( $sCC, $this->arrCC ) )
+                    $this->arrCC[] = $sCC;
+        } else 
+            $this->arrCC[] = $strCC;
+        return $this;
+    }
+    
+    /**
+     * Set cc email
+     * @param mixed $strBCC
+     */
+    public function setBCC( $strBCC )
+    {
+        if ( is_array( $strBCC ))
+            $this->arrBCC = $strBCC;
+        else 
+            $this->arrBCC = array( $strBCC );
+        return $this;
+    }
+   /**
+    * 
+    * @param mixed $strCC
+    * @return App_Mail_Abstract
+    */
+    public function addBCC( $strCC )
+    {
+        if ( is_array( $strCC )) {
+            foreach ( $strCC as $sCC )
+                if ( !in_array( $sCC, $this->arrBCC ) )
+                    $this->arrBCC[] = $sCC;
+        } else 
+            $this->arrBCC[] = $strCC;
+        return $this;
     }
 
     /**

@@ -20,7 +20,8 @@ class App_MailCtrl extends App_AbstractCtrl
                     $mail = new App_Mail_Contact( $objConfig->toArray() );
                     $arrLines = array();
                     foreach ( $this->_getAllParams() as $strKey => $strValue ) {
-                        $arrLines []= $strKey.': '.$strValue;
+                        if ( $strKey != 'section' || $strKey != 'module' || $strKey != 'controller' || $strKey != 'action' || $strKey != 'format' )
+                            $arrLines []= $strKey.': '.$strValue;
                     }
                     if ( $this->_getParam( 'email' ) ) {
                         $mail->setReplyTo( $this->_getParam( 'email' ) );

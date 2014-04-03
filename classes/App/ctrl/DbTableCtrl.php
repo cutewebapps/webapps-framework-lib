@@ -240,10 +240,12 @@ abstract class App_DbTableCtrl extends App_AbstractCtrl
             $paramID = $this->_identity;
         } else {
             $paramID = $this->_getParam($strIndentity);
-	    if ( $paramID === NULL ){
+            if ( $paramID == '' ){ $paramID = $this->_getParam( "_id"); }
+            
+	    if ( $paramID == '' ){
                 throw new App_Exception( 'Param ' . $this->_model->getIdentityName()
-                    . ' or should be defined for getAction', 404 );
-                }
+                . ' or should be defined for getAction', 404 );
+            }
         }
         $this->_joinTables();
         $this->_select->where($this->_model->getTableName() . '.' . $strIndentity . ' = ?' , $paramID);
@@ -266,9 +268,11 @@ abstract class App_DbTableCtrl extends App_AbstractCtrl
     public function editAction()
     {
         $this->init();
-	    $strIndentity = $this->_model->getIdentityName();
-	    $paramID = $this->_getParam($strIndentity);
-
+	$strIndentity = $this->_model->getIdentityName();
+	$paramID = $this->_getParam($strIndentity);
+        if ( $paramID == '' ){ $paramID = $this->_getParam( "_id"); }
+            
+            
         if (!$paramID){
             $this->_object = $this->_model->createRow();
 	} else {
@@ -426,6 +430,8 @@ abstract class App_DbTableCtrl extends App_AbstractCtrl
 
         $strIdentity = $this->_model->getIdentityName();
         $paramID    = $this->_getParam($strIdentity);
+        if ( $paramID == '' ){ $paramID = $this->_getParam( "_id"); }
+        
         $paramField = $this->_getParam('field');
         $paramValue = $this->_getParam('value');
 
@@ -459,7 +465,8 @@ abstract class App_DbTableCtrl extends App_AbstractCtrl
         $this->init();
         
     	$paramID = $this->_getParam($this->_model->getIdentityName());
-        if ( $paramID === NULL ) {
+        if ( $paramID == '' ){ $paramID = $this->_getParam( "_id"); }
+        if ( $paramID == '' ) {
             throw new App_Exception('Param ID should be defined for deleteAction');
         }
 

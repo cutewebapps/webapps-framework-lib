@@ -35,7 +35,14 @@ class Sys_Dir
      */
     protected function _replaceBase( $strPath, $strBase )
     {
-        //TODO: replace $strBase with $this->getName()
+        $strPath = str_replace ('\\', '/', $strPath );
+        $nBaseLen = strlen( $strBase );
+        
+        // replace $strBase at the beginning with $this->getName()
+        if ( substr( $strPath, 0, $nBaseLen ) == $this->getName() ) {
+            $strPath = $this->getName() . substr( $strPath, $nBaseLen );
+        }
+        
         return $strPath;
     }
     /**
@@ -133,6 +140,8 @@ class Sys_Dir
         $arrDirs = $dirOriginal->getAllDirs(); sort( $arrDirs );
         foreach ( $arrDirs as $strDir ) {
             $strRelativeDest = $this->_replaceBase( $strDir, $strBase );
+            
+            Sys_Io::out( "Creating " . $strRelativeDest );
             if ( !is_dir( $strRelativeDest )) { mkdir( $strRelativeDest ); }
         }
 
@@ -202,13 +211,21 @@ class Sys_Dir
     }
     
     /**
-     * Getting all folders recursively
+     * Getting all sub folders of current folder recursively
      * @param string $strRegex
-     * @param null|Sys_Dir $dirFolder (optional)
      * @return array
      */
-    public function getAllDirs( $strRegex = '', $dirFolder = null )
+    public function getAllDirs( $strRegex = '' )
     {
-        return $this->getDirs($strRegex);
+        $arrDirs = array();
+        foreach ( $this->getDirs( $strRegex ) as $strDir ) {
+            $arrDirs[ $strDir ] = $strDir;
+            
+            $dirFolder = new Sys_Dir( $strDir );
+            foreach ( $dirFolder->getAllDirs( $strRegex ) as $strSubdir ) {
+                $arrDirs[ $strSubdir ] = $strSubdir;
+            }
+        }
+        return $arrDirs;
     }
 }

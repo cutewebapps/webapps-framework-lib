@@ -31,7 +31,7 @@ class Sys_Cache_File implements Sys_Cache_Abstract {
         
         
         if ( !is_dir( $this->_options['cache_dir'] ) )  {
-            throw new Sys_Exception( 'Cache Dir was not created' );
+            throw new Sys_Exception( 'Cache Dir was not created '.$this->_options['cache_dir'] );
         }        
     }
     

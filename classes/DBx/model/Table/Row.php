@@ -193,4 +193,14 @@ class DBx_Table_Row extends DBx_Table_Row_Abstract
     {
 	return true;
     }
+    
+    /**
+     * 
+     * @return boolean
+     */
+    public function canBeViewed()
+    {
+        return true;
+    }
+
 }

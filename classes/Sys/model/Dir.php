@@ -105,8 +105,9 @@ class Sys_Dir
                         $file->delete();
                     }
                 }
-                if ( $h ) { closedir( $h ); }
             }
+	    if ( $h ) { closedir( $h ); }
+            
         }
     }
     

@@ -17,7 +17,7 @@ class App_AbstractCtrl
 
     /**
      * 
-     * @param type $strParam
+     * @param string $strParam
      * @return boolean
      */
     protected function _hasParam( $strParam )
@@ -32,7 +32,7 @@ class App_AbstractCtrl
     }
     /**
      * 
-     * @param type $strParam
+     * @param string $strParam
      * @return boolean
      */
     public function hasParam( $strParam ) 
@@ -42,18 +42,20 @@ class App_AbstractCtrl
 
     /**
      * 
-     * @param type $strParam
-     * @param type $value
+     * @param string $strParam
+     * @param mixed $value
+     * @return App_AbstractCtrl
      */
     protected function _setParam( $strParam, $value )
     {
        $this->_arrParams[ $strParam ] = $value;
+       return $this;
     }
     /**
      * 
-     * @param type $strParam
-     * @param type $value
-     * @return type
+     * @param string $strParam
+     * @param mixes $value
+     * @return App_AbstractCtrl
      */
     public function setParam( $strParam, $value ) 
     { 
@@ -148,8 +150,8 @@ class App_AbstractCtrl
 
     /**
      * 
-     * @param type $strIndex
-     * @param type $strFileName
+     * @param string $strIndex
+     * @param string $strFileName
      * @return void
      */
     protected function _saveUploaded( $strIndex, $strFileName )
@@ -160,9 +162,9 @@ class App_AbstractCtrl
 
     /**
      * 
-     * @param type $strParam
-     * @param type $strDefault
-     * @return type
+     * @param string  $strParam
+     * @param mixed $strDefault
+     * @return mixed
      */
     protected function _getParam( $strParam, $strDefault = '' )
     {
@@ -181,7 +183,7 @@ class App_AbstractCtrl
     
     /**
      * 
-     * @param stirng $strParam
+     * @param string $strParam
      * @param int $strDefault
      * @return int
      */
@@ -304,7 +306,7 @@ class App_AbstractCtrl
 
     /**
      * should not be used
-     * @param type $strAction
+     * @param string $strAction
      * @throws App_Exception_Inacceptable
      */
     public function _forward( $strAction )
@@ -358,29 +360,43 @@ class App_AbstractCtrl
     protected function _adjustIntParam( $strParam )
     {
         if ( $this->hasParam( $strParam ) ) {
-            if ( $this->_getParam( $strParam ) == 'true' )
+            if ( is_array( $this->_getParam( $strParam ) ) ) {
+                foreach( $this->_getParam( $strParam ) as $sParam ) {
+                    $this->_adjustIntParam( $sParam );
+                }
+            } elseif ( $this->_getParam( $strParam ) == 'true' ) {
                 $this->_setParam( $strParam, 1 );
-            else if ( $this->_getParam( $strParam ) == 'false' )
+            } else if ( $this->_getParam( $strParam ) == 'false' ) {
                 $this->_setParam( $strParam, 0 );
-            else if ( $this->_getParam( $strParam ) == 'on' )
+            } else if ( $this->_getParam( $strParam ) == 'on' ) {
                 $this->_setParam( $strParam, 1 );
-            else if ( $this->_getParam( $strParam ) == 'off' )
+            } else if ( $this->_getParam( $strParam ) == 'off' ) {
                 $this->_setParam( $strParam, 0 );
+            }
         }
     }
   
     /**
+     * Adjust Date Parameter - that is present in the request
+     *
      * @param string $strParam
      * @throws Sys_Date_Exception
      */
     protected function _adjustDateParam( $strParam )
     {
         $format = App_Application::getInstance()->getConfig()->dateformat;
-        if ( !$format )
+        if ( !$format ) {
             throw new App_Exception( 'dateformat was not configured for this application' );
-        
-        $dt = new Sys_Date( $this->_getParam( $strParam ), $format );
-        $this->_setParam( $strParam, $dt->getDate( Sys_Date::ISO ));
+        }
+
+        if ( is_array( $this->_getParam( $strParam ) ) ) {
+            foreach( $this->_getParam( $strParam ) as $sParam ) {
+                $this->_adjustDateParam( $sParam );
+            }
+        } else {
+            $dt = new Sys_Date( $this->_getParam( $strParam ), $format );
+            $this->_setParam( $strParam, $dt->getDate( Sys_Date::ISO ));
+        }
     }
     
      /**
@@ -390,11 +406,18 @@ class App_AbstractCtrl
     protected function _adjustDateTimeParam( $strParam )
     {
         $format = App_Application::getInstance()->getConfig()->dateformat;
-        if ( !$format )
+        if ( !$format ) {
             throw new App_Exception( 'dateformat was not configured for this application' );
-        
-        $dt = new Sys_Date( $this->_getParam( $strParam ), $format );
-        $this->_setParam( $strParam, $dt->getDate( Sys_Date::ISO ).' '.$dt->getTime24());
+        }
+
+        if ( is_array( $this->_getParam( $strParam ) ) ) {
+            foreach( $this->_getParam( $strParam ) as $sParam ) {
+                $this->_adjustDateTimeParam( $sParam );
+            }
+        } else {
+            $dt = new Sys_Date( $this->_getParam( $strParam ), $format );
+            $this->_setParam( $strParam, $dt->getDate( Sys_Date::ISO ).' '.$dt->getTime24());
+        }
     }
     
     
@@ -403,8 +426,9 @@ class App_AbstractCtrl
         $arrErrors = array();
         $arrPushed = array();
         foreach ( $arrConfiguration as $arrParam ) {
-            if ( ! isset( $arrParam['field'] ) )
-                throw new App_Exception('field expected in require configuration');            
+            if ( ! isset( $arrParam['field'] ) ) {
+                throw new App_Exception('field expected in require configuration');
+            }
             $field = $arrParam['field'];
             if ( isset( $arrPushed[ $field ] )) continue; // do not push errors second time for the same fields
             
@@ -444,15 +468,14 @@ class App_AbstractCtrl
                         $arrPushed[ $field ] = 1;
                     }                    
                     break;
-		case 'overzero':
+		        case 'overzero':
                     $bCondition = ( $val < 0 );
                     
                     if ( $bCondition ) {
                         array_push( $arrErrors, array( $field => $strMessage ) ) ;
                         $arrPushed[ $field ] = 1;
                     }
-		    break;
-
+		            break;
 
                 case 'min':
                     if ( ! isset( $arrParam['value'] ) )

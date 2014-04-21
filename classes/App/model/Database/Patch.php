@@ -125,7 +125,18 @@ class App_Database_Patch
                 continue;
             }
 
-            if ( !$this->getDbAdapterRead()->hasTable( $strTable ) ) {
+            $arrMatch = array();
+            $bHasTable = false;
+            if (  preg_match( '@(.+)\.(.+)$@', $strTable, $arrMatch ) ) {
+                // get table presense in case of another database
+                // Sys_Debug::dumpDie( $arrMatch );
+                $bHasTable = $this->getDbAdapterRead()->hasTable( $arrMatch[2], $arrMatch[1]  );
+            } else {
+                $bHasTable = $this->getDbAdapterRead()->hasTable( $strTable );
+            }
+
+
+            if ( ! $bHasTable ) {
                 Sys_Io::out('Creating '.$strTable.' Table');
                 $this->getDbAdapterWrite()->addTableSql( $strTable, $this->_createTableSqlLines( $arrFields ) );
             } else {

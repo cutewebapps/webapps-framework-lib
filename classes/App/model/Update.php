@@ -114,7 +114,7 @@ class App_Update extends DBx_ReadWrite_Object
     {
           $strComponent = strtolower( $this->_strComponent );
           $objConfigCms = App_Application::getInstance()->getConfig()->$strComponent;
-          return ( !is_object( $objConfigCms ) ) false : $objConfigCms->$strParam;
+          return ( !is_object( $objConfigCms ) ) ? false : $objConfigCms->$strParam;
     }
 
     /**

@@ -2,18 +2,27 @@
 
 class App_Database_Patch
 {
-    /* @var DBx_Adapter_Read */
+    /** @var DBx_Adapter_Read */
     public $objReadDb = null;
-    /* @var DBx_Adapter_Write */
+    /** @var DBx_Adapter_Write */
     public $objWriteDb = null;
 
+    /**
+     * @var boolean
+     */
+    public $bDebug = false;
+
+    /**
+     * @var string
+     */
     public $strConnectionIndex = 'default';
 
-    public function __construct( $strConnectionIndex = 'default')
+    public function __construct( $strConnectionIndex = 'default', $bDebug = false )
     {
         $this->objReadDb = DBx_Registry::getInstance()->get( $strConnectionIndex )->getDbAdapterRead();
         $this->objWriteDb = DBx_Registry::getInstance()->get( $strConnectionIndex )->getDbAdapterWrite();
 
+        $this->bDebug = $bDebug;
         $this->strConnectionIndex = $strConnectionIndex;
     }
 
@@ -44,6 +53,16 @@ class App_Database_Patch
         return $this->objWriteDb;
     }
 
+    /**
+     * @param string $sOut
+     * @return void
+     */
+    protected function out( $sOut )
+    {
+        if ( $this->bDebug ) {
+            Sys_Io::out( $sOut );
+        }
+    }
 
     protected function _applyKeySchema( $strTable, $strSqlVal )
     {
@@ -137,7 +156,7 @@ class App_Database_Patch
 
 
             if ( ! $bHasTable ) {
-                Sys_Io::out('Creating '.$strTable.' Table');
+                $this->out('Creating '.$strTable.' Table');
                 $this->getDbAdapterWrite()->addTableSql( $strTable, $this->_createTableSqlLines( $arrFields ) );
             } else {
                 $this->_recheckSchemaFields( $strTable, $arrFields );

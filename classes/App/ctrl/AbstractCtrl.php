@@ -168,6 +168,9 @@ class App_AbstractCtrl
      */
     protected function _getParam( $strParam, $strDefault = '' )
     {
+        if ( $strParam == ''  || $strParam == null ) {
+            throw new App_Exception( 'Trying to query invalid param' );
+        }
         return $this->_hasParam( $strParam ) ? $this->_arrParams[ $strParam ] : $strDefault;
     }
     /**
@@ -359,9 +362,10 @@ class App_AbstractCtrl
      */
     protected function _adjustIntParam( $strParam )
     {
+
         if ( $this->hasParam( $strParam ) ) {
-            if ( is_array( $this->_getParam( $strParam ) ) ) {
-                foreach( $this->_getParam( $strParam ) as $sParam ) {
+            if ( is_array( $strParam ) ) {
+                foreach( $strParam as $sParam ) {
                     $this->_adjustIntParam( $sParam );
                 }
             } elseif ( $this->_getParam( $strParam ) == 'true' ) {
@@ -389,8 +393,8 @@ class App_AbstractCtrl
             throw new App_Exception( 'dateformat was not configured for this application' );
         }
 
-        if ( is_array( $this->_getParam( $strParam ) ) ) {
-            foreach( $this->_getParam( $strParam ) as $sParam ) {
+        if ( is_array( $strParam ) ) {
+            foreach(  $strParam  as $sParam ) {
                 $this->_adjustDateParam( $sParam );
             }
         } else {
@@ -410,8 +414,8 @@ class App_AbstractCtrl
             throw new App_Exception( 'dateformat was not configured for this application' );
         }
 
-        if ( is_array( $this->_getParam( $strParam ) ) ) {
-            foreach( $this->_getParam( $strParam ) as $sParam ) {
+        if ( is_array( $strParam ) ) {
+            foreach( $strParam as $sParam ) {
                 $this->_adjustDateTimeParam( $sParam );
             }
         } else {

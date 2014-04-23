@@ -282,8 +282,8 @@ class App_Dispatcher
         $strClass = Sys_String::toCamelCase( $strModule ) .'_'
             . Sys_String::toCamelCase( $strController ) . 'Ctrl';
         if ( !class_exists( $strClass ) ) {
-            $strClass = Sys_String::toCamelCase( $arrControllerParams['module'] )
-                .'_'.Sys_String::toCamelCase( $arrControllerParams['controller'], '_' ).'Ctrl';
+            $strClass = Sys_String::toCamelCase( $strModule )
+                .'_'.Sys_String::toCamelCase( $strController, '_' ).'Ctrl';
         }
         $arrParams[ 'action' ] = $strAction;
         $arrParams[ 'controller' ] = $strController;
@@ -357,11 +357,12 @@ class App_Dispatcher
             if ( $arrParams['section'] == $strSection ) { $strTheme = $strSectionTheme; break; }
         //  Sys_Debug::dumpDie( 'THEME: '. $strTheme.' for SECTION='.$arrParams['section'] );
 
+        // Sys_Debug::dumpDie( $arrParams );
         $strModule     = $arrParams['module'];
         $strController = $arrParams['controller'];
-        list( $strModule, $strController ) = explode( '_', preg_replace( '/Ctrl$/', '', $strControllerClass ));
+        list( $strModule, $strControllerNotUsed ) = explode( '_', preg_replace( '/Ctrl$/', '', $strControllerClass ));
         $strModule     = Sys_String::toLowerDashedCase( $strModule );
-        $strController = Sys_String::toLowerDashedCase( $strController );
+        // $strController2 = Sys_String::toLowerDashedCase( $strController2 );
 
         $this->_objCurrentController->view->inflection = $arrParams;
 
@@ -398,7 +399,7 @@ class App_Dispatcher
                     .'.' . $this->_objCurrentController->view->getExtension()
             ));
         }
-
+        // Sys_Debug::dump( $arrScriptPaths ); die;
         
         $this->_objCurrentController->view->setPath( $arrScriptPaths );
 

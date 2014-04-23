@@ -127,10 +127,11 @@ class App_Mail_Abstract
      */
     public function setCC( $strCC )
     {
-        if ( is_array( $strCC ))
+        if ( is_array( $strCC )) {
             $this->arrCC = $strCC;
-        else 
+        } else {
             $this->arrCC = array( $strCC );
+        }
         return $this;
     }
     /**
@@ -141,11 +142,14 @@ class App_Mail_Abstract
     public function addCC( $strCC )
     {
         if ( is_array( $strCC )) {
-            foreach ( $strCC as $sCC )
-                if ( !in_array( $sCC, $this->arrCC ) )
+            foreach ( $strCC as $sCC ) {
+                if ( !in_array( $sCC, $this->arrCC ) ) {
                     $this->arrCC[] = $sCC;
-        } else 
+                }
+            }
+        } else {
             $this->arrCC[] = $strCC;
+        }
         return $this;
     }
     
@@ -155,10 +159,11 @@ class App_Mail_Abstract
      */
     public function setBCC( $strBCC )
     {
-        if ( is_array( $strBCC ))
+        if ( is_array( $strBCC )) {
             $this->arrBCC = $strBCC;
-        else 
+        } else {
             $this->arrBCC = array( $strBCC );
+        }
         return $this;
     }
    /**
@@ -169,11 +174,14 @@ class App_Mail_Abstract
     public function addBCC( $strCC )
     {
         if ( is_array( $strCC )) {
-            foreach ( $strCC as $sCC )
-                if ( !in_array( $sCC, $this->arrBCC ) )
+            foreach ( $strCC as $sCC ) {
+                if ( !in_array( $sCC, $this->arrBCC ) ) {
                     $this->arrBCC[] = $sCC;
-        } else 
+                }
+            }
+        } else {
             $this->arrBCC[] = $strCC;
+        }
         return $this;
     }
 

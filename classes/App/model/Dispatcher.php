@@ -281,7 +281,10 @@ class App_Dispatcher
     {
         $strClass = Sys_String::toCamelCase( $strModule ) .'_'
             . Sys_String::toCamelCase( $strController ) . 'Ctrl';
-
+        if ( !class_exists( $strClass ) ) {
+            $strClass = Sys_String::toCamelCase( $arrControllerParams['module'] )
+                .'_'.Sys_String::toCamelCase( $arrControllerParams['controller'], '_' ).'Ctrl';
+        }
         $arrParams[ 'action' ] = $strAction;
         $arrParams[ 'controller' ] = $strController;
         $arrParams[ 'module' ] = $strModule;
@@ -315,7 +318,7 @@ class App_Dispatcher
         $this->_log( $arrParams );
         $strControllerAction = Sys_String::toCamelCase( $strAction ).'Action';
 
-	if ( !class_exists( $strControllerClass ) ) {
+        if ( !class_exists( $strControllerClass ) ) {
             throw new App_Exception_PageNotFound( 'No controller class for this call' );
         }
         if ( !method_exists($strControllerClass, $strControllerAction ) ) {
@@ -781,6 +784,11 @@ class App_Dispatcher
                 $strControllerClass = Sys_String::toCamelCase( $arrControllerParams['module'] )
                     .'_'.Sys_String::toCamelCase( $arrControllerParams['controller'] ).'Ctrl';
                 $strControllerAction = $arrControllerParams['action'];
+
+                if ( !class_exists( $strControllerClass ) ) {
+                    $strControllerClass = Sys_String::toCamelCase( $arrControllerParams['module'] )
+                        .'_'.Sys_String::toCamelCase( $arrControllerParams['controller'], '_' ).'Ctrl';
+                }
             }
 
             if ( !isset( $arrControllerParams[ 'section' ] ) || $arrControllerParams[ 'section' ] == '' ) {

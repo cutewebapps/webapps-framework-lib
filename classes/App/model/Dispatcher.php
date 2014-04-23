@@ -262,6 +262,7 @@ class App_Dispatcher
             if ( $strConfigTheme == $strTheme ) { return $strSection; }
         return '';
     }
+
     protected function _getSectionFromSlug( $strSlug )
     {
         if ( !$this->getConfig()->user )
@@ -277,18 +278,67 @@ class App_Dispatcher
         }
         return '';
     }
-    public function runAction( $strAction, $strController, $strModule, $arrParams = array() )
+
+
+    protected function _codedClass( array $arrParts, $sBinCode )
+    {
+        $arrRes = array();
+        $nOffs = 0;
+        foreach ( $arrParts as $sPart ) {
+            $arrRes[] = $sPart;
+            if ( substr( $sBinCode, $nOffs, 1 ) == 1 ) {
+                $arrRes[] = '_';
+            }
+            $nOffs ++;
+        }
+        return implode( '', $arrRes );
+    }
+
+    protected function _getClassNameCombos( $arrParts )
+    {
+        $arrRes = array();
+        $nLength = count( $arrParts ) - 1;
+        $nCombos = pow(2, $nLength);
+        for ( $n = 0; $n < $nCombos; $n++ ) {
+             $sBinCode = sprintf( '%0'.$nLength.'b', $n );
+             $arrRes[] = $this->_codedClass( $arrParts, $sBinCode );
+        }
+        return $arrRes;
+    }
+
+    protected function _getControllerClass( $strModule, $strController )
     {
         $strClass = Sys_String::toCamelCase( $strModule ) .'_'
             . Sys_String::toCamelCase( $strController ) . 'Ctrl';
-        if ( !class_exists( $strClass ) ) {
+        if ( ! class_exists( $strClass ) ) {
             $strClass = Sys_String::toCamelCase( $strModule )
                 .'_'.Sys_String::toCamelCase( $strController, '_' ).'Ctrl';
         }
+
+        if ( ! class_exists( $strClass )) {
+            $arrParts = explode( "*", Sys_String::toCamelCase( $strController, '*' ));
+            $arrCombos = $this->_getClassNameCombos( $arrParts );
+            // Sys_Debug::dumpDie(  $arrCombos );
+
+            foreach( $arrCombos as $strPossibleClass ) {
+                $strAttempt = Sys_String::toCamelCase( $strModule ) .'_'.$strPossibleClass.'Ctrl';
+                if( class_exists( $strAttempt )) {
+                    $strClass = $strAttempt; break;
+                }
+            }
+        }
+
+        // Sys_Debug::dumpDie(  $strClass );
+        return $strClass;
+    }
+
+    public function runAction( $strAction, $strController, $strModule, $arrParams = array() )
+    {
+
         $arrParams[ 'action' ] = $strAction;
         $arrParams[ 'controller' ] = $strController;
         $arrParams[ 'module' ] = $strModule;
-        return $this->runControllerAction( $strAction, $strClass, $arrParams );
+        return $this->runControllerAction( $strAction, $this->_getControllerClass( $strModule, $strController ), $arrParams );
     }
     protected function _log( $arrParams )
     {
@@ -363,6 +413,7 @@ class App_Dispatcher
         list( $strModule, $strControllerNotUsed ) = explode( '_', preg_replace( '/Ctrl$/', '', $strControllerClass ));
         $strModule     = Sys_String::toLowerDashedCase( $strModule );
         // $strController2 = Sys_String::toLowerDashedCase( $strController2 );
+
 
         $this->_objCurrentController->view->inflection = $arrParams;
 
@@ -782,14 +833,9 @@ class App_Dispatcher
             if ( isset( $arrControllerParams['module'] ) &&
                     isset( $arrControllerParams['controller'] ) &&
                     isset( $arrControllerParams['action'] ) ) {
-                $strControllerClass = Sys_String::toCamelCase( $arrControllerParams['module'] )
-                    .'_'.Sys_String::toCamelCase( $arrControllerParams['controller'] ).'Ctrl';
-                $strControllerAction = $arrControllerParams['action'];
 
-                if ( !class_exists( $strControllerClass ) ) {
-                    $strControllerClass = Sys_String::toCamelCase( $arrControllerParams['module'] )
-                        .'_'.Sys_String::toCamelCase( $arrControllerParams['controller'], '_' ).'Ctrl';
-                }
+                $strControllerAction = $arrControllerParams['action'];
+                $strControllerClass = $this->_getControllerClass(  $arrControllerParams['module'], $arrControllerParams['controller'] );
             }
 
             if ( !isset( $arrControllerParams[ 'section' ] ) || $arrControllerParams[ 'section' ] == '' ) {

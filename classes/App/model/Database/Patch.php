@@ -24,6 +24,7 @@ class App_Database_Patch
 
         $this->bDebug = $bDebug;
         $this->strConnectionIndex = $strConnectionIndex;
+        $this->metadata = array();
     }
 
     /**
@@ -66,31 +67,42 @@ class App_Database_Patch
 
     protected function _applyKeySchema( $strTable, $strSqlVal )
     {
+        // $this->out( '_applyKeySchema( '.$strTable.': '.$strSqlVal );
     }
 
 
     protected function _deleteColumnSchema( $strTable, $strColumn )
     {
-        $dbRead = $this->getDbAdapterRead();
+        $dbRead = $this->getDSbAdapterRead();
         $metadata = $dbRead->describeTable( $strTable, null );
+
+        $this->out( '_deleteColumnSchema( '.$strTable.': '.$strColumn );
 
         $this->getDbAdapterWrite()->queryWrite(
             'ALTER TABLE `'.$strTable.'` DROP COLUMN `'.$strColumn.'`' );
     }
 
-    protected function _applyColumnSchema( $strTable, $strSqlVal )
+    protected function _applyColumnSchema( $strTable, $strColumn, $strSqlVal )
     {
-        $dbRead = $this->getDbAdapterRead();
-        $metadata = $dbRead->describeTable( $strTable, null );
+       // $this->out( '_applyColumnSchema( '.$strTable.') COLUMN='.$strColumn.', VALUE="'.$strSqlVal.'" ' );
 
-        // TODO: smarter column modification
-        // $this->getDbAdapterWrite()->queryWrite(
-        // 'ALTER TABLE `'.$strTable.'` MODIFY COLUMN `'.$strColumn.'`' );
+        if ( isset( $this->metadata[$strTable][$strColumn] )) {
+            // print_r( $this->metadata[$strTable][ $strColumn ] ); die;
+            // TODO: check column could be updated....
+            // $this->getDbAdapterWrite()->queryWrite(
+            // 'ALTER TABLE `'.$strTable.'` MODIFY COLUMN `'.$strColumn.'`' );
+        } else {
+            $this->out( "CREATING NEW COLUMN ".$strTable.' '.$strColumn );
+            $this->getDbAdapterWrite()->queryWrite(
+                'ALTER TABLE '.$strTable.' ADD COLUMN `'.$strColumn.'` '.$strSqlVal );
+        }
+
     }
 
     protected function _recheckTableDropped( $strTable )
     {
         if ( $this->getDbAdapterRead()->hasTable( $strTable ) ) {
+            $this->out( 'dropping table'.$strTable.' ' );
             $this->getDbAdapterWrite()->queryWrite( 'DROP TABLE IF EXISTS `'.$strTable.'`' );
         }
     }
@@ -102,13 +114,16 @@ class App_Database_Patch
      */
     protected function _recheckSchemaFields( $strTable, array $arrFields )
     {
+        $dbRead = $this->getDbAdapterRead();
+        $this->metadata[ $strTable ]= $dbRead->describeTable( $strTable, null );
+
         foreach ( $arrFields as $strSqlKey => $strSqlVal ) {
             if ( preg_match( '/^\!/', $strSqlVal ) ) {
                 $this->_deleteColumnSchema( $strTable, substr( $strSqlVal, 1 ) );
             } elseif ( preg_match( '/^\d+$/', $strSqlKey ) ) {
                 $this->_applyKeySchema( $strTable, $strSqlVal );
             } else {
-                $this->_applyColumnSchema( $strTable, $strSqlVal );
+                $this->_applyColumnSchema( $strTable, $strSqlKey, $strSqlVal );
             }
         }
     }
@@ -159,6 +174,7 @@ class App_Database_Patch
                 $this->out('Creating '.$strTable.' Table');
                 $this->getDbAdapterWrite()->addTableSql( $strTable, $this->_createTableSqlLines( $arrFields ) );
             } else {
+                $this->out('Reviewing  '.$strTable.' Table');
                 $this->_recheckSchemaFields( $strTable, $arrFields );
             }
         }

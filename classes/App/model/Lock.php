@@ -40,7 +40,7 @@ class App_Lock
      * @return lock physical filename
      */
 
-    protected function getLockFile()
+    public function getLockFile()
     {
         return $this->getLocksDir() . '/' . $this->strFunctionName . '';
     }

@@ -95,6 +95,10 @@ class DBx_Table_Row extends DBx_Table_Row_Abstract
         return new $strTableClass();
     }
 
+
+    /**
+      * @return int
+      */
     public function getId()
     {
         $strIdFieldName = $this->_table->getIdentityName();
@@ -113,6 +117,9 @@ class DBx_Table_Row extends DBx_Table_Row_Abstract
         return TRUE;
     }
 
+    /**
+      * @return mixed
+      */
     public function getOldData($strFieldName)
     {
         if (!in_array($strFieldName, array_keys($this->_cleanData))){
@@ -166,6 +173,34 @@ class DBx_Table_Row extends DBx_Table_Row_Abstract
     		$objResult = $tblObject->find( $this->$strJoinedField )->current();
     	}
     	return $objResult;
+    }
+
+
+    /**
+      * function for further overloading
+      * @return boolean
+      */
+    public function canBeEdited()
+    {
+	return true;
+    }
+
+    /**
+      * function for further overloading
+      * @return boolean
+      */
+    public function canBeDeleted()
+    {
+	return true;
+    }
+    
+    /**
+     * 
+     * @return boolean
+     */
+    public function canBeViewed()
+    {
+        return true;
     }
 
 }

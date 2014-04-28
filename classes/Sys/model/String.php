@@ -93,13 +93,15 @@ class Sys_String {
      * widely used in class, packages, uri, and function namings
      * @param string $str
      */
-    public static function toCamelCase( $str ) {
+    public static function toCamelCase( $str, $chReplaceDash  = '' ) {
         $o = ''; $bNextUpper = true;
         for($i = 0; $i < strlen ( $str ); $i ++) {
             $ch = substr ( $str, $i, 1 );
             
             if ($i > 0 && $ch == '-' ) {
-                /*$o .= '-'; */$bNextUpper = true;
+                /*$o .= '-'; */
+                $o .= $chReplaceDash;
+                $bNextUpper = true;
             } else {
                 if ( $bNextUpper ) {
                     $o .= strtoupper ( $ch );

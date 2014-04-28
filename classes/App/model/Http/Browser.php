@@ -16,7 +16,8 @@ class App_Http_Browser
     public $HttpBody;
     public $Info = array(); //info from last request
 
-
+    public $sUserPwd =  '';
+    
     public $bNoFollow = false;
     /**
      * @var integer
@@ -41,7 +42,7 @@ class App_Http_Browser
         if ( isset($_f) && is_array($_f) ){
             $i=0;
             foreach ($_f as $key=>$value){
-                if($i>0) $params .= '&';
+                if($i>0) { $params .= '&'; }
                 $params.=$key . '=' . urlencode($value); $i++;
             }
         }
@@ -75,7 +76,9 @@ class App_Http_Browser
                         $status = $matches[2];
                 }
                 unset( $a[ $key ] );
-            } else break;
+            } else {
+                break;
+            }
         }
 
         $this->HttpStatus  = $status;
@@ -90,6 +93,17 @@ class App_Http_Browser
     public function getLocation()
     {
         return trim( Sys_String::x( '@Location:(.+)\s@simU', $this->HttpHeaders.' ' ) );
+    }
+    /**
+     * 
+     * @param string $strUser
+     * @param string $strPassword
+     * @return \App_Http_Browser
+     */
+    public function setUserPwd( $strUser, $strPassword = '' )
+    {
+        $this->sUserPwd = ( $strUser != '' ) ? $strUser.':'.$strPassword : '';    
+        return $this;
     }
     
     /**
@@ -159,10 +173,11 @@ class App_Http_Browser
             $arrParams = $arrData;
             foreach ( $arrFiles as $strFieldName => $strFileName ) {
 
-		if ( class_exists( "CurlFile" ))
+		if ( class_exists( "CurlFile" )) {
 	                $arrParams[ $strFieldName ] = new CurlFile( $strFileName, $this->_get_mime( $strFileName ), basename( $strFileName ) );
-		else 
+                } else  {
 			$arrParams[ $strFieldName ] = '@'.$strFileName;
+                }
             }
             curl_setopt( $this->curl, CURLOPT_POSTFIELDS, $arrParams );
         } else {
@@ -183,6 +198,80 @@ class App_Http_Browser
         return $this;
     }
 
+    
+    /**
+     * @param string $strUrl
+     * @param array $arrData
+     * @param array $arrFiles
+     * @return App_Http_Browser
+     */
+    public function httpPut( $strUrl, $arrData, $arrFiles = array(), $arrHeaders = array() )
+    {
+        $this->init();
+        if ( $this->LastHttpUrl != '' ) {
+            curl_setopt($this->curl, CURLOPT_REFERER, $this->LastHttpUrl );
+        }
+
+        curl_setopt( $this->curl, CURLOPT_URL, $strUrl );
+	curl_setopt( $this->curl, CURLOPT_CUSTOMREQUEST, "PUT");
+        curl_setopt( $this->curl, CURLOPT_HTTPHEADER, $arrHeaders );
+        
+        if ( count( $arrFiles ) > 0 ) {
+            $arrParams = $arrData;
+            foreach ( $arrFiles as $strFieldName => $strFileName ) {
+		if ( class_exists( "CurlFile" )) {
+	                $arrParams[ $strFieldName ] = new CurlFile( $strFileName, $this->_get_mime( $strFileName ), basename( $strFileName ) );
+                } else  {
+			$arrParams[ $strFieldName ] = '@'.$strFileName;
+                }
+            }
+            curl_setopt( $this->curl, CURLOPT_POSTFIELDS, $arrParams );
+        } else {
+            curl_setopt( $this->curl, CURLOPT_POSTFIELDS, http_build_query( $arrData ) );
+        }
+
+        $buff = curl_exec( $this->curl );
+
+        $this->errorMsg = curl_error( $this->curl );
+        $this->errorNumber = curl_errno( $this->curl );
+        $this->Info = curl_getinfo($this->curl);
+        curl_close( $this->curl );
+        if ( $this->errorNumber != 0 ) {
+            throw new App_Http_Exception( $this->errorMsg );
+        }
+        $this->LastHttpUrl = $strUrl;
+        $this->_parseResponse( $buff );
+        return $this;
+    }
+    
+    /**
+     * @param string $strUrl
+     * @return App_Http_Browser
+     */
+    public function httpDelete( $strUrl, $arrHeaders = array() )
+    {
+        $this->init();
+        if ( $this->LastHttpUrl != '' ) {
+            curl_setopt($this->curl, CURLOPT_REFERER, $this->LastHttpUrl );
+        }
+
+        curl_setopt( $this->curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+        curl_setopt( $this->curl, CURLOPT_HTTPHEADER, $arrHeaders );
+        curl_setopt( $this->curl, CURLOPT_URL, $strUrl );
+        $buff = curl_exec( $this->curl );
+
+        $this->errorMsg = curl_error( $this->curl );
+        $this->errorNumber = curl_errno( $this->curl );
+        $this->Info = curl_getinfo($this->curl);
+        curl_close( $this->curl );
+        if ( $this->errorNumber != 0 ) {
+            throw new App_Http_Exception( $this->errorMsg );
+        }
+        $this->LastHttpUrl = $strUrl;
+        $this->_parseResponse( $buff );
+        return $this;
+    }
+    
     /**
      * 
      * @param string  $strUrl
@@ -249,6 +338,12 @@ class App_Http_Browser
             curl_setopt($this->curl, CURLOPT_COOKIEJAR,  $this->CookieFile );
             curl_setopt($this->curl, CURLOPT_COOKIEFILE, $this->CookieFile );
         }
+        
+        if ( $this->sUserPwd != '' ) {
+            curl_setopt( $this->curl, CURLOPT_USERPWD, $this->sUserPwd );
+            curl_setopt( $this->curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC );
+        }
+        
         return $this;
     }
 
@@ -295,8 +390,9 @@ class App_Http_Browser
    */
     public function relUrlToAbs( $rel, $base )
     {
-        if ( $rel == '' )
+        if ( $rel == '' ) {
             return $base;
+        }
 
         /* return if already absolute URL */
         if (parse_url($rel, PHP_URL_SCHEME) != '') return $rel;
@@ -322,7 +418,7 @@ class App_Http_Browser
 
         /* destroy path if relative url points to root */
         if ( isset( $rel[0] )) {
-            if ($rel[0] == '/') $path = '';
+            if ($rel[0] == '/') { $path = ''; }
         }
 
         /* dirty absolute URL */

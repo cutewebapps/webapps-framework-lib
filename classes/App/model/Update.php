@@ -27,9 +27,13 @@ class App_Package_List extends DBx_Table_Rowset
 
 class App_Package extends DBx_Table_Row
 {
+    /** @return string */
     public static function getClassName() { return 'App_Package'; }
+    /** @return string */
     public static function TableClass() { return self::getClassName().'_Table'; }
+    /** @return mixed */
     public static function Table() { $strClass = self::TableClass();  return new $strClass; }
+    /** @return string */
     public static function TableName() { return self::Table()->getTableName(); }
 }
 
@@ -38,12 +42,26 @@ class App_Update extends DBx_ReadWrite_Object
     protected $_strComponent;
     protected $_strOldVersion = '0.0.0';
     protected $_objPackage = null;
-    
+
+    /**
+     * @return string
+     */
     public static function getClassName() { return 'App_Update'; }
+
+    /**
+     * @return string
+     */
     protected function _getComponentName() { return $this->_strComponent; }
+
+    /**
+     * @return string
+     */
     protected function _getOldVersion() { return $this->_strOldVersion; }
+
     // for sub-class overloading
     public function update() {}
+
+
     public function __construct( $strComponent, $strConnectionIndex )
     {
         $this->setDbIndex( $strConnectionIndex );
@@ -62,13 +80,21 @@ class App_Update extends DBx_ReadWrite_Object
         }
         
     }
+
+    /**
+     * @param string $version
+     * @return bool
+     */
     public function isVersionBelow($version)
     {
         $version = strtolower($version);
         $version = preg_replace('/(\d)pr(\d?)/', '$1a$2', $version);
         return version_compare($version, strtolower( $this->_getOldVersion() )) > 0;
     }
-    
+
+    /**
+     * @param string $strNewVersion
+     */
     public function save( $strNewVersion )
     {
         if ( $strNewVersion == $this->_getOldVersion() )
@@ -79,52 +105,62 @@ class App_Update extends DBx_ReadWrite_Object
         $this->_objPackage->save();
         $this->_strOldVersion = $strNewVersion;
     }
+
     /**
-     * whether option is enabled in component section of the config
-     * @return boolean 
+     * returns whether option is enabled in component section of the config
+     * @return bool
      */
     public function isEnabled( $strParam )
     {
           $strComponent = strtolower( $this->_strComponent );
           $objConfigCms = App_Application::getInstance()->getConfig()->$strComponent;
-          if ( !is_object( $objConfigCms ) )
-                return false;
-          return $objConfigCms->$strParam;
+          return ( !is_object( $objConfigCms ) ) ? false : $objConfigCms->$strParam;
     }
+
+    /**
+     * @param string $strComponent
+     * @return string
+     */
     private function _getPackageVersion( $strComponent )
     {
-        // $strSelect = 'SELECT package_version FROM host_packages WHERE package_name=\''.$strComponent.'\' ';
-        // $arrResult = $this->getDbAdapterRead()->fetchRow( $strSelect );
-        
         $tbl = App_Package::Table();
         $selectPackage = $tbl->select()->where ( 'package_name = ? ', $strComponent );
         $this->_objPackage = $tbl->fetchRow( $selectPackage );
 
+        $sResult = '0.0.0';
         if ( !is_object( $this->_objPackage )  ) {
             $this->_objPackage = $tbl->createRow();
             $this->_objPackage->package_name = $strComponent;
-            return '0.0.0';
+
+        } else {
+            $sResult = $this->_objPackage->package_version;
         }
-        else 
-            return $this->_objPackage->package_version;
+        return $sResult;
     }
+
+
+    /**
+     * @param array $arrNamespaces
+     * @param string $strConnectionIndex
+     * @throws App_Exception
+     */
     public static function run( $arrNamespaces, $strConnectionIndex = 'default' )
     {
-        if ( Sys_Global::get( 'Environment') == '' )
+        if ( Sys_Global::get( 'Environment') == '' ) {
             throw new App_Exception( 'Running patch interface without environment defined' );
+        }
 
-        if ( ! DBx_Registry::getInstance()->hasConnection( $strConnectionIndex ))
+        if ( ! DBx_Registry::getInstance()->hasConnection( $strConnectionIndex ))  {
             return ;
-        
+        }
+
         /* @var DBx_Adapter_Read */
         $objReadDb = DBx_Registry::getInstance()->get( $strConnectionIndex )->getDbAdapterRead();
         /* @var DBx_Adapter_Write */
         $objWriteDb = DBx_Registry::getInstance()->get( $strConnectionIndex )->getDbAdapterWrite();
         
         $objCache = DBx_Registry::getInstance()->get( $strConnectionIndex )->getCache();        
-        if ( is_object( $objCache )) $objCache->clean();
-        
-        
+        if ( is_object( $objCache )) { $objCache->clean(); }
 
         if ( !$objReadDb->hasTable( 'host_packages' ) ) {
             Sys_Io::out( 'adding table of packages' );
@@ -143,7 +179,8 @@ class App_Update extends DBx_ReadWrite_Object
             $strUpdateClassFile = $strNamespaceDir . '/Update.php';
             // Sys_Debug::dump( $strUpdateClassFile );
             if ( file_exists( $strUpdateClassFile )) {
-                require_once( $strUpdateClassFile );
+
+                require_once  $strUpdateClassFile;
                 // Get Version of namespace
                 $strClass = $strNamespace .'_Update';
                 $objUpdate = new $strClass( $strNamespace, $strConnectionIndex );
@@ -151,6 +188,17 @@ class App_Update extends DBx_ReadWrite_Object
             }
         }
         
-        if ( is_object( $objCache )) $objCache->clean();
+        if ( is_object( $objCache )) { $objCache->clean(); }
     }
+
+    /**
+     * @param array $arrSchema
+     * @param string $strConnectionIndex
+     */
+    public function applySchema( $arrSchema, $strConnectionIndex  = 'default' )
+    {
+        $patch = new App_Database_Patch( $strConnectionIndex );
+        $patch->applySchema( $arrSchema );
+    }
+
 }

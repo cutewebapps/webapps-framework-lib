@@ -137,14 +137,15 @@ class DBx_ReadWrite_Object extends DBx_ReadWrite_Abstract
         return true;
     }
 
-    public function disconnect()
+    public function disconnect( $bVirtual = true )
     {
-        /*
-        if ( null != $this->_objAdapterR  )
-            if ( !$this->_objAdapterR->disconnect() ) return false;
-        if ( null != $this->_objAdapterW  )
-            if ( !$this->_objAdapterW->disconnect() ) return false;
-         */
+	if ( ! $bVirtual ) {
+        	if ( $this->_objAdapterR ) $this->_objAdapterR->disconnect();
+	        if ( $this->_objAdapterW  && $this->_objAdapterR != $this->_objAdapterW ) $this->_objAdapterW->disconnect();
+	}
+
+        $this->_objAdapterR  = null;
+	$this->_objAdapterW  = null;
         return true;
     }
 

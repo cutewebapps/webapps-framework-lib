@@ -182,6 +182,14 @@ class DBx_Registry
         }
         return $this->_arrDbHandlers[ $strConnectionName ];
     }
+
+    /** @return DBx_Registry */
+    public function disconnect(  $strConnectionName = 'default' )
+    {
+	$this->_arrDbHandlers[ $strConnectionName ]->disconnect();
+	return $this;
+    }
+
     /**
      * 
      * @return array of DBx_ReadWrite_Object

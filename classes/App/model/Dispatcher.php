@@ -408,12 +408,17 @@ class App_Dispatcher
             if ( $arrParams['section'] == $strSection ) { $strTheme = $strSectionTheme; break; }
         //  Sys_Debug::dumpDie( 'THEME: '. $strTheme.' for SECTION='.$arrParams['section'] );
 
-        // Sys_Debug::dump( $this->_objCurrentController );
+        // Sys_Debug::dump( $strControllerClass );
         $strModule     = $arrParams['module'];
         $strController = $arrParams['controller'];
-        list( $strModule, $strThemeController ) = explode( '_', preg_replace( '/Ctrl$/', '', $strControllerClass ));
+        $arrParts = explode( '_', preg_replace( '/Ctrl$/', '', $strControllerClass ));
+        list( $strModule, $strThemeController ) = $arrParts;
+        unset( $arrParts[0] ); unset( $arrParts[1] );
         $strModule     = Sys_String::toLowerDashedCase( $strModule );
         $strThemeController = Sys_String::toLowerDashedCase( $strThemeController );
+        foreach( $arrParts as $sPart ) {
+            $strThemeController .= '-'.strtolower($sPart);
+        }
 
 
         $this->_objCurrentController->view->inflection = $arrParams;
@@ -451,7 +456,7 @@ class App_Dispatcher
                     .'.' . $this->_objCurrentController->view->getExtension()
             ));
         }
-        // Sys_Debug::dump(  $strThemeController ); die;
+        //Sys_Debug::dump( $strThemeController ); die;
         
         $this->_objCurrentController->view->setPath( $arrScriptPaths );
 

@@ -15,14 +15,18 @@ function exceptionErrorHandler($errno, $errstr, $errfile, $errline )
 {
     global $_EXCEPTION_WAS_CAUGHT;
     $_EXCEPTION_WAS_CAUGHT = 1;
-    
+
     throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 }
 function shutdownErrorHandler()
 {
     global $_EXCEPTION_WAS_CAUGHT;
     if ( isset( $_EXCEPTION_WAS_CAUGHT) && $_EXCEPTION_WAS_CAUGHT == 1 ) return;
-    
+
+    if ( PHP_SAPI != "cli" && !headers_sent() ) {
+        http_response_code( 501 );
+    }
+
     $last_error = error_get_last();
     if ( !isset( $last_error['message'] ) ) return;
 
@@ -881,14 +885,13 @@ class App_Dispatcher
             echo $this->runControllerAction(  'access-denied', $this->_strDefaultController, $arrControllerParams );
 
         } catch ( App_Exception_ServerError $exception ) {
-
             echo $this->runControllerAction(  'server-error', $this->_strDefaultController, $arrControllerParams );
             
         } catch ( Exception $exception ) {
 
             $ex = new App_Exception_Handler();
             $ex->process( $exception ); // - save into logs and mail if configured
-            
+
             $confException = $this->getConfig()->exceptions;
             if  (is_object(  $confException ) ) {
                 

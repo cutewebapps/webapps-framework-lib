@@ -169,6 +169,9 @@ class App_Exception_Handler
 
     public function process( $exception )
     {
+        if ( PHP_SAPI != "cli" && !headers_sent() ) {
+            http_response_code( 501 );
+        }
         $confException = $this->getConfig()->exceptions;
         if  (is_object(  $confException ) ) {
             if ( $confException->log )  $this->log( $exception );

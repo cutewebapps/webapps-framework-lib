@@ -23,12 +23,11 @@ function shutdownErrorHandler()
     global $_EXCEPTION_WAS_CAUGHT;
     if ( isset( $_EXCEPTION_WAS_CAUGHT) && $_EXCEPTION_WAS_CAUGHT == 1 ) return;
 
+    $last_error = error_get_last();
+    if ( !isset( $last_error['message'] ) ) return;
     if ( PHP_SAPI != "cli" && !headers_sent() ) {
         http_response_code( 501 );
     }
-
-    $last_error = error_get_last();
-    if ( !isset( $last_error['message'] ) ) return;
 
     $strErrorMessage = $last_error['message'];
     if ( isset( $last_error['file'] ) )
@@ -507,6 +506,9 @@ class App_Dispatcher
                     case 'csv' :
                         header( 'Content-Type: text/plain; charset='.$strCharset );
                         break;
+                    //case 'json' :
+                    //    header( 'Content-Type: application/json; charset='.$strCharset );
+                    //    break;
                 }
             }
 

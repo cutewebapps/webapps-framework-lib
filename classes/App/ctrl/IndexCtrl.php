@@ -52,7 +52,7 @@ class App_IndexCtrl extends App_WebsiteCtrl
 
     public function pageNotFoundAction() 
     {
-        if ( !headers_sent()) {
+        if ( PHP_SAPI != "cli" && !headers_sent()) {
             header('HTTP/1.1 404 Page Not Found');
         }
         if ( is_object( App_Application::getInstance()->getConfig()->lang ) ) {
@@ -63,7 +63,7 @@ class App_IndexCtrl extends App_WebsiteCtrl
 
     public function accessDeniedAction() 
     {
-        if ( !headers_sent()) {
+        if ( PHP_SAPI != "cli" && !headers_sent()) {
             header('HTTP/1.1 403 Access Denied');
         }
         $this->setRender( '403' );
@@ -71,7 +71,7 @@ class App_IndexCtrl extends App_WebsiteCtrl
 
     public function serverErrorAction() 
     {
-        if ( !headers_sent()) {
+        if ( PHP_SAPI != "cli" && !headers_sent()) {
             header('HTTP/1.1 501 Server Error');
         }
         $this->setRender( '501' );

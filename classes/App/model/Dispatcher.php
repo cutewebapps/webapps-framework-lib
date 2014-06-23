@@ -15,16 +15,19 @@ function exceptionErrorHandler($errno, $errstr, $errfile, $errline )
 {
     global $_EXCEPTION_WAS_CAUGHT;
     $_EXCEPTION_WAS_CAUGHT = 1;
-    
+
     throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 }
 function shutdownErrorHandler()
 {
     global $_EXCEPTION_WAS_CAUGHT;
     if ( isset( $_EXCEPTION_WAS_CAUGHT) && $_EXCEPTION_WAS_CAUGHT == 1 ) return;
-    
+
     $last_error = error_get_last();
     if ( !isset( $last_error['message'] ) ) return;
+    if ( PHP_SAPI != "cli" && !headers_sent() ) {
+        http_response_code( 501 );
+    }
 
     $strErrorMessage = $last_error['message'];
     if ( isset( $last_error['file'] ) )
@@ -371,6 +374,7 @@ class App_Dispatcher
         if ( !class_exists( $strControllerClass ) ) {
             throw new App_Exception_PageNotFound( 'No controller class for this call' );
         }
+
         if ( !method_exists($strControllerClass, $strControllerAction ) ) {
             throw new App_Exception_PageNotFound( 'No action for this controller' );
         }
@@ -407,12 +411,17 @@ class App_Dispatcher
             if ( $arrParams['section'] == $strSection ) { $strTheme = $strSectionTheme; break; }
         //  Sys_Debug::dumpDie( 'THEME: '. $strTheme.' for SECTION='.$arrParams['section'] );
 
-        // Sys_Debug::dumpDie( $arrParams );
+        // Sys_Debug::dump( $strControllerClass );
         $strModule     = $arrParams['module'];
         $strController = $arrParams['controller'];
-        list( $strModule, $strControllerNotUsed ) = explode( '_', preg_replace( '/Ctrl$/', '', $strControllerClass ));
+        $arrParts = explode( '_', preg_replace( '/Ctrl$/', '', $strControllerClass ));
+        list( $strModule, $strThemeController ) = $arrParts;
+        unset( $arrParts[0] ); unset( $arrParts[1] );
         $strModule     = Sys_String::toLowerDashedCase( $strModule );
-        // $strController2 = Sys_String::toLowerDashedCase( $strController2 );
+        $strThemeController = Sys_String::toLowerDashedCase( $strThemeController );
+        foreach( $arrParts as $sPart ) {
+            $strThemeController .= '-'.strtolower($sPart);
+        }
 
 
         $this->_objCurrentController->view->inflection = $arrParams;
@@ -437,7 +446,7 @@ class App_Dispatcher
         if ( $this->_objCurrentController->getRender() == ""  ) {
             return "";
         }
-        
+
         foreach ( $arrThemes as $strThemeName ) {
             $arrScriptPaths []= implode( '/', array(
                 CWA_APPLICATION_DIR,
@@ -445,12 +454,12 @@ class App_Dispatcher
                 $strThemeName,
                 $arrParams['section'],
                 $strModule,
-                $strController,
+                $strThemeController,
                 $this->_objCurrentController->getRender() . $strSuffix
                     .'.' . $this->_objCurrentController->view->getExtension()
             ));
         }
-        // Sys_Debug::dump( $arrScriptPaths ); die;
+        //Sys_Debug::dump( $strThemeController ); die;
         
         $this->_objCurrentController->view->setPath( $arrScriptPaths );
 
@@ -497,6 +506,9 @@ class App_Dispatcher
                     case 'csv' :
                         header( 'Content-Type: text/plain; charset='.$strCharset );
                         break;
+                    //case 'json' :
+                    //    header( 'Content-Type: application/json; charset='.$strCharset );
+                    //    break;
                 }
             }
 
@@ -766,7 +778,7 @@ class App_Dispatcher
                         break;
                     case 'static' : default:
                         
-                        if ( $bShouldBeChecking && ( $strUrl == $strRoute || $strUrl == $strRoute .'/' ) ) {
+                        if ( $bShouldBeChecking && ( $strUrl == $strRoute || $strUrl == $strRoute .'/' || $strUrl .'/' == $strRoute ) ) {
                             $strControllerClass = Sys_String::toCamelCase( $arrDefaults['module'] )
                                     .'_'.Sys_String::toCamelCase( $arrDefaults['controller'] ).'Ctrl';
                             $strControllerAction = $arrDefaults['action'];
@@ -849,7 +861,7 @@ class App_Dispatcher
             if ( !isset( $arrSections[ $arrControllerParams[ 'section' ] ]  )) {
                 throw new App_Exception( 'No valid section for this call' );
             }
-            // Sys_Debug::dumpDie( $arrControllerParams );
+           // Sys_Debug::dumpDie( $arrControllerParams );
             
             if ( $strControllerClass == '' )
                 throw new App_Exception_PageNotFound( 'No controller for this call' );
@@ -867,6 +879,7 @@ class App_Dispatcher
 
         } catch ( App_Exception_PageNotFound $exception ) {
 
+            // Sys_Debug::dumpDie( $this->_strDefaultController );
             echo $this->runControllerAction(  'page-not-found', $this->_strDefaultController, $arrControllerParams );
 
         } catch ( App_Exception_AccessDenied $exception ) {
@@ -874,14 +887,13 @@ class App_Dispatcher
             echo $this->runControllerAction(  'access-denied', $this->_strDefaultController, $arrControllerParams );
 
         } catch ( App_Exception_ServerError $exception ) {
-
             echo $this->runControllerAction(  'server-error', $this->_strDefaultController, $arrControllerParams );
             
         } catch ( Exception $exception ) {
 
             $ex = new App_Exception_Handler();
             $ex->process( $exception ); // - save into logs and mail if configured
-            
+
             $confException = $this->getConfig()->exceptions;
             if  (is_object(  $confException ) ) {
                 

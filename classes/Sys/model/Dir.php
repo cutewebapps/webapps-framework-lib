@@ -20,10 +20,16 @@ class Sys_Dir
      * Folder might not exist at that moment.
      * 
      * @param string $strDir
+     * @param bool $bEnsureExists
      */
-    public function __construct( $strDir ) 
+    public function __construct( $strDir, $bEnsureExists = false )
     {
         $this->_strDirectory = $strDir;
+        if ( $bEnsureExists ) {
+            if ( !$this->exists() ) {
+                $this->create(0777, true);
+            }
+        }
     }
     
     /**

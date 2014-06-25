@@ -7,6 +7,22 @@
  * Licensed under GPL, Free for usage and redistribution.
  */
 
+/** for PHP 5.4-- compatibility */
+if (!function_exists('http_response_code'))
+{
+    function http_response_code($newcode = NULL)
+    {
+        static $code = 200;
+        if($newcode !== NULL)
+        {
+            header('X-PHP-Response-Code: '.$newcode, true, $newcode);
+            if(!headers_sent())
+                $code = $newcode;
+        }       
+        return $code;
+    }
+}
+
 class App_Exception_Handler
 {
     public function getConfig()

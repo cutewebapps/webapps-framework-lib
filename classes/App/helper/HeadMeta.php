@@ -92,14 +92,8 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
      */
     public function enableResponsiveDesign()
     {
-        $strBrowser = isset( $_SERVER['HTTP_USER_AGENT' ] ) ? $_SERVER['HTTP_USER_AGENT' ] : '';
-        if ( preg_match( '@MSIE (\d+)@sim', $strBrowser, $arrMatch ) ) {
-            $nIeVersion = intval( $arrMatch[1]);
-    //        if ( $nIeVersion < 9 )
-      //          $this->getView()->HeadScript()
-      //               ->append( '//css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js' );
-        }
-        return $this->addName( 'viewport', 'width=device-width, initial-scale=1.0' );
+        return $this->addName( 'viewport', 'width=device-width, initial-scale=1.0, minimal-ui' )
+		    ->addName( 'apple-mobile-web-app-capable', 'yes' );
     }
 
     /**

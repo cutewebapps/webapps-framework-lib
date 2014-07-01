@@ -43,4 +43,18 @@ class App_BoxClassHelper extends App_ViewHelper_Abstract
         return '';
     }
 
+    /** @return App_BoxClassHelper */
+    public function addClass( $strBox, $strValue )
+    {
+	$arrExisting = explode( " ", trim( $this->_arrHash[ $strBox ] ) );
+	$arrNew = explode( " ", trim( $strValue ) );
+	foreach( $arrNew as $sCssClass ) {
+	    if ( !in_array( $sCssClass, $arrExisting ) ) {
+		$arrExisting[] = $sCssClass;
+	    } 		
+	}
+	$this->_arrHash[ $strBox ] = implode( " ", $arrExisting );
+	return $this;
+    }
+
 }

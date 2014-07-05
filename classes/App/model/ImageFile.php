@@ -30,15 +30,17 @@ class App_ImageFile {
     /** @return resource */
     public function getGdPtr()
     {
-        if ( !$this->_ptrImage )
+        if ( !$this->_ptrImage ) {
             $this->_createFrom();
+        }
         
         return $this->_getGdPtr();
     }
 
     public function  __destruct() {
-        if ( $this->_getGdPtr() )
+        if ( $this->_getGdPtr() ) {
             imagedestroy( $this->_getGdPtr () );
+        }
     }
 
     /**
@@ -219,12 +221,15 @@ class App_ImageFile {
     {
         $arrAttr = array();
 
-        if ( !isset($arrAttributes[ 'width' ]) && $this->getWidth() > 0 )
+        if ( !isset($arrAttributes[ 'width' ]) && $this->getWidth() > 0 ) {
             $arrAttributes[ 'width' ] = $this->getWidth();
-        if ( !isset($arrAttributes[ 'height' ]) &&$this->getHeight() > 0 )
+        }
+        if ( !isset($arrAttributes[ 'height' ]) &&$this->getHeight() > 0 ) {
             $arrAttributes[ 'height' ] = $this->getHeight();
-        if ( !isset( $arrAttributes['alt'] ) )
+        }
+        if ( !isset( $arrAttributes['alt'] ) ) {
             $arrAttributes[ 'alt' ] = '';
+        }
 
         $arrAttributes[ 'src' ] = $this->getHttpPath();
         if ( $bIncludeTimeStamp ) {
@@ -235,17 +240,52 @@ class App_ImageFile {
         {
             $arrAttr[ $strAttrKey ] = $strAttrKey.'="'.$strAttrValue.'" ';
         }
-        return '<img '.implode( ' ',$arrAttr ).'/>';
+        return '<img '.implode( ' ',$arrAttr ).' />';
     }
 
+    
+    /**
+     * @return string
+     */
+    public function getImageLazyTag( $arrAttributes = array(), $bIncludeTimeStamp = false )
+    {
+        $arrAttr = array();
+        
+        if ( !isset($arrAttributes[ 'width' ]) && $this->getWidth() > 0 ) {
+            $arrAttributes[ 'width' ] = $this->getWidth();
+        }
+        if ( !isset($arrAttributes[ 'height' ]) &&$this->getHeight() > 0 ) {
+            $arrAttributes[ 'height' ] = $this->getHeight();
+        }
+        if ( !isset( $arrAttributes['alt'] ) ) {
+            $arrAttributes[ 'alt' ] = '';
+        }
+
+        $arrAttributes[ 'data-original' ] = $this->getHttpPath();
+        if ( $bIncludeTimeStamp ) {
+            $arrAttributes[ 'data-original' ] .= '?tm=' . filemtime( $this->getFilePath() );
+        }
+        
+        if ( !isset( $arrAttributes['class'] )) {
+            $arrAttributes['class'] = '';
+        }
+        $arrAttributes['class'] = trim( $arrAttributes['class'].' lazy' );
+
+        foreach( $arrAttributes as $strAttrKey => $strAttrValue )
+        {
+            $arrAttr[ $strAttrKey ] = $strAttrKey.'="'.$strAttrValue.'" ';
+        }
+        return '<img '.implode( ' ',$arrAttr ).' />';
+    }
+    
+    
     /**
      * @return int
      */
     public function getRatio()
     {
-        if ( $this->getHeight() == 0 )
-                return 0;
-        return sprintf( '%0.2f', $this->getWidth() / $this->getHeight() );
+        return ( $this->getHeight() == 0 ) ? 0 : 
+               sprintf( '%0.2f', $this->getWidth() / $this->getHeight() );
     }
 
     

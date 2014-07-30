@@ -5,7 +5,7 @@ var exec = require('child_process').exec;
 
 ServerThread = function( response, url, body ) {
 
-	this.sFolder = process.env.TEMP;
+	this.sFolder = process.env.CWA_TEMP;
 	if  ( !this.sFolder )  this.sFolder = "/tmp";
 
 	this.sFolder += "/nwapp_" + parseInt( Math.random() * 10000 );
@@ -62,6 +62,43 @@ ServerThread = function( response, url, body ) {
 	console.log( 'response sent' );      
 };
 
+deleteFolderRecursive = function(path) {
+    var files = [];
+    if( fs.existsSync(path) ) {
+        files = fs.readdirSync(path);
+        files.forEach(function(file,index){
+            var curPath = path + "/" + file;
+            if(fs.lstatSync(curPath).isDirectory()) { // recurse
+                deleteFolderRecursive(curPath);
+            } else { // delete file
+                fs.unlinkSync(curPath);
+            }
+        });
+        fs.rmdirSync(path);
+    }
+};
+
+
+// TODO: clean the folders from nwapp_ garbage...
+var sTmpFolder = process.env.CWA_TEMP;
+if  ( !sTmpFolder )  sTmpFolder = "/tmp";
+var sFolderRegex = /^nwapp_.+/;
+
+fs.readdir( sTmpFolder, function(err, list) {
+    if (err) { console.log( err); return; }
+    if (!list.length) return;
+    list.forEach(function( sBaseName ) {
+      var sFile = sTmpFolder + '/' + sBaseName;
+      fs.stat( sFile, function(err, stat) {
+         if (stat && stat.isDirectory() && sBaseName.match( sFolderRegex ) ) {
+            console.log( "REMOVING FOLDER: " + sFile  );
+	    deleteFolderRecursive( sFile );
+         }
+      });
+    });
+});
+
+// it is ok to continue - removing folders will be handled in parallel...
 
 var port = 6789;
 http.createServer(function (req, res) {

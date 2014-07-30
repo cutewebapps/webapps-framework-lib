@@ -8,7 +8,7 @@
  * Licensed under GPL, Free for usage and redistribution.
  */
 
-class App_Test_Case
+class App_Test_Case extends App_Parameter_Storage
 {
     protected $_bVerbose = false;
     protected $_bTraceback = false;

@@ -203,4 +203,38 @@ class DBx_Table_Row extends DBx_Table_Row_Abstract
         return true;
     }
 
+  
+    /**
+     * @return object
+     */
+    public function getNextRecord( $arrWhere = array() )
+    {
+	$tbl = self::Table();
+	$sKey = $tbl->getIdentityName();	
+        $select = $tbl->select()
+                ->where( $sKey . ' > ?', $this->getId() )
+                ->order( $sKey )
+                ->limit( 1 );
+	foreach ( $arrWhere as $sKey => $sVal ) {
+		$select->where( $sKey, $sVal );
+	}
+        return $tbl->fetchRow( $select );
+    }
+
+    /**
+     * @return object
+     */
+    public function getPrevRecord( $arrWhere = array()  )
+    {
+	$tbl = self::Table();
+	$sKey = $tbl->getIdentityName();	
+        $select = $tbl->select()
+                ->where( $sKey . ' < ?', $this->getId() )
+                ->order( $sKey.' DESC')
+                ->limit( 1 );
+	foreach ( $arrWhere as $sKey => $sVal ) {
+		$select->where( $sKey, $sVal );
+	}
+        return $tbl->fetchRow( $select );
+    }
 }

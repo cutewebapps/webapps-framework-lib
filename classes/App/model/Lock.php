@@ -83,6 +83,14 @@ class App_Lock
             unlink($strLockFile);
     }
 
+    /**
+     * @return boolean
+     */
+    public function isExists()
+    {
+	return file_exists( $this->getLockFile() );
+    }
+
     /*
      * wait for unlock
      * @param $nSeconds number of seconds until timeout

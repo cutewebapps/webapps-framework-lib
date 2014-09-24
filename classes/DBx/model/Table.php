@@ -469,4 +469,5 @@ class DBx_Table extends DBx_Table_Abstract
         }
         return $res;
     }
+   
 }

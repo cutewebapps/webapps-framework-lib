@@ -49,12 +49,15 @@ class App_Test_Loader
     }
     
     
-    public function runTestCase( $strFile )
+    public function runTestCase( $strFile, $arrParams = null )
     {
         $strClassName = preg_replace( '@\.(.*)$@', '', basename( $strFile ) );
         
         require_once( $strFile );
-        $testCase = new $strClassName();
+        if ( $arrParams == null ) {
+            $arrParams = isset( $_REQUEST ) ? $_REQUEST : array();
+        }
+        $testCase = new $strClassName( $arrParams );
         $arrMethods = get_class_methods( $testCase );
         $testCase->setVerbose( false );
         $testCase->setUp();

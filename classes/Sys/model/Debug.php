@@ -222,14 +222,13 @@ class Sys_Debug
      */
     public static function alert( $sContent, $strPath = '' ) 
     {
-
-        if ( Sys_Global::isRegistered( "DISABLE_ALERTS" ) ) {
+        if ( Sys_Global::isRegistered( "DISABLE_ALERTS" ) && 
+             Sys_Global::get( "DISABLE_ALERTS" ) ) {
             // avoid recursion on exceptions, do not produce alerts on alerts
             return;
         }
         $objAppConfig = App_Application::getInstance()->getConfig()->alert;
-        if ( !is_object( $objAppConfig )) return;
-
+        if ( !is_object( $objAppConfig )) { return; }
 
         $strHtml  = $sContent; 
         $strPlain  = $sContent;
@@ -257,19 +256,22 @@ class Sys_Debug
         Sys_Global::set( "DISABLE_ALERTS", 1);
         if ( $objAppConfig->server ) {
             
-            if ( is_string( $objAppConfig->server ) )
+            if ( is_string( $objAppConfig->server ) ) {
                 $arrServers = array( $objAppConfig->server );
-            else
+            } else {
                 $arrServers = $objAppConfig->server->toArray();
-                        
+            }
+            
             foreach( $arrServers as $strServer ) {
                 try {
                     $browser = new App_Http_Browser();
                     $browser->ConnectTimeout  = 3;
                     $browser->DownloadTimeout  = 5;
                     $browser->httpPostRaw( $strServer.$strPath, $strHtml );
+                    // echo 'RESPONSE: '.$browser->HttpStatus.' '.$browser->HttpBody.PHP_EOL;
                 } catch ( Exception $e ) {
                     // not reaching the server is not a problem to stop at 
+                    // echo 'ERROR: '.$e->getMessage();
                 }
             }
         }

@@ -71,10 +71,11 @@ class App_Application
     {
         $fn1 = $strDirectory . '/config.php';
         $arrConfig = include $fn1;
-        if (is_array($arrConfig))
+        if (is_array($arrConfig)) {
             $this->_objConfig = new Sys_Config($arrConfig, true);
-        else
-            $this->_objConfig = new Sys_Config(array(), true);
+        } else {
+            $this->_objConfig = new Sys_Config(array(), true); 
+        }
 
         if ( !Sys_Global::isRegistered( 'Environment') && getenv('CWA_ENV') ) {
             Sys_Global::set( 'Environment', getenv( 'CWA_ENV' ) );	
@@ -94,17 +95,26 @@ class App_Application
             }
         }
 
-        if ( !Sys_Global::isRegistered( 'Environment') )
+        if ( !Sys_Global::isRegistered( 'Environment') ) {
             Sys_Global::set( 'Environment', 'local' );
+        }
 
         // load environment-specific options, overriding global config settings
         $fn2 = $strDirectory . '/env_' . Sys_Global::get('Environment') . '.php';
+        $arrConfigLocal = null;
         if (file_exists($fn2)) {
             $arrConfigLocal = include $fn2;
-            if (is_array($arrConfigLocal)) {
-                $this->_objConfig->merge(new Sys_Config($arrConfigLocal));
+        } else if ( getenv( 'CWA_HOME' ) ) {
+            $fn2global = getenv( 'CWA_HOME' ).'/etc/application/env_' . Sys_Global::get('Environment') . '.php';
+            if (file_exists($fn2global)) {
+                $arrConfigLocal = include $fn2global;
             }
         }
+        
+        if (is_array($arrConfigLocal)) {
+            $this->_objConfig->merge(new Sys_Config($arrConfigLocal));
+        }
+        
         if (!is_object($this->getConfig()->namespaces)) {
             throw new Sys_Exception('Application namespaces are not defined');
         }
@@ -114,7 +124,8 @@ class App_Application
 
         if (isset($_SERVER['HTTP_HOST'])) {
             if (!isset($this->getConfig()->base)) {
-                throw new Sys_Exception('Application Base URL is not defined');
+                throw new Sys_Exception('Application Base URL is not defined. '
+                        .'Please check presense of env_'.Sys_Global::get('Environment') . '.php');
             }
             if (!is_object($this->getConfig()->sections)) {
                 throw new Sys_Exception('Application Sections are not defined');
@@ -123,8 +134,9 @@ class App_Application
         }
         if (is_object($this->getConfig()->php_settings)) {
             $arrSettings = $this->getConfig()->php_settings->toArray();
-            foreach ($arrSettings as $strKey => $strValue)
+            foreach ($arrSettings as $strKey => $strValue) {
                 ini_set($strKey, $strValue);
+            }
         }
     }
 

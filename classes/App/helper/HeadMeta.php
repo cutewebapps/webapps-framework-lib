@@ -13,6 +13,7 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
 
     protected $_arrName      = array();
     protected $_arrHttpEquiv = array();
+    protected $_arrProperty  = array();
 
     /**
      * @return App_Layout
@@ -42,14 +43,14 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
         // echo( 'added: '. $name. ' = '.$content );
         return $this;
     }
-    
+    /**
+     * 
+     * @param string $name
+     * @return boolean
+     */
     public function hasName( $name )
     {
-        if ( isset( $this->_arrName[ $name ] ) ) {
-            return TRUE;
-        } else {
-            return FALSE;
-        }
+        return ( isset( $this->_arrName[ $name ] ) );
     }
 
     /**
@@ -61,15 +62,47 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
         return $this;
     }
 
+    /**
+     * 
+     * @param string $name
+     * @return boolean
+     */
     public function hasHttpEquiv( $name )
     {
-        if ( isset( $this->_arrHttpEquiv[ $name ] ) ) {
-            return TRUE;
-        } else {
-            return FALSE;
-        }
+        return ( isset( $this->_arrHttpEquiv[ $name ] ) );
     }
 
+    /**
+     * @return App_HeadMetaHelper
+     */
+    public function addProperty( $name, $content )
+    {
+        $this->_arrProperty[ $name ] = $content;
+        // echo( 'added: '. $name. ' = '.$content );
+        return $this;
+    }
+    /**
+     * 
+     * @param string $name
+     * @return boolean
+     */
+    public function hasProperty( $name )
+    {
+        return ( isset( $this->_arrProperty[ $name ] ) );
+    }
+    /**
+     * 
+     * @param array $arrOcData
+     * @return \App_HeadMetaHelper
+     */
+    public function addOpenGraph( array $arrOcData ) 
+    {
+        foreach ( $arrOcData as $key => $strValue ) {
+            $this->addProperty( 'oc:'.$key, $strValue );
+        }
+        return $this;
+    }
+    
     /**
      * @return App_HeadMetaHelper
      */
@@ -92,14 +125,8 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
      */
     public function enableResponsiveDesign()
     {
-        $strBrowser = isset( $_SERVER['HTTP_USER_AGENT' ] ) ? $_SERVER['HTTP_USER_AGENT' ] : '';
-        if ( preg_match( '@MSIE (\d+)@sim', $strBrowser, $arrMatch ) ) {
-            $nIeVersion = intval( $arrMatch[1]);
-    //        if ( $nIeVersion < 9 )
-      //          $this->getView()->HeadScript()
-      //               ->append( '//css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js' );
-        }
-        return $this->addName( 'viewport', 'width=device-width, initial-scale=1.0' );
+        return $this->addName( 'viewport', 'width=device-width, initial-scale=1.0, minimal-ui' )
+		    ->addName( 'apple-mobile-web-app-capable', 'yes' );
     }
 
     /**
@@ -108,14 +135,24 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
     public function get()
     {
         $arrStrResults = array();
-        foreach( $this->_arrHttpEquiv as $strKey => $strValue )
-            if ( $strValue != '' )
+        foreach( $this->_arrHttpEquiv as $strKey => $strValue ) {
+            if ( $strValue != '' ) {
                 $arrStrResults[] = "\t".'<meta http-equiv="'.htmlspecialchars( $strKey, ENT_QUOTES )
                     .'" content="'.htmlspecialchars ( $strValue, ENT_QUOTES ).'" />';
-        foreach( $this->_arrName as $strKey => $strValue )
-            if ( $strValue != '' )
+            }
+        }
+        foreach( $this->_arrName as $strKey => $strValue ) {
+            if ( $strValue != '' ) {
                 $arrStrResults[] = "\t".'<meta name="'.htmlspecialchars( $strKey, ENT_QUOTES )
                     .'" content="'.htmlspecialchars ( $strValue, ENT_QUOTES ).'" />';
+            }
+        }
+        foreach( $this->_arrProperty as $strKey => $strValue ) {
+            if ( $strValue != '' ) {
+                $arrStrResults[] = "\t".'<meta property="'.htmlspecialchars( $strKey, ENT_QUOTES )
+                    .'" content="'.htmlspecialchars ( $strValue, ENT_QUOTES ).'" />';
+            }
+        }
         return implode( "\n", $arrStrResults );
     }
     
@@ -147,8 +184,9 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
      */
     public function addCopyright( $content = '' )
     {
-        if ( $content == '' )
+        if ( $content == '' ) {
             $content = 'Copyright '.date('Y');
+        }
         
         return $this->addName( 'copyright', $content );
     }    

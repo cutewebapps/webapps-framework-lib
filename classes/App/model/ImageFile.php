@@ -585,48 +585,91 @@ class App_ImageFile {
         return ($res)? $imgResult : null;
     }
     
-    function generateThumbnailCrop( $file_output, $crop = 'square', $percent = false) {
-	list($w_i, $h_i, $type) = getimagesize( $this->getFilePath() );
-	if (!$w_i || !$h_i) {
-            throw App_Exception( 'Unable to get the length and width of the image' );
-            return;
+//    function generateThumbnailCrop( $file_output, $crop = 'square', $percent = false, $boolUseAppDir = true) {
+//	list($w_i, $h_i, $type) = getimagesize( $this->getFilePath() );
+//	if (!$w_i || !$h_i) {
+//            throw App_Exception( 'Unable to get the length and width of the image' );
+//            return;
+//        }
+//        $types = array('','gif','jpeg','png');
+//        $ext = $types[$type];
+//        if ($ext) {
+//            $func = 'imagecreatefrom'.$ext;
+//            $img = $func($this->getFilePath());
+//        } else {
+//            echo 'Invalid file format';
+//            return;
+//        }
+//	if ($crop == 'square') {
+//            $min = $w_i;
+//            if ($w_i > $h_i) $min = $h_i;
+//            $w_o = $h_o = $min;
+//	} else {
+//            list($x_o, $y_o, $w_o, $h_o) = $crop;
+//            if ($percent) {
+//                    $w_o *= $w_i / 100;
+//                    $h_o *= $h_i / 100;
+//                    $x_o *= $w_i / 100;
+//                    $y_o *= $h_i / 100;
+//            }
+//    	if ($w_o < 0) $w_o += $w_i;
+//	    $w_o -= $x_o;
+//            if ($h_o < 0) $h_o += $h_i;
+//            $h_o -= $y_o;
+//	}
+//	$img_o = imagecreatetruecolor($w_o, $h_o);
+//	imagecopy($img_o, $img, 0, 0, $x_o, $y_o, $w_o, $h_o);
+//        if ( file_exists( (( $boolUseAppDir ) ? CWA_APPLICATION_DIR : '') . $file_output) )
+//            unlink ( (( $boolUseAppDir ) ? CWA_APPLICATION_DIR : '') . $file_output);
+//	if ($type == 2) {
+//            return imagejpeg($img_o, (( $boolUseAppDir ) ? CWA_APPLICATION_DIR : '') . $file_output,100);
+//	} else {
+//            $func = 'image'.$ext;
+//            return $func($img_o, (( $boolUseAppDir ) ? CWA_APPLICATION_DIR : '') . $file_output);
+//	}
+//        imagedestroy($img_o);
+//    }
+    
+    function generateThumbnailCrop( $strDirImage, $thumb_width, $thumb_height, $strExt )
+    {
+        $imgResult = new App_ImageFile( $strDirImage, $thumb_width, $thumb_height );
+        
+        
+        $src_file = $this->getFilePath();
+        $strFuntion = 'imagecreatefrom' . ( ($strExt == 'jpg') ? 'jpeg' : $strExt );
+        $image = $strFuntion($src_file);
+
+        $width = imagesx($image);
+        $height = imagesy($image);
+
+        $original_aspect = $width / $height;
+        $thumb_aspect = $thumb_width / $thumb_height;
+
+        if ( $original_aspect >= $thumb_aspect )
+        {
+           // If image is wider than thumbnail (in aspect ratio sense)
+           $new_height = $thumb_height;
+           $new_width = $width / ($height / $thumb_height);
         }
-        $types = array('','gif','jpeg','png');
-        $ext = $types[$type];
-        if ($ext) {
-            $func = 'imagecreatefrom'.$ext;
-            $img = $func($this->getFilePath());
-        } else {
-            echo 'Invalid file format';
-            return;
+        else
+        {
+           // If the thumbnail is wider than the image
+           $new_width = $thumb_width;
+           $new_height = $height / ($width / $thumb_width);
         }
-	if ($crop == 'square') {
-            $min = $w_i;
-            if ($w_i > $h_i) $min = $h_i;
-            $w_o = $h_o = $min;
-	} else {
-            list($x_o, $y_o, $w_o, $h_o) = $crop;
-            if ($percent) {
-                    $w_o *= $w_i / 100;
-                    $h_o *= $h_i / 100;
-                    $x_o *= $w_i / 100;
-                    $y_o *= $h_i / 100;
-            }
-    	if ($w_o < 0) $w_o += $w_i;
-	    $w_o -= $x_o;
-            if ($h_o < 0) $h_o += $h_i;
-            $h_o -= $y_o;
-	}
-	$img_o = imagecreatetruecolor($w_o, $h_o);
-	imagecopy($img_o, $img, 0, 0, $x_o, $y_o, $w_o, $h_o);
-        if ( file_exists( CWA_APPLICATION_DIR . $file_output) )
-            unlink ( CWA_APPLICATION_DIR . $file_output);
-	if ($type == 2) {
-            return imagejpeg($img_o, CWA_APPLICATION_DIR . $file_output,100);
-	} else {
-            $func = 'image'.$ext;
-            return $func($img_o, CWA_APPLICATION_DIR . $file_output);
-	}
-        imagedestroy($img_o);
+
+        $thumb = imagecreatetruecolor( $thumb_width, $thumb_height );
+
+        // Resize and crop
+        imagecopyresampled($thumb,
+                           $image,
+                           0 - ($new_width - $thumb_width) / 2, // Center the image horizontally
+                           0 - ($new_height - $thumb_height) / 2, // Center the image vertically
+                           0, 0,
+                           $new_width, $new_height,
+                           $width, $height);
+        imagejpeg($thumb, $strDirImage, 80);
+        
+        return $imgResult;
     }
 }

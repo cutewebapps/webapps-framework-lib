@@ -475,7 +475,7 @@ class App_ImageFile {
     {
         
         $imgResult = new App_ImageFile( $dir, $w, $w );
-        $imgResult->_strPathFull = CWA_APPLICATION_DIR . $imgResult->_strPath; // full system path to thumb
+        $imgResult->_strPathFull = $this->getDirPath( $imgResult );; // full system path to thumb
         
         $src_file = $this->getFilePath();
         if ( !file_exists( $src_file )) {
@@ -534,7 +534,7 @@ class App_ImageFile {
     {
         
         $imgResult = new App_ImageFile( $dir, $w, $w );
-        $imgResult->_strPathFull = CWA_APPLICATION_DIR . $imgResult->_strPath; // full system path to thumb
+        $imgResult->_strPathFull = $this->getDirPath( $imgResult ); // full system path to thumb
         
         $src_file = $this->getFilePath();
         if ( !file_exists( $src_file )) {
@@ -671,5 +671,16 @@ class App_ImageFile {
         imagejpeg($thumb, $strDirImage, 80);
         
         return $imgResult;
+    }
+    
+    public function getDirPath( $imgResult )
+    {
+        if( ! strstr($imgResult->_strPath, 'file://') && ! strstr($imgResult->_strPath, '/home') ) {
+            $strPath = CWA_APPLICATION_DIR . $imgResult->_strPath;
+        } else {
+            $strPath = $imgResult->_strPath;
+        }
+        
+        return $strPath;
     }
 }

@@ -37,7 +37,7 @@ ServerThread = function( response, url, body ) {
 		'<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' +
 		'</head>' +
 		'<body><h1 style="font-family:arial">' + url + '</h1><strong style="display:block;font-family:arial">' + dt + '</strong>' + body + '</body></html>';
-	this.sPackageJson = '{  "name": "Alert ' + this.sAppId + '", "main": "index.html",  "window": { "toolbar": false, "width": 800 } }';
+	this.sPackageJson = '{  "name": "Alert ' + this.sAppId + '", "main": "index.html",  "window": { "toolbar": true, "width": 1024 } }';
 
 
 	console.log( "FOLDER : " + this.sFolder );

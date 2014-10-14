@@ -55,7 +55,7 @@ class App_Lock
      * returns true if lock was just created
      * @return boolean 
      */
-    public function lock()
+    public function lock( $strLockContent = '' )
     {
         clearstatcache();
         
@@ -67,8 +67,8 @@ class App_Lock
             unlink($this->getLockFile());
         }
         
-        $file->write( '' );
-        if ( $file->exists() ) return true;
+        $file->write( $strLockContent );
+        if ( $file->exists() ) { return true; }
 
         return false;
     }
@@ -79,8 +79,9 @@ class App_Lock
     public function unlock()
     {
         $strLockFile = $this->getLockFile();
-        if (file_exists($strLockFile))
+        if (file_exists($strLockFile)) {
             unlink($strLockFile);
+        }
     }
 
     /**
@@ -101,8 +102,9 @@ class App_Lock
     {
         for ($i = 0; $i < $nSeconds; $i++) {
             clearstatcache();
-            if (!file_exists($this->getLockFile()))
+            if (!file_exists($this->getLockFile())) {
                 return true;
+            }
             usleep(5);
         }
         return false;

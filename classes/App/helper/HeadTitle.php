@@ -73,7 +73,7 @@ class App_HeadTitleHelper extends App_ViewHelper_Abstract
      */
     public function h3( $strTitle = '' )
     {
-        echo '<h2>'. (( $strTitle != '' ) ? $strTitle : $this->_strTitle) .'</h3>'."\n";
+        echo '<h3>'. (( $strTitle != '' ) ? $strTitle : $this->_strTitle) .'</h3>'."\n";
         return $this;
     }
     

@@ -48,12 +48,25 @@ class App_HeadTitleHelper extends App_ViewHelper_Abstract
     }
 
     /**
+     * @return string
+     */
+    public function _getAttributesFromArray( $arrAttr )
+    {
+	$arrHtml = array();
+        foreach ( $arrAttr as $key => $value )     {
+		$arrHtml []= $key.'="'.$value.'"';
+        }
+	return " ".implode( " ",$arrHtml );
+    }
+
+    /**
      * Output of the title as H1-tag
      * @return App_HeadTitleHelper
      */
-    public function h1( $strTitle = '' )
+    public function h1( $strTitle = '', $arrAttr = array() )
     {
-        echo '<h1>'. (( $strTitle != '' ) ? $strTitle : $this->_strTitle) .'</h1>'."\n";
+	$sAttr = $this->_getAttributesFromArray( $arrAttr );
+        echo '<h1'.$sAttr.'>'. (( $strTitle != '' ) ? $strTitle : $this->_strTitle) .'</h1>'."\n";
         return $this;
     }
     
@@ -61,9 +74,10 @@ class App_HeadTitleHelper extends App_ViewHelper_Abstract
      * Output of the title as h2 tag (useful with some css frameworks)
      * @return App_HeadTitleHelper
      */
-    public function h2( $strTitle = '' )
+    public function h2( $strTitle = '', $arrAttr = array() )
     {
-        echo '<h2>'. (( $strTitle != '' ) ? $strTitle : $this->_strTitle) .'</h2>'."\n";
+	$sAttr = $this->_getAttributesFromArray( $arrAttr );
+        echo '<h2'.$sAttr.'>'. (( $strTitle != '' ) ? $strTitle : $this->_strTitle) .'</h2>'."\n";
         return $this;
     }
     
@@ -71,9 +85,10 @@ class App_HeadTitleHelper extends App_ViewHelper_Abstract
      * Output of the title as h2 tag (useful  with some css frameworks)
      * @return App_HeadTitleHelper
      */
-    public function h3( $strTitle = '' )
+    public function h3( $strTitle = '', $arrAttr = array() )
     {
-        echo '<h3>'. (( $strTitle != '' ) ? $strTitle : $this->_strTitle) .'</h3>'."\n";
+	$sAttr = $this->_getAttributesFromArray( $arrAttr );
+        echo '<h3'.$sAttr.'>'. (( $strTitle != '' ) ? $strTitle : $this->_strTitle) .'</h3>'."\n";
         return $this;
     }
     

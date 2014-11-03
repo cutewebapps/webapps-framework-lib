@@ -235,4 +235,27 @@ class Sys_Dir
         }
         return $arrDirs;
     }
+    
+    /**
+     * 
+     * @param array $arrResults
+     * @return array of string
+     */
+    public function getRelativeArray( array $arrResults )
+    {
+         $arrDirs = array();
+         $arrExplodedBase = explode( "/", str_replace( '\\', '/', $this->getName()) );
+         foreach ( $arrResults as $strDir ) {
+             $arrExplodedPath = explode( "/", str_replace( '\\', '/', $strDir ) );
+             $arrToImplode = array();
+             foreach ( $arrExplodedPath as $key => $strVal ) {
+                 if ( isset( $arrExplodedBase[ $key ] ) && $arrExplodedBase[ $key ] == $strVal ) {
+                     continue;
+                 }
+                 $arrToImplode []= $strVal;
+             }
+             $arrDirs[] = str_replace( '//', '/', implode( "/", $arrToImplode ) );
+         }
+         return $arrDirs;
+    }
 }

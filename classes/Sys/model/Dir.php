@@ -258,4 +258,14 @@ class Sys_Dir
          }
          return $arrDirs;
     }
+    
+    /**
+     * Clean path - must not start from slash
+     * @param string $sPath
+     * @return string
+     */
+    public static function cleanPath( $sPath )
+    {
+        return preg_replace( '@^/+@', '', str_replace( '//', '', str_replace( '\\', '/', $sPath )));
+    }
 }

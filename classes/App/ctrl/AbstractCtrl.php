@@ -20,7 +20,8 @@ class App_AbstractCtrl extends App_Parameter_Storage
      */
     protected function isPost()
     {
-        return count( $_POST ) > 0;
+        $strRequestMethod = isset( $_SERVER[ 'REQUEST_METHOD' ] ) ? $_SERVER[ 'REQUEST_METHOD' ] : '';
+        return ( $strRequestMethod == 'POST' || $strRequestMethod == 'PUT' );
     }
     
     /**
@@ -118,7 +119,8 @@ class App_AbstractCtrl extends App_Parameter_Storage
      */
     protected function _isPost()
     {
-        return count( $_POST ) > 0;
+        $strRequestMethod = isset( $_SERVER[ 'REQUEST_METHOD' ] ) ? $_SERVER[ 'REQUEST_METHOD' ] : '';
+        return ( $strRequestMethod == 'POST' || $strRequestMethod == 'PUT' );
     }
 
     /**

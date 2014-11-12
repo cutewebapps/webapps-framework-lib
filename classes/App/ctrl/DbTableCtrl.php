@@ -199,9 +199,30 @@ abstract class App_DbTableCtrl extends App_AbstractCtrl
 //	return (int)$objCount->count;
     }
 
-
+    protected $_arrPosted = array();
+    
     public function init()
     {
+        $strRequestMethod = isset( $_SERVER[ 'REQUEST_METHOD' ] ) ? $_SERVER[ 'REQUEST_METHOD' ] : '';
+        if ( $strRequestMethod == 'POST' || $strRequestMethod == 'PUT' ) {
+            // adjusting Post parameters, accepting them from JSON body payload
+            
+            if ( isset( $_POST ) && count( $_POST ) > 0  ) {
+                foreach ( $_POST as $key => $val ) { $this->_arrPosted[ $key ] = $val; }
+            }
+            // fixes for REST controllers without support of PUT method
+            $request_body = file_get_contents('php://input');
+            if ( trim( $request_body ) ) { 
+                $arrJsonDecoded = json_decode( $request_body, true  );
+                if ( is_array( $arrJsonDecoded ) && count( $arrJsonDecoded )) {
+                    foreach( $arrJsonDecoded as $key => $val ) {
+                        $this->_setParam( $key, $val );
+                        $this->_arrPosted[ $key ] = $val;
+                    }
+                }
+            }
+        }
+        
         $this->_modelName 	= $this->_getModelName();
 
         if ( $this->_model == null ) { // allow controller to set this up instead of init
@@ -294,7 +315,7 @@ abstract class App_DbTableCtrl extends App_AbstractCtrl
 
                 $arrayElements = $this->_objectForm->getElements();
   // Sys_Debug::dump( $_POST );
-  // Sys_Debug::dump( $arrayElements );
+  // Sys_Debug::alert( $arrayElements );
                 foreach ($arrayElements as $nameElement => $objectElement){
                    if ($nameElement == $strIndentity){
                        continue;

@@ -405,7 +405,7 @@ class App_Dispatcher
             }
         }
 
-
+        
         $strTheme = 'admin';
         foreach ($this->getConfig()->sections as $strSection => $strSectionTheme )
             if ( $arrParams['section'] == $strSection ) { $strTheme = $strSectionTheme; break; }
@@ -664,9 +664,12 @@ class App_Dispatcher
 
         $this->timeframe = new Sys_Timeframe();
 
+        $strRequestMethod = isset( $_SERVER[ 'REQUEST_METHOD' ] ) ? $_SERVER[ 'REQUEST_METHOD' ] : '';
+        if ( $strRequestMethod == 'GET' ) { $strRequestMethod = ''; }
+        
         if ( $this->getConfig()->action_log ) {
             // if action log was enabled, we should write the actions
-            $strLine =  date('Y-m-d H:i:s').' ['.$this->getInstanceId().'] RUNNING URL '.$strUrl;
+            $strLine =  date('Y-m-d H:i:s').' ['.$this->getInstanceId().'] RUNNING URL '.$strRequestMethod.' '.$strUrl;
             $strLogFile = new Sys_File( $this->getConfig()->action_log );
             $strLogFile->append( "\n".$strLine. "\n" );
         }
@@ -676,7 +679,7 @@ class App_Dispatcher
             $strLine =  date('Y-m-d H:i:s').' '.$strUrl.' ';
             $strLogFile = new Sys_File( $this->getConfig()->ip_log.'/'.date('Y-m-d').'/'.$strIp.'.log' );
             $strLogFile->checkDirectory();
-            $strLogFile->append( "\n".$strLine. "\n" );
+            $strLogFile->append( "\n".$strRequestMethod.' '.$strLine. "\n" );
             if ( isset( $_SERVER['HTTP_USER_AGENT'] ))
                 $strLogFile->append( "-- UA: ".$_SERVER['HTTP_USER_AGENT']. "\n" );
             if ( isset( $_SERVER['HTTP_REFERER'] ))
@@ -718,8 +721,12 @@ class App_Dispatcher
             'action' => '',
         );
         
-        if ( $arrControllerParams[ 'section' ] == '' )
+        if ( $arrControllerParams[ 'section' ] == '' ) {
             $arrControllerParams[ 'section' ] = 'frontend';
+        }
+        if ( !isset( $arrControllerParams[ 'method' ] ) || $arrControllerParams[ 'method' ] == '' ) {
+            $arrControllerParams[ 'method' ] = $strRequestMethod;
+        }
 
         // Sys_Debug::dump( $arrControllerParams );
 

@@ -105,9 +105,16 @@ class App_Application
         if (file_exists($fn2)) {
             $arrConfigLocal = include $fn2;
         } else if ( getenv( 'CWA_HOME' ) ) {
-            $fn2global = getenv( 'CWA_HOME' ).'/etc/application/env_' . Sys_Global::get('Environment') . '.php';
-            if (file_exists($fn2global)) {
-                $arrConfigLocal = include $fn2global;
+            if ( defined( "CWA_APP" ) ) {
+                $fn2global = getenv( 'CWA_HOME' ).'/etc/application/env_'.getenv( 'CWA_APP').'_'. Sys_Global::get('Environment') . '.php';
+                if (file_exists($fn2global)) {
+                    $arrConfigLocal = include $fn2global;
+                } 
+            } else {
+                $fn2global = getenv( 'CWA_HOME' ).'/etc/application/env_' . Sys_Global::get('Environment') . '.php';
+                if (file_exists($fn2global)) {
+                    $arrConfigLocal = include $fn2global;
+                } 
             }
         }
         

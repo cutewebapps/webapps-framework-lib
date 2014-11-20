@@ -106,7 +106,7 @@ class App_Application
             $arrConfigLocal = include $fn2;
         } else if ( getenv( 'CWA_HOME' ) ) {
             if ( defined( "CWA_APP" ) ) {
-                $fn2global = getenv( 'CWA_HOME' ).'/etc/application/env_'.getenv( 'CWA_APP').'_'. Sys_Global::get('Environment') . '.php';
+                $fn2global = getenv( 'CWA_HOME' ).'/etc/application/env_'. CWA_APP . '_'. Sys_Global::get('Environment') . '.php';
                 if (file_exists($fn2global)) {
                     $arrConfigLocal = include $fn2global;
                 } 

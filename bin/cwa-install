@@ -425,7 +425,7 @@ EOF;
                     if ( $strGitRevision != '' ) {
                         Sys_Io::out( 'version saved from git head revision: '. $strGitRevision );
                         $fVersion = new Sys_File( $strDestDir.'/cdn/version.txt' );
-                        $fVersion->save( $nVersion );
+                        $fVersion->save( $strGitRevision );
                     }    
                     break;
                 }                

@@ -301,6 +301,7 @@ class Cwa_Package
         SetEnv CWA_CLASS_ROOT {$this->env->getClassRoot()}
         $npmitk
 	<Directory {$this->env->getVirtualHostsRoot()}/$strName>
+                Require all granted
 		AllowOverride All
 		Order allow,deny
 		Allow from all

@@ -45,7 +45,7 @@ function shutdownErrorHandler()
 
             // same exception info into LOG file
             $strFile = new Sys_File( $strFileName );
-            $strBody = date("Y-m-d H:i:s")."\t".$_SERVER['REMOTE_ADDR']
+            $strBody = date("Y-m-d H:i:s")."\t".(isset( $_SERVER['REMOTE_ADDR'] ) ? '127.0.0.1' : '' )
                                 ."\t".App_Dispatcher::$strUrl.' ';
             $strBody .= "\n***\t".$strErrorMessage;
             $strBody .= "\n\n";
@@ -86,7 +86,7 @@ function shutdownErrorHandler()
             $strTo = $confException->mail->to;
             $strSubject = $confException->mail->subject.' '
                     .'"'.$strErrorMessage.'"'
-                    .' for '.$_SERVER['REMOTE_ADDR'];
+                    .' for '.(isset( $_SERVER['REMOTE_ADDR'] ) ? '127.0.0.1' : '' );
             $strHeaders =
                     'Content-Type: text/html; charset="utf-8"' . "\r\n"
                     .$confException->mail->headers;
@@ -121,22 +121,21 @@ function shutdownErrorHandler()
             // using php mailer to send
             if ($confException->mail->method == 'php-mailer') {
                 
-                
                 $mail = new App_Mailer();
 
                 $mail->IsSMTP();
                 $mail->Host     = $confException->smtp->host;
                 if ( $confException->smtp->port ) {
                     $mail->Port = $confException->smtp->port;
-		}
+		        }
                 if ( $confException->smtp->username != "" ) {
                     $mail->SMTPAuth = true;
                     $mail->Username = $confException->smtp->username;
                     $mail->Password = $confException->smtp->password;
                 }
-		if ( $confException->smtp->ssl ) {
+		         if ( $confException->smtp->ssl ) {
                     $mail->SMTPSecure  = $confException->smtp->ssl;
-		}                
+		        }                
 
                 // from
                 $arrFrom = explode(' ', $confException->mail->headers);
@@ -581,6 +580,13 @@ class App_Dispatcher
 
         if ( !Sys_Global::isRegistered( 'Environment') )
             throw new App_Exception( 'Running command line interface without environment defined' );
+
+        $confException = $this->getConfig()->exceptions;
+
+        if ( is_object( $confException ) && $confException->on_errors ) {
+            set_error_handler( "exceptionErrorHandler" );
+            register_shutdown_function( 'shutdownErrorHandler' );
+        }
 
 
         $arrControllerParams['section'] = 'cli';

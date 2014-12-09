@@ -24,11 +24,16 @@ class Sys_Dir
      */
     public function __construct( $strDir, $bEnsureExists = false )
     {
-        $this->_strDirectory = $strDir;
+        $pathinfo = pathinfo( $strDir );
+        $this->_strDirectory = $pathinfo['dirname']. '/' .$pathinfo['basename'];
+
         if ( $bEnsureExists ) {
             if ( !$this->exists() ) {
                 $this->create(0777, true);
             }
+        }
+        if ( is_dir( $this->_strDirectory )) {
+            $this->_strDirectory = realpath( $this->_strDirectory );
         }
     }
     
@@ -43,10 +48,11 @@ class Sys_Dir
     {
         $strPath = str_replace ('\\', '/', $strPath );
         $nBaseLen = strlen( $strBase );
-        
+        $sName = str_replace ('\\', '/', $strBase );
+
         // replace $strBase at the beginning with $this->getName()
-        if ( substr( $strPath, 0, $nBaseLen ) == $this->getName() ) {
-            $strPath = $this->getName() . substr( $strPath, $nBaseLen );
+        if ( substr( $strPath, 0, $nBaseLen ) == $sName ) {
+            $strPath = str_replace ('\\', '/',$this->getName()).substr( $strPath, $nBaseLen );
         }
         
         return $strPath;
@@ -143,20 +149,24 @@ class Sys_Dir
         }
         
         // precreate all nececcaru folders
-        $strBase = $dirOriginal->getName();
+        $strBase = str_replace( "\\", "/", $dirOriginal->getName());
         $arrDirs = $dirOriginal->getAllDirs(); sort( $arrDirs );
+
+        // echo 'ORIGINAL BASE: '.$strBase.PHP_EOL;
         foreach ( $arrDirs as $strDir ) {
-            $strRelativeDest = $this->_replaceBase( $strDir, $strBase );
+            $strRelativeDest = $this->_replaceBase( str_replace( "\\", "/", $strDir), $strBase );
             
-            Sys_Io::out( "Creating " . $strRelativeDest );
+            // Sys_Io::out( "Creating " . $strRelativeDest );
             if ( !is_dir( $strRelativeDest )) { mkdir( $strRelativeDest ); }
         }
 
         // copy all files
         $arrFiles = $dirOriginal->getFiles( '', true );
+        
         foreach ( $arrFiles as $strFile ) {
-            $strRelativeDest = $this->_replaceBase( $strFile, $strBase );
-            if ( !file_exists( $strRelativeDest )) { copy( $strFile, $strRelativeDest ); }
+            $strRelativeDest = $this->_replaceBase( str_replace( "\\", "/", $strFile), $strBase );
+            // Sys_Io::out( str_replace( "\\", "/", $strFile ).' -> '. $strRelativeDest );
+            copy( $strFile, $strRelativeDest );
         }
         
         return $this;

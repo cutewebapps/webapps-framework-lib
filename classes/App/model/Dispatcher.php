@@ -4,7 +4,7 @@
  * This file is a part of CWA framework.
  * Copyright 2012, CuteWebApps.com
  * https://github.com/cutewebapps/webapps-framework-lib
- * 
+ *
  * Licensed under GPL, Free for usage and redistribution.
  */
 
@@ -25,7 +25,7 @@ function shutdownErrorHandler()
 
     $last_error = error_get_last();
     if ( !isset( $last_error['message'] ) ) return;
-    if ( PHP_SAPI != "cli" && !headers_sent() ) {
+    if ( PHP_SAPI != "cli" && !headers_sent() && function_exists( "http_response_code" )) {
         http_response_code( 501 );
     }
 
@@ -37,7 +37,7 @@ function shutdownErrorHandler()
 
     $confException = App_Application::getInstance()->getConfig()->exceptions;
     if  (is_object( $confException ) ) {
-       
+
         if ( $confException->log ) {
 
             $strFileName = $confException->log.'/'.date('Y-m-d').'.log';
@@ -55,7 +55,7 @@ function shutdownErrorHandler()
         if ( $confException->alert ) {
             $strMessage = "***\t[".date('Y-m-d H:i:s')."]\n";
             $strMessage .= "\n***\t<strong>".$strErrorMessage.'</strong>'."\n\n";
-            
+
             foreach ( $_SERVER as $strKey => $strValue )  {
                 if ( !is_array( $strValue ) ) {
                     $strMessage .= '_SERVER['.$strKey . ']=' . $strValue ."\n";
@@ -79,8 +79,8 @@ function shutdownErrorHandler()
             }
             Sys_Debug::alert( $strMessage );
         }
-        
-        
+
+
         if ( $confException->mail ) {
             // mail exception info to somebody
             $strTo = $confException->mail->to;
@@ -94,7 +94,7 @@ function shutdownErrorHandler()
             // preparing message - more detailed than in logs
             $strMessage = "<pre style='font-size:12px'>"."***\t[".date('Y-m-d H:i:s')."]\n";
             $strMessage .= "\n***\t<strong>".$strErrorMessage.'</strong>'."\n\n";
-            
+
             foreach ( $_SERVER as $strKey => $strValue )  {
                 if ( !is_array( $strValue ) ) {
                     $strMessage .= '_SERVER['.$strKey . ']=' . $strValue ."\n";
@@ -117,10 +117,10 @@ function shutdownErrorHandler()
                 $strMessage .= '_COOKIE['.$strKey . ']=' . $strValue ."\n";
             }
             $strMessage .= '</pre>';
-            
+
             // using php mailer to send
             if ($confException->mail->method == 'php-mailer') {
-                
+
                 $mail = new App_Mailer();
 
                 $mail->IsSMTP();
@@ -135,21 +135,21 @@ function shutdownErrorHandler()
                 }
 		         if ( $confException->smtp->ssl ) {
                     $mail->SMTPSecure  = $confException->smtp->ssl;
-		        }                
+		        }
 
                 // from
                 $arrFrom = explode(' ', $confException->mail->headers);
                 $strFrom = $arrFrom[1];
-                
+
                 $mail->From = $strFrom;
                 $mail->AddReplyTo($mail->From);
 
                 // to
                 $arrTo = explode(',', $strTo);
-                
+
                 foreach ($arrTo as $strTo)
                     $mail->AddAddress($strTo);
-                
+
                 // attachments
                 //$mail->AddAttachment("/tmp/image.jpg", "new.jpg");    // name is optional
 
@@ -162,13 +162,13 @@ function shutdownErrorHandler()
                 $mail->Body    = $strMessage;
                 //$mail->AltBody = $strMessage;
 
-                $mail->Send();                
-                
+                $mail->Send();
+
             } else {
                 mail( $strTo, $strSubject, $strMessage, $strHeaders );
             }
         }
-        
+
         if ( $confException->render ) {
             echo file_get_contents( CWA_APPLICATION_DIR.'/'.$confException->render  );
         }
@@ -183,11 +183,11 @@ class App_Dispatcher
      */
     static public $strFullUrl  = '';
     /**
-     * 
+     *
      * @var string
      */
     static public $strUrl      = '';
-    /** 
+    /**
      * Time of dispatcher start - for checking performance
      * @var Sys_Timeframe
      */
@@ -222,9 +222,9 @@ class App_Dispatcher
     {
         if ( defined( 'CWA_DISABLE_PLUGINS') )
             return true;
-        
+
         if ( is_object( $this->getConfig()->ctrlplugin ) ) {
-    
+
             foreach( $this->getConfig()->ctrlplugin as $strPluginClass ) {
                 $objPlugin = new $strPluginClass( $this );
                 if ( !$objPlugin->preDispatch() ) return false;
@@ -269,7 +269,7 @@ class App_Dispatcher
     {
         if ( !$this->getConfig()->user )
             return '';
-        
+
         $areas = $this->getConfig()->user->area;
         if ( is_object( $areas )) {
             $arrSections = $areas->toArray();
@@ -351,16 +351,16 @@ class App_Dispatcher
                 $strPath .= '-'.$arrParams['template'];
             if ( isset( $arrParams['section'] ))
                 $strPath = $arrParams['section']. '/'.$strPath;
-            
+
             $arrMyParams = $arrParams;
             unset( $arrMyParams[  'section' ] );
             unset( $arrMyParams[  'module' ] );
             unset( $arrMyParams[  'controller' ] );
             unset( $arrMyParams[  'action' ] );
             unset( $arrMyParams[  'template'] );
-            
+
             $strLine = date('Y-m-d H:i:s').' ['.$this->getInstanceId().'] '.$strPath.' '.json_encode( $arrMyParams );
-            
+
             $strLogFile = new Sys_File( $this->getConfig()->action_log );
             $strLogFile->append( $strLine. "\n" );
         }
@@ -388,7 +388,7 @@ class App_Dispatcher
 
         if ( self::$strUrl != '' )
             $this->_objCurrentController->view->url = (string) self::$strUrl;
-        
+
         if ( isset( $arrParams['noplugin'] ) ) {
             $this->_objCurrentController->$strControllerAction();
         } else {
@@ -404,7 +404,7 @@ class App_Dispatcher
             }
         }
 
-        
+
         $strTheme = 'admin';
         foreach ($this->getConfig()->sections as $strSection => $strSectionTheme )
             if ( $arrParams['section'] == $strSection ) { $strTheme = $strSectionTheme; break; }
@@ -459,7 +459,7 @@ class App_Dispatcher
             ));
         }
         //Sys_Debug::dump( $strThemeController ); die;
-        
+
         $this->_objCurrentController->view->setPath( $arrScriptPaths );
 
         $strLayoutBaseName = 'layout';
@@ -477,7 +477,7 @@ class App_Dispatcher
                 $strLayoutBaseName.'.'.$this->_objCurrentController->view->getLayout()->getExtension()
             ));
         }
-        
+
         // die( 'PATH' . $strLayoutPath );
         $strCharset = 'utf-8';
         // detect charset from application config
@@ -497,7 +497,7 @@ class App_Dispatcher
             // TODO: think of layouts in different contexts
             $this->_objCurrentController->view->getLayout()->disableLayout();
 
-            if ( !isset( $arrParams['output'] ) || $arrParams['output'] == '' ) { 
+            if ( !isset( $arrParams['output'] ) || $arrParams['output'] == '' ) {
                 switch ( $arrParams['format' ] ) {
                     case 'xml' :
                         header( 'Content-Type: text/xml; charset='.$strCharset );
@@ -515,7 +515,7 @@ class App_Dispatcher
                      $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest' ) {
 
             $this->_objCurrentController->view->getLayout()->disableLayout();
-            
+
         } else {
             // if we dont have format, we can set up headers:
             if ( PHP_SAPI != "cli" && !headers_sent() )
@@ -524,12 +524,12 @@ class App_Dispatcher
 
         if ( isset( $arrParams['noheaders'] ) ) {
             $this->_objCurrentController->view->noheaders = $arrParams['noheaders'];
-        }   
+        }
 
         $this->_objCurrentController->view->getLayout()->setPath( $arrLayoutPaths );
-        if ( isset( $arrParams['output'] ) && $arrParams['output'] != '' ) { 
+        if ( isset( $arrParams['output'] ) && $arrParams['output'] != '' ) {
             $strResult = $this->_objCurrentController->view->getLayout()->render();
-            
+
             // all output folders must be listed in a config section
             $strFiltered = $arrParams['output'];
             if ( is_object( $this->getConfig()->output ) ) {
@@ -540,14 +540,14 @@ class App_Dispatcher
             } else if ( $this->getConfig()->output  != '*' ) {
                 throw new App_Exception( 'No output entry in application config' );
             }
-            
+
             $file = new Sys_File( CWA_APPLICATION_DIR . $strFiltered );
             if ( $strResult != '' ) $file->save( $strResult );
 
-            return ""; 
+            return "";
         } else {
             return $this->_objCurrentController->view->getLayout()->render();
-        }   
+        }
     }
     public function runCli( $arrArguments )
     {
@@ -565,7 +565,7 @@ class App_Dispatcher
         }
 
 
-        $strKey = ''; 
+        $strKey = '';
         foreach( $arrArguments as $strParamName ) {
             if ( substr( $strParamName, 0, 1 )  == '-' ) {
                 $strKey = substr( $strParamName, 1 );
@@ -613,7 +613,7 @@ class App_Dispatcher
             $nParamIndex = 0;
             if ( count( $arrUrlParams ) > 0 )
             foreach ( $arrUrlParams as $nKey => $strParam ) {
-                
+
                 if ( $nParamIndex == 0 ) {
                     $arrControllerParams[ 'module' ] = $strParam;
                     $nParamIndex++;
@@ -637,13 +637,13 @@ class App_Dispatcher
 
         $arrControllerParams['nolayout'] = 1;
 
-        if (  ! isset( $arrControllerParams['module'] ) 
+        if (  ! isset( $arrControllerParams['module'] )
            || ! isset( $arrControllerParams['controller'] ) ) {
             Sys_Io::out( 'ERROR: module/controller was not specified' );
         }
 
         try {
-            echo $this->runAction( 
+            echo $this->runAction(
                 $arrControllerParams['action'],
                 $arrControllerParams['controller'],
                 $arrControllerParams['module'],
@@ -660,7 +660,7 @@ class App_Dispatcher
             $ex->process( $exception ); // - save into logs and mail if configured
             die( "\n". 'EXCEPTION: ' . $exception->getMessage(). "\n". App_Exception_Handler::backTraceString( $exception->getTrace() ));
         }
-        
+
     }
     public function runUrl( $strUrl )
     {
@@ -672,7 +672,7 @@ class App_Dispatcher
 
         $strRequestMethod = isset( $_SERVER[ 'REQUEST_METHOD' ] ) ? $_SERVER[ 'REQUEST_METHOD' ] : '';
         if ( $strRequestMethod == 'GET' ) { $strRequestMethod = ''; }
-        
+
         if ( $this->getConfig()->action_log ) {
             // if action log was enabled, we should write the actions
             $strLine =  date('Y-m-d H:i:s').' ['.$this->getInstanceId().'] RUNNING URL '.$strRequestMethod.' '.$strUrl;
@@ -681,7 +681,7 @@ class App_Dispatcher
         }
         if ( $this->getConfig()->ip_log ) {
             $strIp = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR']  : '';
-            
+
             $strLine =  date('Y-m-d H:i:s').' '.$strUrl.' ';
             $strLogFile = new Sys_File( $this->getConfig()->ip_log.'/'.date('Y-m-d').'/'.$strIp.'.log' );
             $strLogFile->checkDirectory();
@@ -699,7 +699,7 @@ class App_Dispatcher
             if ( isset( $_COOKIE ) && count( $_COOKIE ) > 0 )
                 $strLogFile->append( "-- COOKIE: ".json_encode( $_COOKIE ). "\n" );
         }
-        
+
         $strBase = $this->getConfig()->base;
         if ( $strBase != '' && $strBase != '/' ) {
             if ( substr( $strUrl, 0, strlen( $strBase ) ) == $strBase ) {
@@ -726,7 +726,7 @@ class App_Dispatcher
             'controller' => '',
             'action' => '',
         );
-        
+
         if ( $arrControllerParams[ 'section' ] == '' ) {
             $arrControllerParams[ 'section' ] = 'frontend';
         }
@@ -761,7 +761,7 @@ class App_Dispatcher
                 if ( Sys_Mode::is('dispatcher') ) {
                     Sys_Io::out( '@'.$strRoute. '@i'. $strUrl );
                 }
-                
+
                 $bShouldBeChecking = true;
                 foreach ( $arrExclude as $strExcludePattern ) {
                     if ( preg_match( '@'.$strExcludePattern.'@i', $strUrl, $arrMatches ) ) {
@@ -777,7 +777,7 @@ class App_Dispatcher
                             if ( Sys_Mode::is('dispatcher') ) {
                                 print_r( $arrMatches );die;
                             }
-                            
+
                             $arrMap       = isset( $arrRouteProperties['map'] ) ? $arrRouteProperties['map'] : array();
                             $strControllerClass = Sys_String::toCamelCase( $arrDefaults['module'] )
                                     .'_'.Sys_String::toCamelCase( $arrDefaults['controller'] ).'Ctrl';
@@ -790,7 +790,7 @@ class App_Dispatcher
                         }
                         break;
                     case 'static' : default:
-                        
+
                         if ( $bShouldBeChecking && ( $strUrl == $strRoute || $strUrl == $strRoute .'/' || $strUrl .'/' == $strRoute ) ) {
                             $strControllerClass = Sys_String::toCamelCase( $arrDefaults['module'] )
                                     .'_'.Sys_String::toCamelCase( $arrDefaults['controller'] ).'Ctrl';
@@ -809,7 +809,7 @@ class App_Dispatcher
             if ( !$bDetected ) {
                 // TODO: split URL into parameters and define Module/Controller/Action
                 $arrUrlParams = explode( '/', $strUrl );
-                if ( $arrUrlParams[0] == '' ) { 
+                if ( $arrUrlParams[0] == '' ) {
                     unset( $arrUrlParams[0] );
                     // array_shift($arrUrlParams);
                 }
@@ -820,7 +820,7 @@ class App_Dispatcher
                 if ( count( $arrUrlParams ) > 0 )
                 foreach ( $arrUrlParams as $nKey => $strParam ) {
                     $strParam = rawurldecode( $strParam );
-                    
+
                     if ( $nParamIndex == 0 && !$bSectionDetected && $this->_getSectionFromSlug( $strParam )) {
                         // case when section is given in URL
                         $arrControllerParams[ 'section' ] = $this->_getSectionFromSlug( $strParam );
@@ -864,7 +864,7 @@ class App_Dispatcher
             }
 
             if ( !isset( $arrControllerParams[ 'section' ] ) || $arrControllerParams[ 'section' ] == '' ) {
-                
+
                 $arrControllerParams[ 'section' ] = $this->getConfig()->default_section;
                 if ( $arrControllerParams[ 'section' ] == '' )
                     $arrControllerParams[ 'section' ] = 'frontend';
@@ -875,7 +875,7 @@ class App_Dispatcher
                 throw new App_Exception( 'No valid section for this call' );
             }
            // Sys_Debug::dumpDie( $arrControllerParams );
-            
+
             if ( $strControllerClass == '' )
                 throw new App_Exception_PageNotFound( 'No controller for this call' );
             if ( $strControllerAction == '' )
@@ -887,7 +887,7 @@ class App_Dispatcher
             App_Permission::check( $arrControllerParams );
             // check CSRF-token presence( where it is configured )
             App_Permission::checkToken( $arrControllerParams );
-            
+
             echo $this->runControllerAction(  $strControllerAction, $strControllerClass, $arrControllerParams );
 
         } catch ( App_Exception_PageNotFound $exception ) {
@@ -901,7 +901,7 @@ class App_Dispatcher
 
         } catch ( App_Exception_ServerError $exception ) {
             echo $this->runControllerAction(  'server-error', $this->_strDefaultController, $arrControllerParams );
-            
+
         } catch ( Exception $exception ) {
 
             $ex = new App_Exception_Handler();
@@ -909,7 +909,7 @@ class App_Dispatcher
 
             $confException = $this->getConfig()->exceptions;
             if  (is_object(  $confException ) ) {
-                
+
                 if ( $confException->throw ) {
                     // displaying exception for debug simplicity
                     if ( $confException->html && isset($_SERVER['HTTP_HOST'] ) ) echo '<pre>';
@@ -926,11 +926,11 @@ class App_Dispatcher
         }
 
         $bAutoAppend = true;
-        if ( is_object( $this->_objCurrentController->view ) 
+        if ( is_object( $this->_objCurrentController->view )
             && ! $this->_objCurrentController->view->canAutoAppend() ) {
             $bAutoAppend = false;
         }
-        
+
         $strBottom = '';
         if ( !isset( $arrControllerParams['format'] )  && !isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) ) {
             if ( App_Application::getInstance()->getConfig()->display_time_generated ) {
@@ -944,22 +944,22 @@ class App_Dispatcher
                     $strBottom .= ' Build #'. file_get_contents( $strVersionFile ) .' from '.date('m/d/Y H:i', filemtime( $strVersionFile ) ).'';
                 }
             }
-            
+
             if ( App_Application::getInstance()->getConfig()->display_mysql_stat ) {
                 /* @var DBx_Adapter_Read */
                 $arrConns = DBx_Registry::getInstance()->getConnected();
                 if ( count( $arrConns ) > 0 ) {
-                    if ( count( $arrConns ) > 1 ) 
+                    if ( count( $arrConns ) > 1 )
                         $strBottom .= ' '.count( $arrConns ).' db connections';
                     foreach( $arrConns as $conn ) {
                         if ( $conn->canRead() ) {
                             $arrSelect = $conn->getDbAdapterRead()->queryRead( 'SHOW STATUS LIKE \'com_select\'' )->fetchAll();
                             $strBottom .= ' '.print_r( $arrSelect[0]['Value'], true ).' selects';
-                            
+
                             $arrQCache = $conn->getDbAdapterRead()->queryRead( 'SHOW STATUS LIKE \'Qcache_hits\'' )->fetchAll();
                             if ( $arrQCache[0]['Value'] > 0 )
                                 $strBottom .= ' '.print_r( $arrQCache[0]['Value'], true ).' cache hits';
-                            
+
                             $arrFullJoin = $conn->getDbAdapterRead()->queryRead( 'SHOW STATUS LIKE \'Select_full_join\'' )->fetchAll();
                             if ( $arrFullJoin[0]['Value'] > 0 )
                                 $strBottom .= ' '.print_r( $arrFullJoin[0]['Value'], true ).' full joins';
@@ -972,9 +972,9 @@ class App_Dispatcher
                         //    }
                         // }
                     }
-                    
+
                 }
-                
+
             }
         }
         if ( $bAutoAppend && $strBottom != '' ) {

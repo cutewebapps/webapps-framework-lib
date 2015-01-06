@@ -179,7 +179,11 @@ class Sys_Debug
             $strOut .= '<tr><td>'.$keyRow.'</td>';
             for( $i = 1; $i < $nMaxColumn; $i ++ ) {
                 $strKey = $arrColumnsIndex[ $i  ];
-                if ( isset( $arrFields[ $strKey ] ) ) $strOut .= '<td>'.$arrFields[ $strKey ].'</td>';
+                if ( isset( $arrFields[ $strKey ] ) ) {
+                    $strOut .= '<td>'
+                        . ( is_string( $arrFields[ $strKey ] )  ?  $arrFields[ $strKey ] : json_encode( $arrFields[ $strKey ] ) )
+                        .'</td>';
+                }
             }
             $strOut .= '</tr>'."\n";
         }
@@ -216,7 +220,7 @@ class Sys_Debug
                 for( $i = 1; $i < $nMaxColumn; $i ++ ) {
                     $strKey = $arrColumnsIndex[ $i  ];
                     if ( isset( $arrFields[ $strKey ] ) ) {
-                        $fields[]= $arrFields[ $strKey ];
+                        $fields[]= ( is_string( $arrFields[ $strKey ] )  ?  $arrFields[ $strKey ] : json_encode( $arrFields[ $strKey ] ) );
                     }
                 }
                 fputcsv($handler, $fields);

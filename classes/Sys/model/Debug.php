@@ -5,7 +5,7 @@
  * This file is a part of CWA framework.
  * Copyright 2012, CuteWebApps.com
  * https://github.com/cutewebapps/webapps-framework-lib
- * 
+ *
  * Licensed under GPL, Free for usage and redistribution.
  */
 
@@ -13,12 +13,12 @@ define( 'DEBUG_COOKIE_NAME', 'debug_123123' );
 
 class Sys_Debug
 {
-    
+
     public static function dumpRequest( $strFile  = '' )
     {
         global $HTTP_RAW_POST_DATA;
         ob_start();
-        
+
         Sys_Io::out( 'GET' );       print_r( $_GET );
         Sys_Io::out( 'COOKIE' );    print_r( $_COOKIE );
         Sys_Io::out( 'POST' );      print_r( $_POST );
@@ -34,7 +34,7 @@ class Sys_Debug
             Sys_Io::out( 'php://input' );
             Sys_Io::out( $strInput );
         }
-        
+
         $strContents = ob_get_contents();
         ob_end_clean();
 
@@ -43,7 +43,7 @@ class Sys_Debug
             $file->save( $strContents );
         }
     }
-    
+
     public static function dumpToFile( $obj, $strFile = '' )
     {
         ob_start();
@@ -89,7 +89,7 @@ class Sys_Debug
 		}
 		echo implode( "\n",$arrResult);
     }
-    
+
     public static function dumpPlain( $arr, $caption = '' )
     {
         echo "\n\n";
@@ -98,13 +98,13 @@ class Sys_Debug
         $nOffset = 1;
         if ( Sys_Global::isRegistered( "DEBUG_OFFSET" ) )
             $nOffset = Sys_Global::get( "DEBUG_OFFSET" );
-        
+
         $backtrace = debug_backtrace();
 	if ( isset( $backtrace[ $nOffset ] )) {
 	        echo $backtrace[ $nOffset ]['file'] . ' in line ' . $backtrace[ $nOffset ]['line'].' ';
 	}
     	print_r( $arr );
-        
+
     }
 
     public static function dump( $arr, $strCaption = "" )
@@ -113,13 +113,13 @@ class Sys_Debug
             self::dumpPlain( $arr, $strCaption );
         else
             self::dumpHtml( $arr, $strCaption );
-        
+
         $confException = App_Application::getInstance()->getConfig()->exceptions;
         if ( is_object( $confException ) && $confException->on_debug ) {
             throw new App_Exception("Debugging is forbidden on this environment" );
         }
     }
-    
+
     public static function quoteWrap($var){
 	switch(gettype($var)){
             case 'string':
@@ -134,7 +134,7 @@ class Sys_Debug
     /**
      * Get dump of array in PHP syntax
      * @param array $arr
-     * @param integer $depth 
+     * @param integer $depth
      * @return string
      */
     public static function dumpPhp( $arr, $depth=0 )
@@ -152,12 +152,12 @@ class Sys_Debug
         }
         $depth--;
         $string .= str_repeat('    ',$depth).")";
-        
+
         if ( $depth != 0 ) return $string;
         return self::dumpHtml( $string );
     }
 
-    
+
     public static  function dumpTable( $arr )
     {
         $arrColumns = array();
@@ -172,7 +172,7 @@ class Sys_Debug
                 }
             }
         }
-        
+
         $strOut = '<table border cellspacing="0" cellpaddin="3" class="table table-bordered table-striped"><thead><tr><th>#</th>'.implode( "", $arrColumns ).'</tr></thead>';
         $strOut .= '<tbody>';
         foreach ( $arr as $keyRow => $arrFields ) {
@@ -184,10 +184,46 @@ class Sys_Debug
             $strOut .= '</tr>'."\n";
         }
         $strOut .= '</tbody></table>';
-        
+
         return $strOut;
     }
-    
+
+
+    public static function dumpCsv( $handler, $arr )
+    {
+        $arrColumns = array();
+        $arrColumnsIndex = array();
+        $nMaxColumn = 1;
+        foreach ( $arr as $keyRow => $arrFields ) {
+            foreach ( $arrFields as $key => $value ) {
+                if ( !isset( $arrColumns[ $key ] ) ) {
+                    $arrColumns[ $key ] = $key;
+                    $arrColumnsIndex[ $nMaxColumn  ] = $key;
+                    $nMaxColumn ++;
+                }
+            }
+        }
+        if ( count( $arrColumns ))  {
+            $fields = [];
+            foreach ( $arrColumns as $key ) {
+                $fields[]= $key;
+            }
+            fputcsv($handler, $fields);
+
+            // traversing rows
+            foreach ( $arr as $keyRow => $arrFields ) {
+                $fields = [];
+                for( $i = 1; $i < $nMaxColumn; $i ++ ) {
+                    $strKey = $arrColumnsIndex[ $i  ];
+                    if ( isset( $arrFields[ $strKey ] ) ) {
+                        $fields[]= $arrFields[ $strKey ];
+                    }
+                }
+                fputcsv($handler, $fields);
+            }
+        }
+    }
+
     /**
      * Get dump of array in PHP syntax
      *
@@ -200,29 +236,29 @@ class Sys_Debug
         return self::dumpHtml( $sqlFormatter->toString() );
     }
 
-    /** 
+    /**
      * @warning: please avoid this function, user dump + die instead separately,
      * reason: traceback could be useless
-     * 
+     *
      * @param type $arr
      * @param type $strCaption
      */
     public static function dumpDie( $arr  = '', $strCaption = "" )
     {
         Sys_Global::set( "DEBUG_OFFSET", "2" );
-        
+
         self::dump( $arr, $strCaption );
         die;
     }
-    
+
     /**
-     * 
+     *
      * @param mixed $arr
      * @param string $strCaption
      */
-    public static function alert( $sContent, $strPath = '' ) 
+    public static function alert( $sContent, $strPath = '' )
     {
-        if ( Sys_Global::isRegistered( "DISABLE_ALERTS" ) && 
+        if ( Sys_Global::isRegistered( "DISABLE_ALERTS" ) &&
              Sys_Global::get( "DISABLE_ALERTS" ) ) {
             // avoid recursion on exceptions, do not produce alerts on alerts
             return;
@@ -230,38 +266,38 @@ class Sys_Debug
         $objAppConfig = App_Application::getInstance()->getConfig()->alert;
         if ( !is_object( $objAppConfig )) { return; }
 
-        $strHtml  = $sContent; 
+        $strHtml  = $sContent;
         $strPlain  = $sContent;
-        
+
         if ( is_array( $sContent ) || is_object( $sContent ) ) {
-            ob_start(); 
+            ob_start();
             self::dumpPlain( $sContent );
             $strPlain = ob_get_contents();
             ob_end_clean();
-            
-            ob_start(); 
+
+            ob_start();
             self::dumpHtml( $sContent );
             $strHtml = ob_get_contents();
             ob_end_clean();
-            
+
         }
-        
+
         //  alert could be saved in logs ( ->alert_log )
         if ( $objAppConfig->log ) {
             $logFile = new Sys_File( $objAppConfig->log );
             $logFile->append( "\n\n[".date("Y-m-d H:i:s")."]\n" . $strPlain );
         }
-        
+
         // sending alert to a server
         Sys_Global::set( "DISABLE_ALERTS", 1);
         if ( $objAppConfig->server ) {
-            
+
             if ( is_string( $objAppConfig->server ) ) {
                 $arrServers = array( $objAppConfig->server );
             } else {
                 $arrServers = $objAppConfig->server->toArray();
             }
-            
+
             foreach( $arrServers as $strServer ) {
                 try {
                     $browser = new App_Http_Browser();
@@ -270,21 +306,21 @@ class Sys_Debug
                     $browser->httpPostRaw( $strServer.$strPath, $strHtml );
                     // echo 'RESPONSE: '.$browser->HttpStatus.' '.$browser->HttpBody.PHP_EOL;
                 } catch ( Exception $e ) {
-                    // not reaching the server is not a problem to stop at 
+                    // not reaching the server is not a problem to stop at
                     // echo 'ERROR: '.$e->getMessage();
                 }
             }
         }
         Sys_Global::set( "DISABLE_ALERTS", "");
     }
-    
-    
+
+
      /**
-     * 
+     *
      * @param mixed $arr
      * @param string $strCaption
      */
-    public static function alertHtml( array $arrProperties, $sContent1, $sContent2 = '', $sContent3 = '', $sContent4 = '', $sContent5 = '' ) 
+    public static function alertHtml( array $arrProperties, $sContent1, $sContent2 = '', $sContent3 = '', $sContent4 = '', $sContent5 = '' )
     {
         if ( Sys_Global::isRegistered( "DISABLE_ALERTS" ) ) {
             // avoid recursion on exceptions, do not produce alerts on alerts
@@ -292,46 +328,46 @@ class Sys_Debug
         }
         $objAppConfig = App_Application::getInstance()->getConfig()->alert;
         if ( !is_object( $objAppConfig )) return;
-        
+
         //  alert could be saved in logs ( ->alert_log )
         if ( $objAppConfig->log ) {
             $logFile = new Sys_File( $objAppConfig->log );
             $logFile->append( "\n\n[".date("Y-m-d H:i:s")."]\n" . print_r( $arrProperties, true )."\n"
                     . implode( "\n", array( $sContent1, $sContent2, $sContent3, $sContent4, $sContent5 ) ) );
         }
-        
+
         $strPath = 'alert';
         if ( isset( $arrProperties['alert'] ) ) {
             $strPath = $arrProperties['alert'];
             unset( $arrProperties['alert'] );
         }
-        
+
         // sending alert to a server
         Sys_Global::set( "DISABLE_ALERTS", 1);
         if ( $objAppConfig->server ) {
-            
+
             if ( is_string( $objAppConfig->server ) )
                 $arrServers = array( $objAppConfig->server );
             else
                 $arrServers = $objAppConfig->server->toArray();
-                        
+
             foreach( $arrServers as $strServer ) {
                 try {
                     $browser = new App_Http_Browser();
                     $browser->ConnectTimeout  = 3;
                     $browser->DownloadTimeout  = 5;
-                    
+
                     $arrResult = $arrProperties;
                     if ( $sContent1 ) $arrResult[ 'HTML_CONTENTS_1' ] = $sContent1;
                     if ( $sContent2 ) $arrResult[ 'HTML_CONTENTS_2' ] = $sContent2;
                     if ( $sContent3 ) $arrResult[ 'HTML_CONTENTS_3' ] = $sContent3;
                     if ( $sContent4 ) $arrResult[ 'HTML_CONTENTS_4' ] = $sContent4;
                     if ( $sContent5 ) $arrResult[ 'HTML_CONTENTS_5' ] = $sContent5;
-                    
+
                     $browser->httpPostRaw( $strServer.$strPath, json_encode( $arrResult ) );
-                    
+
                 } catch ( Exception $e ) {
-                    // not reaching the server is not a problem to stop at 
+                    // not reaching the server is not a problem to stop at
                 }
             }
         }

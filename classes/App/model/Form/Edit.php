@@ -3,7 +3,7 @@
  * This file is a part of CWA framework.
  * Copyright 2012, CuteWebApps.com
  * https://github.com/cutewebapps/webapps-framework-lib
- * 
+ *
  * Licensed under GPL, Free for usage and redistribution.
  */
 
@@ -49,6 +49,15 @@ class App_Form_Edit extends App_Form
         $classes = explode('_', get_class( $this ));
         array_pop( $classes );
         array_pop( $classes );
-        return implode( '_', $classes );
+        unset( $classes[0] ); // the first word is usually a namespace
+        $strCamelCase = implode( ' ', $classes );
+
+        $o = '';
+        for($i = 0; $i < strlen ( $strCamelCase ); $i ++) {
+            $ch = substr ( $strCamelCase, $i, 1 );
+            if ($i > 0 && $ch == strtoupper ( $ch ) && ! preg_match ( '/^\d+$/', $ch ))  { $o .= ' '; }
+            $o .= $ch;
+        }
+        return $o;
     }
 }

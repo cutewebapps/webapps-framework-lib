@@ -98,11 +98,7 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
     public function addOpenGraph( array $arrOcData ) 
     {
         foreach ( $arrOcData as $key => $strValue ) {
-	    if ( is_array( $strValue )) {               
-                foreach( $strValue as $val ) { $this->addProperty( 'og:'.$key, $val ); }
-	    } else {
-                $this->addProperty( 'og:'.$key, $strValue );
-            }
+            $this->addProperty( 'og:'.$key, $strValue );
         }
         return $this;
     }
@@ -152,7 +148,12 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
             }
         }
         foreach( $this->_arrProperty as $strKey => $strValue ) {
-            if ( $strValue != '' ) {
+            if ( is_array( $strValue ) {
+		foreach ( $strValue as $sValue ) {
+                   $arrStrResults[] = "\t".'<meta property="'.htmlspecialchars( $strKey, ENT_QUOTES )
+                     .'" content="'.htmlspecialchars ( $sValue, ENT_QUOTES ).'" />';
+                } 
+	    } else if ( $strValue != '' ) {
                 $arrStrResults[] = "\t".'<meta property="'.htmlspecialchars( $strKey, ENT_QUOTES )
                     .'" content="'.htmlspecialchars ( $strValue, ENT_QUOTES ).'" />';
             }

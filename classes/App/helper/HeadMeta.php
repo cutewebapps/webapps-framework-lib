@@ -98,7 +98,11 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
     public function addOpenGraph( array $arrOcData ) 
     {
         foreach ( $arrOcData as $key => $strValue ) {
-            $this->addProperty( 'oc:'.$key, $strValue );
+	    if ( is_array( $strValue )) {               
+                foreach( $strValue as $val ) { $this->addProperty( 'og:'.$key, $val ); }
+	    } else {
+                $this->addProperty( 'og:'.$key, $strValue );
+            }
         }
         return $this;
     }

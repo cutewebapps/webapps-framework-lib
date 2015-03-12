@@ -428,7 +428,6 @@ EOF;
                         $fVersion = new Sys_File( $strDestDir.'/cdn/version.txt' );
                         $fVersion->save( $strGitRevision );
                     }    
-                    break;
                 }                
             }
             

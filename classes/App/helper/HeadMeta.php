@@ -148,7 +148,7 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
             }
         }
         foreach( $this->_arrProperty as $strKey => $strValue ) {
-            if ( is_array( $strValue ) {
+            if ( is_array( $strValue ) ) {
 		foreach ( $strValue as $sValue ) {
                    $arrStrResults[] = "\t".'<meta property="'.htmlspecialchars( $strKey, ENT_QUOTES )
                      .'" content="'.htmlspecialchars ( $sValue, ENT_QUOTES ).'" />';

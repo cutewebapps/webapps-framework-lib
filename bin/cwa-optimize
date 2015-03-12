@@ -1,0 +1,14 @@
+#!/bin/bash
+find -name '*.png' -print0 | xargs -0 optipng -nc -nb -o7
+
+for jpg in `find $1 -iname "*.jpg"`; do
+    echo "crushing $jpg ..."
+    jpegtran -copy none -optimize -perfect "$jpg" > "$jpg.bak.jpg"
+
+    # preserve original on error
+    if [ $? = 0 ]; then
+        mv -f "$jpg.bak.jpg" $jpg
+    else
+        rm "$jpg.bak.jpg"
+    fi
+done

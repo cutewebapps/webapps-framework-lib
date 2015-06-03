@@ -89,8 +89,10 @@ class Sys_File
     {
         if (dirname($this->getName()) != '' and 
             !file_exists( dirname($this->getName() ) ) ) {
+
             $dir = new Sys_Dir(dirname($this->getName() ) );
-            $dir->create( $strChMod, true);
+	    // suppress error that can be possible on creation
+            try{ $dir->create( $strChMod, true); } catch( Exception $e ) { };
         }
     }
     public function read ( $onLockNotCritical = true)

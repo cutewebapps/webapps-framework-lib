@@ -21,8 +21,11 @@ class App_IndexCtrl extends App_WebsiteCtrl
 
     public function delayedAction() 
     {
-	Sys_Io::out( date('c')." delayed ".$this->_getParam('title') );
-	usleep( $this->_getParam( 'delay',  5000 ) );
+	echo PHP_EOL;
+	Sys_Io::out( date('c')." delayed ".$this->_getParam('title').' start' );
+	sleep( $this->_getIntParam( 'delay',  5 ) );
+
+	Sys_Io::out( date('c')." delayed ".$this->_getParam('title').' finished after '.$this->_getIntParam( 'delay',  5000 ).' msec' );
 	die;
     }
 

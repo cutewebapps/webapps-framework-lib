@@ -211,6 +211,7 @@ class App_Parameter_Storage
                 $this->_adjustDateTimeParam( $sParam );
             }
         } else {
+
             $dt = new Sys_Date( $this->_getParam( $strParam ), $format );
             $this->_setParam( $strParam, $dt->getDate( Sys_Date::ISO ).' '.$dt->getTime24());
         }

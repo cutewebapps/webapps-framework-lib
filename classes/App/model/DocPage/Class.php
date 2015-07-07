@@ -283,6 +283,7 @@ class App_DocPage_Class
     {
         $arrMethods = array();
         foreach( $this->arrBlocks as $arrBlock ) { 
+	    if  (!isset( $arrBlock['name'] ) ) continue;
             if ( $arrBlock['type' ] == 'function' && !preg_match( '@Action$@', $arrBlock['name'] ) )
                 $arrMethods [] = $arrBlock; 
         }
@@ -345,6 +346,7 @@ class App_DocPage_Class
     {
         $arrMethods = array();
         foreach( $this->arrBlocks as $arrBlock ) { 
+	    if  (!isset( $arrBlock['name'] ) ) continue;
             if ( $arrBlock['type' ] == 'function' && preg_match( '@Action$@', $arrBlock['name'] ) ) {
                 // TODO: add discovered views for the method..
                 $arrBlock['shortname'] = str_replace ('Action', '', $arrBlock['name'] );

@@ -179,7 +179,7 @@ class Sys_Debug
             $strOut .= '<tr><td>'.$keyRow.'</td>';
             for( $i = 1; $i < $nMaxColumn; $i ++ ) {
                 $strKey = $arrColumnsIndex[ $i  ];
-                if ( isset( $arrFields[ $strKey ] ) ) {
+                if ( isset( $arrFields[ $strKey ] ) || $arrFields[ $strKey ] === null ) {
                     $strOut .= '<td>'
                         . ( is_string( $arrFields[ $strKey ] )  ?  $arrFields[ $strKey ] : json_encode( $arrFields[ $strKey ] ) )
                         .'</td>';

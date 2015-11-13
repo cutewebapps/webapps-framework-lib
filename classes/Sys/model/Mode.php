@@ -4,7 +4,7 @@
  * This file is a part of CWA framework.
  * Copyright 2012, CuteWebApps.com
  * https://github.com/cutewebapps/webapps-framework-lib
- * 
+ *
  * Licensed under GPL, Free for usage and redistribution.
  */
 
@@ -12,7 +12,7 @@ class Sys_Mode
 {
     /**
      * checks whether certain develop mode is available
-     * @param string strMode what mode should be checked 
+     * @param string strMode what mode should be checked
      */
     static function is ($strMode = '')
     {
@@ -31,7 +31,7 @@ class Sys_Mode
             if ($v != '' && $strMode == $v) return 1;
         }
     }
-    
+
    /**
     * whether we'are running from console
     * @return void
@@ -41,7 +41,7 @@ class Sys_Mode
         return ( !isset( $_SERVER['HTTP_HOST'] ) );
     }
     /**
-     * APLLICATION_ENV is set up in apache config to detect 
+     * APLLICATION_ENV is set up in apache config to detect
      * host type in CGI mode
      */
     public static function getApplicationEnv ()
@@ -54,42 +54,42 @@ class Sys_Mode
     }
 
     /**
-     * detects whether we are on local server 
+     * detects whether we are on local server
      */
     static function isLocal ()
     {
         return (self::getApplicationEnv() == 'local');
     }
     /**
-     * detects whether we are on test server 
+     * detects whether we are on test server
      */
     static function isTest()
     {
         return (self::getApplicationEnv() == 'local');
     }
 /**
-     * detects whether we are on demo server 
+     * detects whether we are on demo server
      */
     static function isDemo()
     {
         return (self::getApplicationEnv() == 'demo');
     }
 /**
-     * detects whether we are on staging server 
+     * detects whether we are on staging server
      */
     static function isStaging()
     {
         return (self::getApplicationEnv() == 'staging');
-    }    
-    
+    }
+
     /**
-     * detects whether we are on live server 
+     * detects whether we are on live server
      */
     static function isProduction ()
     {
         if (self::getApplicationEnv() == 'production')
             return true;
-        
+
         return (! self::isLocal() ) && (! self::isTest() && (! self::isDemo() ) && (! self::isStaging() ));
     }
 
@@ -101,7 +101,7 @@ class Sys_Mode
     {
         if ( isset($_SERVER['HTTP_HOST']))
             return (strstr($_SERVER['HTTP_HOST'], 'www.') !== false);
-        else 
+        else
             return false;
     }
     /**
@@ -111,7 +111,7 @@ class Sys_Mode
     {
         if ( isset($_SERVER['HTTPS']))
             return (isset($_SERVER['HTTPS']) and $_SERVER['HTTPS'] == 'on');
-        else 
+        else
             return false;
     }
 
@@ -122,11 +122,11 @@ class Sys_Mode
 
 
     /**
-     * detects whether user-agent is iPad 
+     * detects whether user-agent is iPad
      */
     static public function isIpad() {
         if ( self::is('ipad') ) return false;
-        if ( isset( $_SERVER['HTTP_USER_AGENT'] ) ) 
+        if ( isset( $_SERVER['HTTP_USER_AGENT'] ) )
             return strstr( $_SERVER['HTTP_USER_AGENT'], 'iPad' );
         return false;
     }
@@ -147,7 +147,7 @@ class Sys_Mode
         }
         return false;
     }
-    
+
     /**
      * detects whether it is command-line mode
      */
@@ -155,9 +155,9 @@ class Sys_Mode
     {
         return ( PHP_SAPI == 'cli' );
     }
-    
+
     /**
-     * detects whether user-agent is mobile device 
+     * detects whether user-agent is mobile device
      */
     static function isMobile ()
     {
@@ -190,33 +190,22 @@ class Sys_Mode
         }
         if (isset($_SERVER['HTTP_USER_AGENT'])) {
             $ua = $_SERVER['HTTP_USER_AGENT'];
-            
+
             // Quick Array to kill out matches in the user agent
             // that might cause false positives
             $badmatches = array(
-            'OfficeLiveConnector', 'MSIE\s8\.0', 'OptimizedIE8', 
+            'OfficeLiveConnector', 'MSIE\s8\.0', 'OptimizedIE8',
             'MSN\sOptimized', 'Creative\sAutoUpdate', 'Swapper');
             foreach ($badmatches as $badstring) {
-                if (preg_match('/' . $badstring . '/i', 
+                if (preg_match('/' . $badstring . '/i',
                 $_SERVER['HTTP_USER_AGENT'])) {
                     $_is_mobile = false;
                     return false;
                 }
             }
             // Now we'll go for positive matches
-            $uamatches = array(
-            'midp', 'j2me', 'avantg', 'docomo', 'novarra', 'palmos', 
-            'palmsource', '240x320', 'opwv', 'chtml', 'pda', 
-            'windows\sce', 'mmp\/', 'blackberry', 'mib\/', 'symbian', 
-            'wireless', 'nokia', 'hand', 'mobi', 'phone', 'cdm', 'up\.b', 
-            'audio', 'SIE\-', 'SEC\-', 'samsung', 'HTC', 'mot\-', 
-            'mitsu', 'sagem', 'sony', 'alcatel', 'lg', 'erics', 'vx', 
-            'NEC', 'philips', 'mmm', 'xx', 'panasonic', 'sharp', 'wap', 
-            'sch', 'rover', 'pocket', 'benq', 'java', 'pt', 'pg', 'vox', 
-            'amoi', 'bird', 'compal', 'kg', 'voda', 'sany', 'kdd', 'dbt', 
-            'sendo', 'sgh', 'gradi', 'jb', '\d\d\di', 'moto', 'webos', 
-            'iphone', 'android', 'netfront');
-            
+            $uamatches = array( 'iphone', 'android', 'ipod', 'ipad');
+
             foreach ($uamatches as $uastring) {
                 if (preg_match('/' . $uastring . '/i', $ua)) {
                     $_is_mobile = true;
@@ -227,5 +216,5 @@ class Sys_Mode
         $_is_mobile = false;
         return false;
     }
-    
+
 }

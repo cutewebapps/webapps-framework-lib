@@ -173,16 +173,22 @@ class Sys_Debug
             }
         }
 
-        $strOut = '<table border cellspacing="0" cellpaddin="3" class="table table-bordered table-striped"><thead><tr><th>#</th>'.implode( "", $arrColumns ).'</tr></thead>';
+        $strOut = '<table border cellspacing="0" cellpadding="3" class="table table-bordered table-striped"><thead><tr><th>#</th>'.implode( "", $arrColumns ).'</tr></thead>';
         $strOut .= '<tbody>';
         foreach ( $arr as $keyRow => $arrFields ) {
             $strOut .= '<tr><td>'.$keyRow.'</td>';
             for( $i = 1; $i < $nMaxColumn; $i ++ ) {
                 $strKey = $arrColumnsIndex[ $i  ];
                 if ( isset( $arrFields[ $strKey ] ) || $arrFields[ $strKey ] === null ) {
-                    $strOut .= '<td>'
-                        . ( is_string( $arrFields[ $strKey ] )  ?  $arrFields[ $strKey ] : json_encode( $arrFields[ $strKey ] ) )
-                        .'</td>';
+                    $value  = '';
+                    if  ( is_string( $arrFields[ $strKey ] ) ) {
+                        $value =  $arrFields[ $strKey ];
+                        $value = str_replace( " 00:00:00", "", $value );
+                        $value = str_replace( "0000-00-00", "", $value );
+                    } else {
+                        $value = json_encode( $arrFields[ $strKey ] );
+                    }
+                    $strOut .= '<td>'. $value.'</td>';
                 }
             }
             $strOut .= '</tr>'."\n";
@@ -208,7 +214,7 @@ class Sys_Debug
             }
         }
         if ( count( $arrColumns ))  {
-            $fields = [];
+            $fields = array();
             foreach ( $arrColumns as $key ) {
                 $fields[]= $key;
             }

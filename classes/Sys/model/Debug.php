@@ -222,7 +222,7 @@ class Sys_Debug
 
             // traversing rows
             foreach ( $arr as $keyRow => $arrFields ) {
-                $fields = [];
+                $fields = array();
                 for( $i = 1; $i < $nMaxColumn; $i ++ ) {
                     $strKey = $arrColumnsIndex[ $i  ];
                     if ( isset( $arrFields[ $strKey ] ) ) {

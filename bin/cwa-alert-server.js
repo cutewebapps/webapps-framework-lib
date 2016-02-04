@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 var http  = require('http'), fs = require("fs");
-var sys = require('sys');
+var sys = require('util');
 var exec = require('child_process').exec;
 
 ServerThread = function( response, url, body ) {

@@ -4,7 +4,7 @@
  * This file is a part of CWA framework.
  * Copyright 2012, CuteWebApps.com
  * https://github.com/cutewebapps/webapps-framework-lib
- * 
+ *
  * Licensed under GPL, Free for usage and redistribution.
  */
 class App_HeadMetaHelper extends App_ViewHelper_Abstract
@@ -44,7 +44,7 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
         return $this;
     }
     /**
-     * 
+     *
      * @param string $name
      * @return boolean
      */
@@ -63,7 +63,7 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
     }
 
     /**
-     * 
+     *
      * @param string $name
      * @return boolean
      */
@@ -82,7 +82,7 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
         return $this;
     }
     /**
-     * 
+     *
      * @param string $name
      * @return boolean
      */
@@ -91,25 +91,31 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
         return ( isset( $this->_arrProperty[ $name ] ) );
     }
     /**
-     * 
+     *
      * @param array $arrOcData
      * @return \App_HeadMetaHelper
      */
-    public function addOpenGraph( array $arrOcData ) 
+    public function addOpenGraph( array $arrOcData )
     {
         foreach ( $arrOcData as $key => $strValue ) {
             $this->addProperty( 'og:'.$key, $strValue );
         }
         return $this;
     }
-    
+
+    public function addOpenGraphImage( $strValue )
+    {
+        $this->addProperty( 'og:image/'. count($this->_arrProperty), $strValue );
+        return $this;
+    }
+
     /**
      * @return App_HeadMetaHelper
      */
     public function setCharset( $strCharset )
     {
         return $this->addHttpEquiv( 'Content-Type', "text/html; charset=" . $strCharset );
-        
+
     }
 
     /**
@@ -137,30 +143,37 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
         $arrStrResults = array();
         foreach( $this->_arrHttpEquiv as $strKey => $strValue ) {
             if ( $strValue != '' ) {
-                $arrStrResults[] = "\t".'<meta http-equiv="'.htmlspecialchars( $strKey, ENT_QUOTES )
+                $arrStrResults[] = "\t".'<meta http-equiv="'.htmlspecialchars( preg_replace( '@/.+$@', '', $strKey ), ENT_QUOTES )
                     .'" content="'.htmlspecialchars ( $strValue, ENT_QUOTES ).'" />';
             }
         }
         foreach( $this->_arrName as $strKey => $strValue ) {
             if ( $strValue != '' ) {
-                $arrStrResults[] = "\t".'<meta name="'.htmlspecialchars( $strKey, ENT_QUOTES )
+                $arrStrResults[] = "\t".'<meta name="'.htmlspecialchars( preg_replace( '@/.+$@', '', $strKey ), ENT_QUOTES )
                     .'" content="'.htmlspecialchars ( $strValue, ENT_QUOTES ).'" />';
             }
         }
         foreach( $this->_arrProperty as $strKey => $strValue ) {
             if ( is_array( $strValue ) ) {
 		foreach ( $strValue as $sValue ) {
-                   $arrStrResults[] = "\t".'<meta property="'.htmlspecialchars( $strKey, ENT_QUOTES )
+                   $arrStrResults[] = "\t".'<meta property="'.htmlspecialchars( preg_replace( '@/.+$@', '', $strKey ), ENT_QUOTES )
                      .'" content="'.htmlspecialchars ( $sValue, ENT_QUOTES ).'" />';
-                } 
+                }
 	    } else if ( $strValue != '' ) {
-                $arrStrResults[] = "\t".'<meta property="'.htmlspecialchars( $strKey, ENT_QUOTES )
+                $arrStrResults[] = "\t".'<meta property="'.htmlspecialchars( preg_replace( '@/.+$@', '', $strKey ), ENT_QUOTES )
                     .'" content="'.htmlspecialchars ( $strValue, ENT_QUOTES ).'" />';
             }
         }
         return implode( "\n", $arrStrResults );
     }
-    
+
+    /**
+     * @return App_HeadMetaHelper
+     */
+    public function addKeywords( $content )
+    {
+        return $this->addName('keywords', $content );
+    }
     /**
      * @return App_HeadMetaHelper
      */
@@ -168,7 +181,7 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
     {
         return $this->addName('description', $content );
     }
-    
+
     /**
      * @return App_HeadMetaHelper
      */
@@ -176,14 +189,14 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
     {
         return $this->addName('designer', $content );
     }
-    
+
     /**
      * @return App_HeadMetaHelper
      */
     public function addAuthor( $content )
     {
         return $this->addName( 'author', $content );
-    }   
+    }
     /**
      * @return App_HeadMetaHelper
      */
@@ -192,16 +205,16 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
         if ( $content == '' ) {
             $content = 'Copyright '.date('Y');
         }
-        
+
         return $this->addName( 'copyright', $content );
-    }    
+    }
     /**
      * @return App_HeadMetaHelper
      */
     public function addContentLanguage( $locale  = 'en-GB')
     {
         return $this->addHttpEquiv( 'content-language', $locale );
-    }    
+    }
     /**
      * @return App_HeadMetaHelper
      */
@@ -209,7 +222,7 @@ class App_HeadMetaHelper extends App_ViewHelper_Abstract
     {
         return $this->addName( 'robots', 'noindex,nofollow' );
     }
-    
+
     /**
      * @return App_HeadMetaHelper
      */

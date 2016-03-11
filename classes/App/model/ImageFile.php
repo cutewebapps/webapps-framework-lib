@@ -56,9 +56,9 @@ class App_ImageFile {
 	if ( !$f )
             return null;
 	$hdr = fread( $f, 500 ); fclose( $f );
+    $hdr5 = substr( $hdr, 0, 5 );
 
-
-    if ( strstr( $hdr, 'GIF89' ) ) {
+    if ( strstr( $hdr10, 'GIF8' ) ) {
             $this->_ptrImage = @imagecreatefromgif( $this->getFilePath() );
     } else if ( strstr( $hdr, 'JFIF' ) || strstr( $hdr, 'Exif' )  ) {
             $this->_ptrImage = imagecreatefromjpeg( $this->getFilePath() );

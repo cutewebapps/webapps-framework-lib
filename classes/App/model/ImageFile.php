@@ -4,7 +4,7 @@
  * This file is a part of CWA framework.
  * Copyright 2012, CuteWebApps.com
  * https://github.com/cutewebapps/webapps-framework-lib
- * 
+ *
  * Licensed under GPL, Free for usage and redistribution.
  */
 
@@ -33,7 +33,7 @@ class App_ImageFile {
         if ( !$this->_ptrImage ) {
             $this->_createFrom();
         }
-        
+
         return $this->_getGdPtr();
     }
 
@@ -58,10 +58,10 @@ class App_ImageFile {
 	$hdr = fread( $f, 500 ); fclose( $f );
 
 
-        if ( strstr( $hdr, 'JFIF' ) || strstr( $hdr, 'Exif' )  ) {
-            $this->_ptrImage = imagecreatefromjpeg( $this->getFilePath() );
-	} else if ( strstr( $hdr, 'GIF89' ) ) {
+    if ( strstr( $hdr, 'GIF89' ) ) {
             $this->_ptrImage = @imagecreatefromgif( $this->getFilePath() );
+    } else if ( strstr( $hdr, 'JFIF' ) || strstr( $hdr, 'Exif' )  ) {
+            $this->_ptrImage = imagecreatefromjpeg( $this->getFilePath() );
 	} else if ( strstr( $hdr, 'PNG' ) ) {
             $this->_ptrImage = @imagecreatefrompng( $this->getFilePath() );
 	} else if ( substr( $hdr, 0, 2 ) == 'BM' ) {
@@ -145,9 +145,9 @@ class App_ImageFile {
     /**
      * IMPORTANT: if $strImagePath starts from slash, it will mean relative to CWA_APPLICATION_DIR path
      * otherwise, use "file://" prefix for your $strImagePath
-     * 
+     *
      * @param string $strImagePath
-     * @param int $nWidth (optional, autodetect by default) 
+     * @param int $nWidth (optional, autodetect by default)
      * @param int $nHeight (optional, autodetect by default)
      */
     public function __construct( $strImagePath, $nWidth = 0, $nHeight = 0 )
@@ -243,14 +243,14 @@ class App_ImageFile {
         return '<img '.implode( ' ',$arrAttr ).' />';
     }
 
-    
+
     /**
      * @return string
      */
     public function getImageLazyTag( $arrAttributes = array(), $bIncludeTimeStamp = false )
     {
         $arrAttr = array();
-        
+
         if ( !isset($arrAttributes[ 'width' ]) && $this->getWidth() > 0 ) {
             $arrAttributes[ 'width' ] = $this->getWidth();
         }
@@ -265,7 +265,7 @@ class App_ImageFile {
         if ( $bIncludeTimeStamp ) {
             $arrAttributes[ 'data-original' ] .= '?tm=' . filemtime( $this->getFilePath() );
         }
-        
+
         if ( !isset( $arrAttributes['class'] )) {
             $arrAttributes['class'] = '';
         }
@@ -277,25 +277,25 @@ class App_ImageFile {
         }
         return '<img '.implode( ' ',$arrAttr ).' />';
     }
-    
-    
+
+
     /**
      * @return int
      */
     public function getRatio()
     {
-        return ( $this->getHeight() == 0 ) ? 0 : 
+        return ( $this->getHeight() == 0 ) ? 0 :
                sprintf( '%0.2f', $this->getWidth() / $this->getHeight() );
     }
 
-    
+
     public function saveAsJpg()
     {
         if ( !$this->_createFrom() ) {
             throw new App_ImageFile_Exception( "Image cannot be opened" );
         }
         $im = $this->_getGdPtr();
-        
+
         $file = new Sys_File( $this->getFilePath() );
         $file->write( '', true );
 
@@ -303,18 +303,18 @@ class App_ImageFile {
         imagedestroy($im);
         $this->_ptrImage = null;
     }
-    
+
     /**
      * Rotate image automatically
      * @param integer $nWidthLimit
      * @return App_ImageFile
      */
     public function fixOrientation( $strRoot, $strPath, $nWidthLimit, $nOrientation = '' ) {
-    
+
         if (!$nOrientation) {
 
-            $exif = exif_read_data( $strRoot . $strPath );            
-            
+            $exif = exif_read_data( $strRoot . $strPath );
+
             // no orientation tag found, exit
             if (!isset($exif['COMPUTED']['Orientation'])) return false;
             //$exif['COMPUTED']['Orientation'] = 6;
@@ -322,19 +322,19 @@ class App_ImageFile {
     //        Sys_Debug::dump($exif);
             $nOrientation = $exif['COMPUTED']['Orientation'];
     //        Sys_Debug::dumpDie($nOrientation);
-            
+
         }
-        
+
         // Get new dimensions
         $nHeight = (int) (($nWidthLimit / $this->getWidth()) * $this->getHeight());
-        
+
         // create new image file
         $imgResult = new App_ImageFile( $strPath, $nWidthLimit, $nHeight );
 	    $this->_createFrom();
         $image = $this->_getGdPtr();
 	    if ( !$image )
             throw new App_ImageFile_Exception( 'GD Pointer was not created' );
-        
+
         // Resample
         $im = imagecreatetruecolor($nWidthLimit, $nHeight);
 
@@ -364,11 +364,11 @@ class App_ImageFile {
 	    $a = imagejpeg($im, $file->getName(), 95);
 
 	    imagedestroy($im);
-        return  $imgResult;        
-        
-    }    
-    
-    
+        return  $imgResult;
+
+    }
+
+
     /**
      * Generates resampled image with filling in into box
      * @return App_ImageFile
@@ -405,7 +405,7 @@ class App_ImageFile {
 	    imagedestroy($im);
         return  $imgResult;
     }
-   
+
     /**
      * @return  App_ImageFile
      */
@@ -467,16 +467,16 @@ class App_ImageFile {
 	imagedestroy($im);
         return $imgResult;
     }
-    
+
     /**
      * @return  App_ImageFile (crop square )
      */
     public function generateThumbnailSquare( $dir, $w, $q = 80 )
     {
-        
+
         $imgResult = new App_ImageFile( $dir, $w, $w );
         $imgResult->_strPathFull = $this->getDirPath( $imgResult );; // full system path to thumb
-        
+
         $src_file = $this->getFilePath();
         if ( !file_exists( $src_file )) {
             throw new App_ImageFile_Exception('Source file cannot be found');
@@ -486,12 +486,12 @@ class App_ImageFile {
         // auto detect type
         $arrImgSize = getimagesize($src_file);
         list($strImg,$strType) = explode('/', $arrImgSize['mime']);
-        
+
         // создаём исходное изображение на основе
         // исходного файла и опеределяем его размеры
         $strCreateFuncName = 'imagecreatefrom'.strtolower($strType);
         $src = $strCreateFuncName($src_file);
-        
+
         $w_src = imagesx($src);
         $h_src = imagesy($src);
 
@@ -514,7 +514,7 @@ class App_ImageFile {
 
         // квадратная картинка масштабируется без вырезок
         else {
-            imagecopyresampled($dest, $src, 0, 0, 0, 0, $w, $w, $w_src, $w_src);    
+            imagecopyresampled($dest, $src, 0, 0, 0, 0, $w, $w, $w_src, $w_src);
         }
 
         // вывод картинки и очистка памяти
@@ -524,18 +524,18 @@ class App_ImageFile {
         imagedestroy($src);
 
         return ($res)? $imgResult : null;
-    }    
-    
-    
+    }
+
+
     /**
      * @return  App_ImageFile (crop square )
      */
     public function generateThumbnailRectangle( $dir, $w, $h, $q = 80 )
     {
-        
+
         $imgResult = new App_ImageFile( $dir, $w, $w );
         $imgResult->_strPathFull = $this->getDirPath( $imgResult ); // full system path to thumb
-        
+
         $src_file = $this->getFilePath();
         if ( !file_exists( $src_file )) {
             throw new App_ImageFile_Exception('Source file cannot be found');
@@ -545,12 +545,12 @@ class App_ImageFile {
         // auto detect type
         $arrImgSize = getimagesize($src_file);
         list($strImg,$strType) = explode('/', $arrImgSize['mime']);
-        
+
         // создаём исходное изображение на основе
         // исходного файла и опеределяем его размеры
         $strCreateFuncName = 'imagecreatefrom'.strtolower($strType);
         $src = $strCreateFuncName($src_file);
-        
+
         $w_src = imagesx($src);
         $h_src = imagesy($src);
 
@@ -573,7 +573,7 @@ class App_ImageFile {
 
         // квадратная картинка масштабируется без вырезок
         else {
-            imagecopyresampled($dest, $src, 0, 0, 0, 0, $w, $h, $w_src, $h_src);    
+            imagecopyresampled($dest, $src, 0, 0, 0, 0, $w, $h, $w_src, $h_src);
         }
 
         // вывод картинки и очистка памяти
@@ -584,7 +584,7 @@ class App_ImageFile {
 
         return ($res)? $imgResult : null;
     }
-    
+
 //    function generateThumbnailCrop( $file_output, $crop = 'square', $percent = false, $boolUseAppDir = true) {
 //	list($w_i, $h_i, $type) = getimagesize( $this->getFilePath() );
 //	if (!$w_i || !$h_i) {
@@ -629,12 +629,12 @@ class App_ImageFile {
 //	}
 //        imagedestroy($img_o);
 //    }
-    
+
     function generateThumbnailCrop( $strDirImage, $thumb_width, $thumb_height, $strExt )
     {
         $imgResult = new App_ImageFile( $strDirImage, $thumb_width, $thumb_height );
-        
-        
+
+
         $src_file = $this->getFilePath();
         $strFuntion = 'imagecreatefrom' . ( ($strExt == 'jpg') ? 'jpeg' : $strExt );
         $image = $strFuntion($src_file);
@@ -669,10 +669,10 @@ class App_ImageFile {
                            $new_width, $new_height,
                            $width, $height);
         imagejpeg($thumb, $strDirImage, 80);
-        
+
         return $imgResult;
     }
-    
+
     public function getDirPath( $imgResult )
     {
         if( ! strstr($imgResult->_strPath, 'file://') && ! strstr($imgResult->_strPath, '/home') ) {
@@ -680,7 +680,7 @@ class App_ImageFile {
         } else {
             $strPath = $imgResult->_strPath;
         }
-        
+
         return $strPath;
     }
 }

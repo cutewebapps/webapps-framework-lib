@@ -4,12 +4,12 @@
  * This file is a part of CWA framework.
  * Copyright 2012, CuteWebApps.com
  * https://github.com/cutewebapps/webapps-framework-lib
- * 
+ *
  * Licensed under GPL, Free for usage and redistribution.
  */
 
 class Sys_String {
-    
+
     /**
      * return result of regular expression
      * @param string $r - regular expression
@@ -29,7 +29,7 @@ class Sys_String {
         }
         return '';
     }
-    
+
     /**
      * return array of results given by single preg_match
      * except 0 result
@@ -51,7 +51,7 @@ class Sys_String {
      * @param string $r  regular expression
      * @param string $co contents
      * @param int    $n  index of elements to extract
-     */ 
+     */
     public static function xAll($r, $co, $n = 1)
     {
         $e = array();
@@ -69,22 +69,22 @@ class Sys_String {
     }
 
     /**
-     * whether date in the string is empty 
+     * whether date in the string is empty
      * @return bool
      * @param unknown_type $dt
      */
     public static function isEmptyDate( $dt ) {
          return ( $dt == '' || substr( $dt, 0, 10 ) == '0000-00-00' );
     }
-    
+
     /**
      * Check whether given parameter is a valid email string
-     * @param string $strEmail 
-     * @return boolean 
+     * @param string $strEmail
+     * @return boolean
      */
     public static function isEmail( $strEmail )
     {
-        $regex = '/^([*+!.&#$¦\'\\%\/0-9a-z^_`{}=?~:-]+)@(([0-9a-z-]+\.)+[0-9a-z]{2,4})$/i';
+        $regex = '/^([*+!.&#$¦\'\\%\/0-9a-z^_`{}=?~:-]+)@(([0-9a-z-]+\.)+[0-9a-z]{2,7})$/i';
         return preg_match( $regex, $strEmail );
     }
 
@@ -97,7 +97,7 @@ class Sys_String {
         $o = ''; $bNextUpper = true;
         for($i = 0; $i < strlen ( $str ); $i ++) {
             $ch = substr ( $str, $i, 1 );
-            
+
             if ($i > 0 && $ch == '-' ) {
                 /*$o .= '-'; */
                 $o .= $chReplaceDash;
@@ -111,11 +111,11 @@ class Sys_String {
                 }
             }
         }
-        return $o;     
+        return $o;
     }
-    
+
     /**
-     * translates camel case string into dashed lower case 
+     * translates camel case string into dashed lower case
      * widely used in class, packages, uri, and function namings
      * @param string $str
      */
@@ -123,7 +123,7 @@ class Sys_String {
         $o = '';
         for($i = 0; $i < strlen ( $str ); $i ++) {
             $ch = substr ( $str, $i, 1 );
-            if ($i > 0 && $ch == strtoupper ( $ch ) && 
+            if ($i > 0 && $ch == strtoupper ( $ch ) &&
                 ! preg_match ( '/^\d+$/', $ch ))
                     $o .= '-';
             $o .= strtolower ( $ch );
@@ -133,13 +133,13 @@ class Sys_String {
 
     /**
      * get database quoted string
-     * @return string 
+     * @return string
      * @param string $str
      */
     public static function quote( $str ) {
         return '\''.str_replace( '\'', '\'\'', $str ).'\'';
     }
-    
+
     public static function getAutoSlug( $strSlug ) {
         $s = $strSlug;
         $s = preg_replace( '/^\s+/sim', '', $s );
@@ -151,5 +151,5 @@ class Sys_String {
         $s = preg_replace( '/-+$/sim', '', $s );
         $s = preg_replace( '/^-+/sim', '', $s );
         return strtolower( $s );
-    }  
+    }
 }

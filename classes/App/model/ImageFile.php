@@ -61,7 +61,17 @@ class App_ImageFile {
     if ( strstr( $hdr5, 'GIF8' ) ) {
             $this->_ptrImage = @imagecreatefromgif( $this->getFilePath() );
     } else if ( strstr( $hdr, 'JFIF' ) || strstr( $hdr, 'Exif' )  ) {
-            $this->_ptrImage = imagecreatefromjpeg( $this->getFilePath() );
+        ini_set('gd.jpeg_ignore_warning', true);
+        try{
+            $this->_ptrImage = @imagecreatefromjpeg( $this->getFilePath() );
+        } catch ( Exception $e ) {
+            $fh = fopen( $this->getFilePath(), 'rb');
+            $str = '';
+            while($fh !== false && !feof($fh)){
+                $str .= fread($fh, 1024);
+            }
+            $this->_ptrImage = @imagecreatefromstring($str);
+        }
 	} else if ( strstr( $hdr, 'PNG' ) ) {
             $this->_ptrImage = @imagecreatefrompng( $this->getFilePath() );
 	} else if ( substr( $hdr, 0, 2 ) == 'BM' ) {
